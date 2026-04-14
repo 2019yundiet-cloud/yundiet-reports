@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>크런틴 마케팅 구조 분석 | 2026 Q2</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0f1117;--card:#1a1d27;--border:#2a2d3a;--accent:#a29bfe;--accent2:#6c5ce7;--text:#e8e8ee;--text-dim:#8b8d9a;--green:#00b894;--red:#d63031;--yellow:#fdcb6e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+.header{background:linear-gradient(135deg,#1a1d27 0%,#2d1f5e 50%,#1a1d27 100%);padding:60px 40px;text-align:center;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.header h1{font-size:2.2rem;font-weight:800;background:linear-gradient(135deg,#fff,#a29bfe);-webkit-background-clip:text;-webkit-text-fill-color:transparent;position:relative}
+.header .sub{color:var(--text-dim);font-size:1rem;margin-top:8px;position:relative}
+.badge{display:inline-block;margin-top:14px;padding:6px 16px;background:rgba(162,155,254,0.2);border:1px solid rgba(162,155,254,0.4);border-radius:20px;font-size:0.85rem;color:#a29bfe;position:relative}
+.container{max-width:1300px;margin:0 auto;padding:40px 24px}
+.section{margin-bottom:50px}
+.stitle{font-size:1.3rem;font-weight:700;margin-bottom:20px;padding-left:14px;border-left:4px solid var(--accent);display:flex;align-items:center;gap:10px}
+.stitle .n{background:var(--accent);color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.grid-6{display:grid;grid-template-columns:repeat(6,1fr);gap:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;transition:transform .2s}
+.card:hover{transform:translateY(-2px)}
+.kpi{text-align:center}
+.kpi-label{font-size:.78rem;color:var(--text-dim);margin-bottom:6px}
+.kpi-val{font-size:2rem;font-weight:800}
+.kpi-sub{font-size:.82rem;margin-top:4px}
+.chart-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px}
+.chart-box h3{font-size:1rem;margin-bottom:16px}
+.cw{position:relative;height:300px}
+.cw-lg{position:relative;height:380px}
+.tag{display:inline-block;padding:2px 10px;border-radius:6px;font-size:.75rem;font-weight:600;margin-right:4px;margin-bottom:4px}
+.tag-p{background:rgba(162,155,254,.15);color:#a29bfe}
+.tag-g{background:rgba(0,184,148,.15);color:var(--green)}
+.tag-y{background:rgba(253,203,110,.15);color:var(--yellow)}
+.tag-r{background:rgba(255,107,107,.15);color:#ff6b6b}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 14px;font-size:.78rem;color:var(--text-dim);text-transform:uppercase;border-bottom:2px solid var(--border)}
+td{padding:12px 14px;font-size:.88rem;border-bottom:1px solid rgba(255,255,255,.05)}
+.funnel{display:flex;gap:4px;align-items:center;font-size:.78rem;flex-wrap:wrap;margin-top:10px}
+.funnel span{padding:5px 12px;border-radius:6px}
+.insight-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;border-left:4px solid var(--accent)}
+.insight-card h4{font-size:.95rem;margin-bottom:6px}
+.insight-card p{font-size:.85rem;color:var(--text-dim)}
+.apply{background:rgba(0,184,148,.08);border-radius:8px;padding:10px 14px;margin-top:10px;font-size:.85rem}
+.apply strong{color:var(--green)}
+.callout{background:linear-gradient(135deg,rgba(162,155,254,.1),rgba(108,92,231,.05));border:1px solid rgba(162,155,254,.3);border-radius:14px;padding:28px;text-align:center;margin-top:40px}
+.callout h3{font-size:1.15rem;margin-bottom:10px;color:#a29bfe}
+.callout p{color:var(--text-dim);font-size:.92rem;max-width:680px;margin:0 auto}
+.fade-in{opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+@media(max-width:768px){.grid-2,.grid-3{grid-template-columns:1fr}.grid-4,.grid-6{grid-template-columns:1fr 1fr}.header{padding:40px 20px}.header h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>크런틴 마케팅 구조 분석</h1>
+  <div class="sub">CRUNTEIN | 유어유니콘 | 크런치볼 단백질 쉐이크 · 프로틴바 | 윤식단 벤치마킹용</div>
+  <div class="badge">2026년 4월 기준 | 경쟁마케팅-분석 에이전트</div>
+</div>
+
+<div class="container">
+
+  <!-- KPIs -->
+  <div class="grid-6 fade-in" style="margin-bottom:40px;">
+    <div class="card kpi">
+      <div class="kpi-label">2026 매출 목표</div>
+      <div class="kpi-val" style="color:#a29bfe">210억</div>
+      <div class="kpi-sub" style="color:var(--green)">급성장 D2C 브랜드</div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-label">와디즈 펀딩</div>
+      <div class="kpi-val" style="color:#a29bfe">3.3억</div>
+      <div class="kpi-sub">역대 1위 (단백질 카테고리)</div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-label">메타 활성 광고</div>
+      <div class="kpi-val" style="color:#a29bfe">180개</div>
+      <div class="kpi-sub">퍼포먼스 마케팅 집중</div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-label">올영 라이브 단건</div>
+      <div class="kpi-val" style="color:#a29bfe">2.4억</div>
+      <div class="kpi-sub">라이브커머스 최고 성과</div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-label">인스타그램</div>
+      <div class="kpi-val" style="color:#a29bfe">1.1만</div>
+      <div class="kpi-sub">팔로워 / 165 게시물</div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-label">누적 판매</div>
+      <div class="kpi-val" style="color:#a29bfe">30만포</div>
+      <div class="kpi-sub">단백질 쉐이크 누적</div>
+    </div>
+  </div>
+
+  <!-- Section 1: Brand Overview -->
+  <div class="section fade-in">
+    <div class="stitle"><span class="n">1</span> 브랜드 개요</div>
+    <div class="grid-2">
+      <div class="card">
+        <h4 style="margin-bottom:12px;">기본 정보</h4>
+        <table>
+          <tr><td style="color:var(--text-dim)">법인명</td><td>유어유니콘</td></tr>
+          <tr><td style="color:var(--text-dim)">설립</td><td>2024년 9월</td></tr>
+          <tr><td style="color:var(--text-dim)">대표</td><td>김용우 / 오지영</td></tr>
+          <tr><td style="color:var(--text-dim)">브랜드명</td><td>CRUNTEIN (Crunchy + Protein)</td></tr>
+          <tr><td style="color:var(--text-dim)">원료 차별점</td><td>WPI (분리유청단백질) 사용</td></tr>
+          <tr><td style="color:var(--text-dim)">카테고리</td><td>단백질 쉐이크 · 프로틴바</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h4 style="margin-bottom:12px;">핵심 제품 라인업</h4>
+        <table>
+          <thead><tr><th>제품</th><th>핵심 스펙</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>크런치볼 단백질 쉐이크</strong></td>
+              <td>
+                <span class="tag tag-p">단백질 25%</span>
+                <span class="tag tag-g">당류 0g대</span>
+                <span class="tag tag-y">크런치볼 식감</span>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>판초코형 프로틴바</strong></td>
+              <td>
+                <span class="tag tag-p">단백질 13g</span>
+                <span class="tag tag-g">당 0.3g</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top:16px;padding:12px;background:rgba(162,155,254,.08);border-radius:8px;font-size:.85rem;">
+          <strong style="color:#a29bfe;">USP:</strong> "밍밍한 쉐이크" 문제를 크런치볼 식감으로 해결. 씹는 즐거움 + 포만감 동시 제공.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Growth Funnel -->
+  <div class="section fade-in">
+    <div class="stitle"><span class="n">2</span> 성장 퍼널</div>
+    <div class="grid-2">
+      <div class="chart-box">
+        <h3>주요 성과 지표</h3>
+        <div class="cw-lg">
+          <canvas id="milestoneChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-box">
+        <h3>성장 퍼널 — 7단계</h3>
+        <div style="display:flex;flex-direction:column;gap:18px;margin-top:10px;">
+          <div>
+            <div style="font-size:.82rem;color:var(--text-dim);margin-bottom:6px;">Phase 1 — 크라우드펀딩 검증</div>
+            <div class="funnel">
+              <span style="background:rgba(162,155,254,.25);color:#a29bfe;font-weight:700">와디즈 3.3억</span>
+              <span style="color:var(--text-dim)">→</span>
+              <span style="background:rgba(162,155,254,.15);color:#a29bfe">역대 1위 달성</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:.82rem;color:var(--text-dim);margin-bottom:6px;">Phase 2 — 셀럽 신뢰 전이</div>
+            <div class="funnel">
+              <span style="background:rgba(162,155,254,.2);color:#a29bfe">기은세 협업</span>
+              <span style="color:var(--text-dim)">→</span>
+              <span style="background:rgba(162,155,254,.15);color:#a29bfe">라이프스타일 인지도</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:.82rem;color:var(--text-dim);margin-bottom:6px;">Phase 3 — 체험 장벽 제거</div>
+            <div class="funnel">
+              <span style="background:rgba(162,155,254,.2);color:#a29bfe">무료체험팩</span>
+              <span style="color:var(--text-dim)">→</span>
+              <span style="background:rgba(162,155,254,.15);color:#a29bfe">이메일/회원 확보</span>
+              <span style="color:var(--text-dim)">→</span>
+              <span style="background:rgba(162,155,254,.15);color:#a29bfe">전환</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:.82rem;color:var(--text-dim);margin-bottom:6px;">Phase 4 — 오프라인 입점</div>
+            <div class="funnel">
+              <span style="background:rgba(162,155,254,.2);color:#a29bfe">올리브영 704매장</span>
+              <span style="color:var(--text-dim)">→</span>
+              <span style="background:rgba(162,155,254,.15);color:#a29bfe">라이징 브랜드</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:.82rem;color:var(--text-dim);margin-bottom:6px;">Phase 5 — 라이브커머스 폭발</div>
+            <div class="funnel">
+              <span style="background:rgba(162,155,254,.2);color:#a29bfe">올영 라이브</span>
+              <span style="color:var(--text-dim)">→</span>
+              <span style="background:rgba(162,155,254,.25);color:#a29bfe;font-weight:700">단건 2.4억</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:.82rem;color:var(--text-dim);margin-bottom:6px;">Phase 6 — 팝업 · 체험</div>
+            <div class="funnel">
+              <span style="background:rgba(162,155,254,.2);color:#a29bfe">팝업 3회 진행</span>
+              <span style="color:var(--text-dim)">→</span>
+              <span style="background:rgba(162,155,254,.15);color:#a29bfe">오프라인 체험 접점</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:.82rem;color:var(--text-dim);margin-bottom:6px;">Phase 7 — 글로벌 확장</div>
+            <div class="funnel">
+              <span style="background:rgba(162,155,254,.2);color:#a29bfe">미국 진출</span>
+              <span style="color:var(--text-dim)">→</span>
+              <span style="background:rgba(162,155,254,.25);color:#a29bfe;font-weight:700">us.cruntin.com</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Channel Analysis -->
+  <div class="section fade-in">
+    <div class="stitle"><span class="n">3</span> 채널별 마케팅 구조</div>
+    <div class="grid-2" style="margin-bottom:20px;">
+      <div class="chart-box">
+        <h3>채널 투자 수준 (10점 척도) — vs 윤식단</h3>
+        <div class="cw">
+          <canvas id="channelRadar"></canvas>
+        </div>
+      </div>
+      <div class="chart-box">
+        <h3>메타 광고 운영 현황</h3>
+        <div class="cw">
+          <canvas id="metaAdChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Channel Detail Cards -->
+    <div class="grid-3">
+      <div class="card" style="border-top:3px solid #a29bfe">
+        <h4 style="font-size:.9rem;margin-bottom:10px;">메타 광고 (핵심 채널)</h4>
+        <div style="font-size:.85rem;color:var(--text-dim);margin-bottom:8px;">
+          활성 광고 180개 — 퍼포먼스 올인 전략
+        </div>
+        <ul style="list-style:none;font-size:.82rem;">
+          <li style="padding:3px 0">- <strong>핵심 카피:</strong> "당 0g인데 이 맛이?"</li>
+          <li style="padding:3px 0">- <strong>포만감 강조:</strong> "포만폭탄"</li>
+          <li style="padding:3px 0">- <strong>식감 소구:</strong> "바삭한 식감"</li>
+          <li style="padding:3px 0">- 대량 소재 A/B 테스트 운영</li>
+        </ul>
+      </div>
+      <div class="card" style="border-top:3px solid #a29bfe">
+        <h4 style="font-size:.9rem;margin-bottom:10px;">인스타그램</h4>
+        <div style="font-size:.85rem;color:var(--text-dim);margin-bottom:8px;">
+          1.1만 팔로워 / 165 게시물
+        </div>
+        <ul style="list-style:none;font-size:.82rem;">
+          <li style="padding:3px 0">- <strong>셀럽 콘텐츠:</strong> 기은세 라이프스타일 연출</li>
+          <li style="padding:3px 0">- <strong>제품 비주얼:</strong> 크런치볼 식감 강조</li>
+          <li style="padding:3px 0">- <strong>후기 재가공:</strong> 고객 리뷰 → 카드뉴스</li>
+          <li style="padding:3px 0">- 릴스 중심 콘텐츠 운영</li>
+        </ul>
+      </div>
+      <div class="card" style="border-top:3px solid #a29bfe">
+        <h4 style="font-size:.9rem;margin-bottom:10px;">틱톡 키워드 분석</h4>
+        <div style="font-size:.85rem;color:var(--text-dim);margin-bottom:8px;">
+          UGC 기반 자연 바이럴 확산
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;">
+          <span class="tag tag-p">크런틴 쉰내</span>
+          <span class="tag tag-p">내돈내산</span>
+          <span class="tag tag-y">맛</span>
+          <span class="tag tag-y">물</span>
+          <span class="tag tag-g">단쉐 후기</span>
+        </div>
+        <div style="margin-top:10px;font-size:.82rem;color:var(--text-dim);">
+          "쉰내" 이슈 → 부정 키워드 모니터링 필요.<br>
+          "내돈내산" 태그가 신뢰 전환에 기여.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Sales Channels -->
+  <div class="section fade-in">
+    <div class="stitle"><span class="n">4</span> 유통 채널 구조</div>
+    <div class="grid-2">
+      <div class="chart-box">
+        <h3>판매 채널 비중</h3>
+        <div class="cw">
+          <canvas id="distChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <h4 style="margin-bottom:12px;">판매 채널 상세</h4>
+        <table>
+          <thead><tr><th>채널</th><th>역할</th><th>비고</th></tr></thead>
+          <tbody>
+            <tr><td><strong>자사몰</strong></td><td>D2C 주력</td><td style="color:#a29bfe">무료체험팩 · 번들 할인</td></tr>
+            <tr><td><strong>올리브영</strong></td><td>오프라인 핵심</td><td style="color:#a29bfe">704매장 + 온라인</td></tr>
+            <tr><td>쿠팡</td><td>신규 유입</td><td>검색 노출 확장</td></tr>
+            <tr><td>11번가</td><td>오픈마켓</td><td>추가 채널</td></tr>
+            <tr><td>와디즈</td><td>런칭 검증</td><td>3.3억 달성 (완료)</td></tr>
+            <tr><td><strong>미국</strong></td><td>글로벌 확장</td><td style="color:#a29bfe">us.cruntin.com</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: Key Strategies -->
+  <div class="section fade-in">
+    <div class="stitle"><span class="n">5</span> 핵심 전략 5가지</div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="insight-card">
+        <h4>1. 무료체험팩 — "드셔보시고 결정하세요"</h4>
+        <p>체험 리스크를 제거하여 첫 구매 장벽을 낮춤. 무료체험팩 신청 시 이메일·회원 정보를 확보하여 리타겟팅 풀을 구축. "맛이 없으면 안 사도 됩니다"라는 자신감이 신뢰로 전환된다.</p>
+        <div class="apply"><strong>윤식단 적용:</strong> "1끼 무료 체험 도시락" 프로그램 도입. 배송비만 받고 1끼를 보내주는 방식으로 이메일/카카오 알림톡 수신 동의 확보. 체험 → 정기배송 전환 퍼널 설계.</div>
+      </div>
+      <div class="insight-card">
+        <h4>2. 셀럽(기은세) — 라이프스타일 신뢰 전이</h4>
+        <p>연예인이 아닌 "건강한 라이프스타일 아이콘"으로서의 기은세를 활용. 단순 광고 모델이 아니라 일상에서 실제로 먹는 모습을 콘텐츠화하여 자연스러운 신뢰를 형성.</p>
+        <div class="apply"><strong>윤식단 적용:</strong> 다이어트·헬스 분야 셀럽 1명과 장기 파트너십. "윤식단으로 한 달 식단 관리" 시리즈를 브이로그·인스타 스토리로 연재.</div>
+      </div>
+      <div class="insight-card">
+        <h4>3. 식감 차별화 — 크런치볼로 "밍밍한 쉐이크" 문제 해결</h4>
+        <p>단백질 쉐이크 시장의 공통 불만("밍밍하다", "맛없다")을 크런치볼이라는 물리적 식감으로 해결. "Crunchy + Protein" 브랜드명 자체가 USP를 전달하며, 경쟁사 대비 명확한 차별점을 가진다.</p>
+        <div class="apply"><strong>윤식단 적용:</strong> "도시락인데 이 식감?"이라는 차별점 발굴. 밥 위 토핑의 바삭함·쫄깃함 등 식감 요소를 콘텐츠 전면에 배치.</div>
+      </div>
+      <div class="insight-card">
+        <h4>4. 올리브영 입점 → 오프라인 접점 + 라이브커머스</h4>
+        <p>올리브영 704매장 입점으로 오프라인 체험 채널을 확보하고, 올영 라이브에서 단건 2.4억을 달성. 온라인 인지 → 오프라인 체험 → 라이브 전환의 옴니채널 전략.</p>
+        <div class="apply"><strong>윤식단 적용:</strong> 오프라인 팝업 또는 편의점 냉장 코너 입점 검토. 온라인 광고 → 매장 체험 → 자사몰 정기배송 전환 퍼널 구축.</div>
+      </div>
+      <div class="insight-card">
+        <h4>5. 번들 할인(3+1, 5+2, 16+8) — 객단가 높이며 단가 낮추기</h4>
+        <p>대량 구매 시 추가 증정 구조로 객단가를 끌어올리면서 개당 단가를 낮추는 가격 전략. 고객은 "이왕 살 거 많이 사자"는 심리, 브랜드는 LTV와 재구매율을 동시에 확보.</p>
+        <div class="apply"><strong>윤식단 적용:</strong> "5일 세트 주문 시 +1일 무료" 번들 구성. 주간 단위 정기배송에 번들 할인을 결합하여 객단가 향상.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6: Promo Strategy -->
+  <div class="section fade-in">
+    <div class="stitle"><span class="n">6</span> 프로모션 전략</div>
+    <div class="grid-4">
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:8px;">🎁</div>
+        <h4 style="font-size:.9rem;margin-bottom:6px;">무료체험팩</h4>
+        <p style="font-size:.82rem;color:var(--text-dim)">체험 장벽 제거. 배송비만 부담. 회원 DB 확보 → 리타겟팅.</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:8px;">📦</div>
+        <h4 style="font-size:.9rem;margin-bottom:6px;">번들 할인</h4>
+        <p style="font-size:.82rem;color:var(--text-dim)">3+1, 5+2, 16+8 구성. 객단가 UP, 개당 단가 DOWN.</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:8px;">🔴</div>
+        <h4 style="font-size:.9rem;margin-bottom:6px;">올영 오늘의 특가</h4>
+        <p style="font-size:.82rem;color:var(--text-dim)">올리브영 라이브 · 특가 딜. 단건 2.4억 달성 실적.</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:8px;">🔄</div>
+        <h4 style="font-size:.9rem;margin-bottom:6px;">정기배송</h4>
+        <p style="font-size:.82rem;color:var(--text-dim)">자사몰 정기배송 할인. 리텐션 확보 + 예측 가능 매출.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 7: Insights for Yundiet -->
+  <div class="section fade-in">
+    <div class="stitle"><span class="n">7</span> 윤식단 적용 인사이트</div>
+    <div class="grid-3">
+      <div class="card" style="border-left:4px solid var(--green)">
+        <h4 style="font-size:.9rem;margin-bottom:8px;color:var(--green)">1. 무료체험팩 도입</h4>
+        <p style="font-size:.82rem;color:var(--text-dim)">크런틴의 무료체험팩 전략을 윤식단에 적용. "1끼 체험 도시락"으로 첫 구매 장벽 제거. 이메일·카카오 알림톡 DB 확보가 핵심.</p>
+      </div>
+      <div class="card" style="border-left:4px solid var(--green)">
+        <h4 style="font-size:.9rem;margin-bottom:8px;color:var(--green)">2. 셀럽 장기 파트너십</h4>
+        <p style="font-size:.82rem;color:var(--text-dim)">단발 광고가 아닌 "함께 식단 관리하는 셀럽" 콘셉트. 3~6개월 시리즈로 자연스러운 브랜드 신뢰 형성.</p>
+      </div>
+      <div class="card" style="border-left:4px solid var(--green)">
+        <h4 style="font-size:.9rem;margin-bottom:8px;color:var(--green)">3. 번들 전략</h4>
+        <p style="font-size:.82rem;color:var(--text-dim)">5일+1일 무료, 주간 세트 할인 등 번들로 객단가 향상. 정기배송과 결합하여 LTV 극대화.</p>
+      </div>
+      <div class="card" style="border-left:4px solid var(--green)">
+        <h4 style="font-size:.9rem;margin-bottom:8px;color:var(--green)">4. 내돈내산 바이럴</h4>
+        <p style="font-size:.82rem;color:var(--text-dim)">틱톡·네이버 "내돈내산" 후기가 신뢰 전환에 결정적. 실제 구매 고객 후기를 체계적으로 수집·재가공하여 광고 소재로 활용.</p>
+      </div>
+      <div class="card" style="border-left:4px solid var(--green)">
+        <h4 style="font-size:.9rem;margin-bottom:8px;color:var(--green)">5. 팝업 체험</h4>
+        <p style="font-size:.82rem;color:var(--text-dim)">크런틴의 팝업 3회 운영처럼, 윤식단도 "시식 팝업" 진행. 오프라인 체험 → 온라인 전환 퍼널.</p>
+      </div>
+      <div class="card" style="border-left:4px solid var(--green)">
+        <h4 style="font-size:.9rem;margin-bottom:8px;color:var(--green)">6. 플레이버별 콘텐츠</h4>
+        <p style="font-size:.82rem;color:var(--text-dim)">크런틴이 맛별로 릴스를 제작하듯, 윤식단도 메뉴별 콘텐츠 시리즈 운영. "이번 주 신메뉴" 릴스로 주기적 콘텐츠 생산.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Callout -->
+  <div class="callout fade-in">
+    <h3>윤식단이 크런틴에서 배울 핵심 한 줄</h3>
+    <p>"체험 장벽을 제거하면 전환이 따라온다."<br><br>
+    크런틴은 <strong style="color:#fff">무료체험팩</strong>으로 첫 구매 리스크를 없앴고,<br>
+    <strong style="color:#fff">크런치볼 식감</strong>으로 "밍밍한 쉐이크" 페인포인트를 정면 돌파했다.<br>
+    윤식단은 <strong style="color:#a29bfe">"1끼 무료 체험 → 정기배송 전환"</strong> 퍼널을 만들어야 한다.</p>
+  </div>
+
+</div>
+
+<script>
+Chart.defaults.color='#8b8d9a';Chart.defaults.borderColor='rgba(255,255,255,0.06)';Chart.defaults.font.family="'Pretendard',-apple-system,sans-serif";
+
+// Milestone Chart
+new Chart(document.getElementById('milestoneChart'),{type:'bar',data:{labels:['와디즈 펀딩','올영 라이브\n(단건)','메타 활성\n광고 수','누적 판매\n(만포)','인스타\n팔로워(천)','팝업\n횟수'],datasets:[{label:'크런틴 성과',data:[3.3,2.4,180,30,11,3],backgroundColor:['rgba(162,155,254,.7)','rgba(162,155,254,.6)','rgba(162,155,254,.5)','rgba(162,155,254,.6)','rgba(162,155,254,.5)','rgba(162,155,254,.4)'],borderRadius:6,barThickness:36}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){const labels=['억 원','억 원','개','만포','천명','회'];return ctx.raw+labels[ctx.dataIndex]}}}},scales:{y:{grid:{color:'rgba(255,255,255,.04)'}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+
+// Channel Radar
+new Chart(document.getElementById('channelRadar'),{type:'radar',data:{labels:['검색 키워드','네이버 바이럴','인스타그램','유튜브','틱톡','메타 광고'],datasets:[{label:'크런틴',data:[6,5,6,5,6,9],borderColor:'#a29bfe',backgroundColor:'rgba(162,155,254,.15)',pointBackgroundColor:'#a29bfe',borderWidth:2},{label:'윤식단',data:[4,1,4,1,0,3],borderColor:'#00b894',backgroundColor:'rgba(0,184,148,.1)',pointBackgroundColor:'#00b894',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:10,ticks:{stepSize:2,color:'#555'},grid:{color:'rgba(255,255,255,.06)'},pointLabels:{font:{size:11}}}},plugins:{legend:{position:'bottom',labels:{padding:12}}}}});
+
+// Meta Ad Chart
+new Chart(document.getElementById('metaAdChart'),{type:'doughnut',data:{labels:['퍼포먼스 (CTA 전환)','브랜드 인지도','리타겟팅','셀럽 콘텐츠'],datasets:[{data:[45,20,25,10],backgroundColor:['rgba(162,155,254,.7)','rgba(108,92,231,.5)','rgba(253,203,110,.5)','rgba(0,184,148,.5)'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:10,font:{size:11}}}}}});
+
+// Distribution Chart
+new Chart(document.getElementById('distChart'),{type:'polarArea',data:{labels:['자사몰 (D2C)','올리브영','쿠팡','11번가','와디즈 (완료)','미국'],datasets:[{data:[10,8,5,3,4,3],backgroundColor:['rgba(162,155,254,.7)','rgba(108,92,231,.5)','rgba(253,203,110,.5)','rgba(0,206,201,.5)','rgba(139,141,154,.4)','rgba(85,239,196,.4)'],borderColor:'transparent'}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{ticks:{display:false},grid:{color:'rgba(255,255,255,.06)'}}},plugins:{legend:{position:'bottom',labels:{padding:10,font:{size:10}}}}}});
+
+const obs=new IntersectionObserver(e=>{e.forEach(el=>{if(el.isIntersecting)el.target.classList.add('visible')})},{threshold:.1});document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

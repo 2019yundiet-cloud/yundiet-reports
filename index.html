@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>윤식단 마케팅 현황 분석 | 2026 Q2</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --border: #2a2d3a;
+    --accent: #6c5ce7;
+    --accent2: #00cec9;
+    --accent3: #fdcb6e;
+    --accent4: #e17055;
+    --accent5: #55efc4;
+    --text: #e8e8ee;
+    --text-dim: #8b8d9a;
+    --green: #00b894;
+    --red: #d63031;
+    --orange: #e17055;
+    --yellow: #fdcb6e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1a1d27 0%, #2d1b69 50%, #1a1d27 100%);
+    padding: 60px 40px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(108,92,231,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(0,206,201,0.08) 0%, transparent 50%);
+    animation: pulse 8s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+  .header h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    position: relative;
+    background: linear-gradient(135deg, #fff, #a29bfe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .header .subtitle {
+    color: var(--text-dim);
+    font-size: 1rem;
+    margin-top: 8px;
+    position: relative;
+  }
+  .header .date-badge {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 6px 16px;
+    background: rgba(108,92,231,0.2);
+    border: 1px solid rgba(108,92,231,0.4);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: #a29bfe;
+    position: relative;
+  }
+
+  /* Layout */
+  .container { max-width: 1400px; margin: 0 auto; padding: 40px 24px; }
+  .section-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    padding-left: 16px;
+    border-left: 4px solid var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title .num {
+    background: var(--accent);
+    color: #fff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .section { margin-bottom: 56px; }
+
+  /* Grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; }
+  .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .card-title {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .card-value {
+    font-size: 2rem;
+    font-weight: 800;
+  }
+  .card-sub {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-green { border-left: 4px solid var(--green); }
+  .card-orange { border-left: 4px solid var(--orange); }
+  .card-red { border-left: 4px solid var(--red); }
+
+  /* KPI Cards */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; }
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+  }
+  .kpi-card:nth-child(1)::after { background: var(--accent); }
+  .kpi-card:nth-child(2)::after { background: var(--accent2); }
+  .kpi-card:nth-child(3)::after { background: var(--accent3); }
+  .kpi-card:nth-child(4)::after { background: var(--accent4); }
+  .kpi-label { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 8px; }
+  .kpi-value { font-size: 2.2rem; font-weight: 800; }
+  .kpi-change { font-size: 0.85rem; margin-top: 6px; }
+  .kpi-up { color: var(--green); }
+  .kpi-down { color: var(--red); }
+
+  /* Chart Container */
+  .chart-container {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    position: relative;
+  }
+  .chart-container h3 {
+    font-size: 1rem;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+  .chart-wrapper { position: relative; height: 320px; }
+  .chart-wrapper-lg { position: relative; height: 400px; }
+
+  /* SWOT */
+  .swot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .swot-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid var(--border);
+  }
+  .swot-card h4 {
+    font-size: 1rem;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .swot-card ul { list-style: none; }
+  .swot-card li {
+    padding: 8px 0;
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding-left: 20px;
+    position: relative;
+  }
+  .swot-card li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  .swot-s li::before { background: var(--green); }
+  .swot-w li::before { background: var(--red); }
+  .swot-o li::before { background: var(--accent); }
+  .swot-t li::before { background: var(--orange); }
+  .swot-badge {
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .badge-s { background: rgba(0,184,148,0.15); color: var(--green); }
+  .badge-w { background: rgba(214,48,49,0.15); color: var(--red); }
+  .badge-o { background: rgba(108,92,231,0.15); color: #a29bfe; }
+  .badge-t { background: rgba(225,112,85,0.15); color: var(--orange); }
+
+  /* Channel Status */
+  .channel-row {
+    display: grid;
+    grid-template-columns: 140px 100px 1fr 100px;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    gap: 16px;
+  }
+  .channel-row:last-child { border-bottom: none; }
+  .channel-name { font-weight: 600; font-size: 0.95rem; }
+  .status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+  }
+  .status-none { background: rgba(214,48,49,0.15); color: var(--red); }
+  .status-low { background: rgba(225,112,85,0.15); color: var(--orange); }
+  .status-mid { background: rgba(253,203,110,0.15); color: var(--yellow); }
+  .status-high { background: rgba(0,184,148,0.15); color: var(--green); }
+
+  /* Progress bar */
+  .progress-bar {
+    height: 8px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease;
+  }
+
+  /* Keyword Table */
+  .keyword-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .keyword-table th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--border);
+  }
+  .keyword-table td {
+    padding: 14px 16px;
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .tier-s { background: rgba(108,92,231,0.2); color: #a29bfe; padding: 2px 10px; border-radius: 6px; font-weight: 700; font-size: 0.8rem; }
+  .tier-a { background: rgba(0,206,201,0.2); color: var(--accent2); padding: 2px 10px; border-radius: 6px; font-weight: 700; font-size: 0.8rem; }
+  .tier-b { background: rgba(253,203,110,0.15); color: var(--yellow); padding: 2px 10px; border-radius: 6px; font-weight: 700; font-size: 0.8rem; }
+
+  /* Competitor */
+  .comp-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+  }
+  .comp-name { font-weight: 700; font-size: 1.05rem; margin-bottom: 6px; }
+  .comp-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    background: rgba(108,92,231,0.15);
+    color: #a29bfe;
+    margin-right: 4px;
+    margin-bottom: 4px;
+  }
+  .comp-stat { font-size: 0.85rem; color: var(--text-dim); margin-top: 8px; }
+
+  /* Action Plan */
+  .action-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    transition: border-color 0.2s;
+  }
+  .action-card:hover { border-color: var(--accent); }
+  .action-num {
+    min-width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--accent), #a29bfe);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.1rem;
+  }
+  .action-body h4 { font-size: 1rem; margin-bottom: 4px; }
+  .action-body p { font-size: 0.85rem; color: var(--text-dim); }
+  .action-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .action-tag {
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .tag-easy { background: rgba(0,184,148,0.15); color: var(--green); }
+  .tag-medium { background: rgba(253,203,110,0.15); color: var(--yellow); }
+  .tag-channel { background: rgba(108,92,231,0.15); color: #a29bfe; }
+
+  /* Trend Arrow */
+  .trend-up { color: var(--green); }
+  .trend-down { color: var(--red); }
+  .trend-flat { color: var(--yellow); }
+
+  /* Season Timeline */
+  .timeline {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin-top: 16px;
+  }
+  .timeline-item {
+    flex: 1;
+    padding: 14px 10px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+  .timeline-item:last-child { border-right: none; }
+  .timeline-month { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 6px; }
+  .timeline-bar {
+    height: 6px;
+    border-radius: 3px;
+    margin: 8px auto;
+    max-width: 80%;
+  }
+  .timeline-label { font-size: 0.7rem; color: var(--text-dim); }
+  .timeline-now {
+    position: relative;
+  }
+  .timeline-now::before {
+    content: 'NOW';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #fff;
+    padding: 1px 8px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+  }
+
+  /* Callout */
+  .callout {
+    background: linear-gradient(135deg, rgba(108,92,231,0.1), rgba(0,206,201,0.05));
+    border: 1px solid rgba(108,92,231,0.3);
+    border-radius: 16px;
+    padding: 28px;
+    margin-top: 40px;
+    text-align: center;
+  }
+  .callout h3 {
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #a29bfe, #00cec9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .callout p { color: var(--text-dim); font-size: 0.95rem; max-width: 700px; margin: 0 auto; }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .grid-4, .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .grid-5 { grid-template-columns: repeat(3, 1fr); }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .channel-row { grid-template-columns: 120px 80px 1fr 80px; }
+  }
+  @media (max-width: 768px) {
+    .grid-2, .swot-grid { grid-template-columns: 1fr; }
+    .grid-3, .grid-5 { grid-template-columns: 1fr; }
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .header { padding: 40px 20px; }
+    .header h1 { font-size: 1.6rem; }
+    .channel-row { grid-template-columns: 1fr; gap: 8px; }
+  }
+
+  /* Animate on scroll */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <h1>윤식단 마케팅 현황 분석</h1>
+  <div class="subtitle">시장 트렌드 / 경쟁사 / 키워드 / 자사 채널 종합 리포트</div>
+  <div class="date-badge">2026년 4월 13일 기준</div>
+</div>
+
+<div class="container">
+
+  <!-- KPI Summary -->
+  <div class="kpi-grid fade-in">
+    <div class="kpi-card">
+      <div class="kpi-label">HMR 시장 규모 (2026)</div>
+      <div class="kpi-value" style="color: var(--accent);">~7조</div>
+      <div class="kpi-change kpi-up">YoY +10~12%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">단백질 시장 (2026)</div>
+      <div class="kpi-value" style="color: var(--accent2);">8,000억</div>
+      <div class="kpi-change kpi-up">YoY +77.8%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">인스타그램 팔로워</div>
+      <div class="kpi-value" style="color: var(--accent3);">22K</div>
+      <div class="kpi-change" style="color: var(--orange);">성장 정체</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">네이버 바이럴 수준</div>
+      <div class="kpi-value" style="color: var(--red);">~0</div>
+      <div class="kpi-change kpi-down">즉시 개선 필요</div>
+    </div>
+  </div>
+
+  <!-- Section 1: Market Trends -->
+  <div class="section fade-in">
+    <div class="section-title"><span class="num">1</span> 시장 트렌드</div>
+    <div class="grid-2">
+      <div class="chart-container">
+        <h3>서브카테고리 성장률</h3>
+        <div class="chart-wrapper">
+          <canvas id="growthChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-container">
+        <h3>트렌드 키워드 스코어카드</h3>
+        <div class="chart-wrapper">
+          <canvas id="trendRadar"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seasonality -->
+    <div class="chart-container" style="margin-top: 20px;">
+      <h3>계절성 분석 — 다이어트 수요 사이클</h3>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-month">1~2월</div>
+          <div class="timeline-bar" style="background: var(--accent2); width: 70%;"></div>
+          <div class="timeline-label">신년 결심</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-month">3~4월</div>
+          <div class="timeline-bar timeline-now" style="background: var(--accent); width: 80%;"></div>
+          <div class="timeline-label">봄 준비</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-month">5~6월</div>
+          <div class="timeline-bar" style="background: var(--green); width: 100%;"></div>
+          <div class="timeline-label" style="color: var(--green); font-weight: 700;">연중 피크</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-month">7~8월</div>
+          <div class="timeline-bar" style="background: var(--yellow); width: 60%;"></div>
+          <div class="timeline-label">유지 모드</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-month">9~10월</div>
+          <div class="timeline-bar" style="background: var(--orange); width: 40%;"></div>
+          <div class="timeline-label">피로감</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-month">11~12월</div>
+          <div class="timeline-bar" style="background: var(--accent2); width: 55%;"></div>
+          <div class="timeline-label">연말 관리</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: SWOT -->
+  <div class="section fade-in">
+    <div class="section-title"><span class="num">2</span> 윤식단 SWOT 분석</div>
+    <div class="swot-grid">
+      <div class="swot-card swot-s">
+        <h4><span class="swot-badge badge-s">S</span> 강점</h4>
+        <ul>
+          <li>수치 기반 USP: 단백질 50g / 당류 1g</li>
+          <li>자사몰 직영 + 정기구독 모델</li>
+          <li>리뷰 별점 4.92점 (구매 설득력)</li>
+          <li>저당+고단백 동시 소구 시장 유일</li>
+        </ul>
+      </div>
+      <div class="swot-card swot-w">
+        <h4><span class="swot-badge badge-w">W</span> 약점</h4>
+        <ul>
+          <li>틱톡 미진입 + 유튜브 채널 부재</li>
+          <li>네이버 바이럴 거의 0 수준</li>
+          <li>인스타 22K / 480게시물 = 성장 정체</li>
+          <li>브랜드 검색광고 미집행 추정</li>
+        </ul>
+      </div>
+      <div class="swot-card swot-o">
+        <h4><span class="swot-badge badge-o">O</span> 기회</h4>
+        <ul>
+          <li>저속노화/혈당관리 트렌드 급성장</li>
+          <li>다노 재무 압박 → "습관화" 포지셔닝 공백</li>
+          <li>틱톡/릴스 CPC 아직 저렴</li>
+          <li>5~6월 연중 다이어트 피크 시즌</li>
+        </ul>
+      </div>
+      <div class="swot-card swot-t">
+        <h4><span class="swot-badge badge-t">T</span> 위협</h4>
+        <ul>
+          <li>식스밀/랭킹닭컴/대기업 PB 확대</li>
+          <li>Meta 광고 단가 지속 상승</li>
+          <li>쿠팡 PB 저당 도시락 출시 가능성</li>
+          <li>저당 식품 광고 포화로 차별화 난이도 상승</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Channel Status -->
+  <div class="section fade-in">
+    <div class="section-title"><span class="num">3</span> 채널별 투자 현황 vs 경쟁사</div>
+    <div class="grid-2">
+      <div class="chart-container">
+        <h3>윤식단 채널 투자 수준</h3>
+        <div class="chart-wrapper">
+          <canvas id="channelChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-container">
+        <h3>경쟁사 대비 채널 점유 (5점 척도)</h3>
+        <div class="chart-wrapper">
+          <canvas id="compRadar"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-container" style="margin-top: 20px;">
+      <h3>채널 상세 진단</h3>
+      <div class="channel-row" style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">
+        <div style="font-size: 0.8rem; color: var(--text-dim);">채널</div>
+        <div style="font-size: 0.8rem; color: var(--text-dim);">투자 수준</div>
+        <div style="font-size: 0.8rem; color: var(--text-dim);">핵심 이슈</div>
+        <div style="font-size: 0.8rem; color: var(--text-dim);">긴급도</div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">검색 키워드</div>
+        <div><span class="status-badge status-mid">중간</span></div>
+        <div style="font-size: 0.85rem; color: var(--text-dim);">브랜드 방어 광고 미집행, 카테고리 노출 약세</div>
+        <div><span class="status-badge status-low">높음</span></div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">네이버 바이럴</div>
+        <div><span class="status-badge status-none">없음</span></div>
+        <div style="font-size: 0.85rem; color: var(--text-dim);">체험단 0건, "저당 도시락 추천" 검색 시 부재</div>
+        <div><span class="status-badge status-none">긴급</span></div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">인스타그램</div>
+        <div><span class="status-badge status-mid">중간</span></div>
+        <div style="font-size: 0.85rem; color: var(--text-dim);">22K 팔로워, 릴스 전환 부족, ManyChat 미세팅</div>
+        <div><span class="status-badge status-low">높음</span></div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">유튜브</div>
+        <div><span class="status-badge status-none">없음</span></div>
+        <div style="font-size: 0.85rem; color: var(--text-dim);">공식 채널 부재, 인플루언서 협찬 기록 없음</div>
+        <div><span class="status-badge status-low">높음</span></div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">틱톡</div>
+        <div><span class="status-badge status-none">없음</span></div>
+        <div style="font-size: 0.85rem; color: var(--text-dim);">완전 미진입 — 경쟁사도 공백이라 선점 기회</div>
+        <div><span class="status-badge status-none">긴급</span></div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">쿠팡</div>
+        <div><span class="status-badge status-low">낮음</span></div>
+        <div style="font-size: 0.85rem; color: var(--text-dim);">로켓그로스 미입점 추정, 검색 노출 불리</div>
+        <div><span class="status-badge status-mid">중간</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Keywords -->
+  <div class="section fade-in">
+    <div class="section-title"><span class="num">4</span> 키워드 전략</div>
+    <div class="grid-2">
+      <div class="chart-container">
+        <h3>키워드 매트릭스 (검색량 vs 전환의도)</h3>
+        <div class="chart-wrapper-lg">
+          <canvas id="keywordBubble"></canvas>
+        </div>
+      </div>
+      <div class="chart-container">
+        <h3>키워드 티어 분류</h3>
+        <table class="keyword-table">
+          <thead>
+            <tr><th>키워드</th><th>티어</th><th>전환의도</th><th>경쟁</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>저당 단백질 도시락</td><td><span class="tier-s">S</span></td><td>5/5</td><td style="color: var(--green);">낮음</td></tr>
+            <tr><td>단백질 도시락</td><td><span class="tier-s">S</span></td><td>5/5</td><td style="color: var(--yellow);">중간</td></tr>
+            <tr><td>저당 도시락</td><td><span class="tier-s">S</span></td><td>5/5</td><td style="color: var(--yellow);">중간</td></tr>
+            <tr><td>다이어트 도시락</td><td><span class="tier-s">S</span></td><td>4/5</td><td style="color: var(--red);">높음</td></tr>
+            <tr><td>당뇨 식단</td><td><span class="tier-a">A</span></td><td>4/5</td><td style="color: var(--green);">낮음</td></tr>
+            <tr><td>고단백 도시락</td><td><span class="tier-a">A</span></td><td>5/5</td><td style="color: var(--yellow);">중간</td></tr>
+            <tr><td>냉동 도시락</td><td><span class="tier-a">A</span></td><td>3/5</td><td style="color: var(--red);">높음</td></tr>
+            <tr><td>식단 배달</td><td><span class="tier-a">A</span></td><td>3/5</td><td style="color: var(--red);">높음</td></tr>
+            <tr><td>저탄수 식단</td><td><span class="tier-b">B</span></td><td>3/5</td><td style="color: var(--green);">낮음</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top: 16px; padding: 12px; background: rgba(108,92,231,0.1); border-radius: 8px; font-size: 0.85rem;">
+          <strong style="color: #a29bfe;">블루오션:</strong> "저당 단백질 도시락" — 복합 키워드로 경쟁 낮고 전환의도 최고
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: Competitors -->
+  <div class="section fade-in">
+    <div class="section-title"><span class="num">5</span> 경쟁사 포지셔닝 맵</div>
+    <div class="grid-2">
+      <div class="chart-container">
+        <h3>경쟁사 포지셔닝 (저당 vs 고단백)</h3>
+        <div class="chart-wrapper-lg">
+          <canvas id="positionChart"></canvas>
+        </div>
+      </div>
+      <div>
+        <div class="grid-2" style="gap: 12px;">
+          <div class="comp-card">
+            <div class="comp-name">식스밀</div>
+            <div><span class="comp-tag">단백질 51g</span><span class="comp-tag">쿠팡 장악</span></div>
+            <div class="comp-stat">저당 소구 없음 / 당뇨 타겟 없음</div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-name">랭킹닭컴</div>
+            <div><span class="comp-tag">270만 팔로워</span><span class="comp-tag">셀럽 모델</span></div>
+            <div class="comp-stat">영업손실 178억 / 공격 여력 제한</div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-name">다노</div>
+            <div><span class="comp-tag">마테크 최선진</span><span class="comp-tag">습관화</span></div>
+            <div class="comp-stat">재무 압박 → 마케팅 축소 중</div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-name">그리팅</div>
+            <div><span class="comp-tag">당뇨 전문</span><span class="comp-tag">메디컬</span></div>
+            <div class="comp-stat">일반 소비자 진입장벽 / 고가</div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-name">허닭</div>
+            <div><span class="comp-tag">SKU 다양</span><span class="comp-tag">로켓그로스</span></div>
+            <div class="comp-stat">탄수화물 저감 소구 없음</div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-name" style="color: var(--accent);">윤식단</div>
+            <div><span class="comp-tag" style="background: rgba(0,184,148,0.2); color: var(--green);">저당+고단백</span><span class="comp-tag" style="background: rgba(0,184,148,0.2); color: var(--green);">유일 포지션</span></div>
+            <div class="comp-stat" style="color: var(--accent2);">단백질 50g / 당류 1g → 공백 선점</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6: New Brand Deep-Dive -->
+  <div class="section fade-in">
+    <div class="section-title"><span class="num">6</span> 신규 경쟁 브랜드 심층 분석</div>
+
+    <!-- Brand Cards Grid -->
+    <div class="grid-3" style="margin-bottom: 24px;">
+
+      <!-- 라라스윗 -->
+      <div class="card" style="border-top: 3px solid #ff6b6b; padding: 0; overflow: hidden;">
+        <div style="background: linear-gradient(135deg, rgba(255,107,107,0.15), transparent); padding: 20px 20px 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 1.3rem; font-weight: 800;">라라스윗</div>
+            <span style="background: rgba(255,107,107,0.2); color: #ff6b6b; padding: 2px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">저당 디저트 1위</span>
+          </div>
+          <div style="color: var(--text-dim); font-size: 0.8rem; margin-top: 4px;">LALASWEET | 2017~ | 직원 100명</div>
+        </div>
+        <div style="padding: 0 20px 20px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0;">
+            <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px; text-align: center;">
+              <div style="font-size: 0.7rem; color: var(--text-dim);">2025 매출 목표</div>
+              <div style="font-size: 1.3rem; font-weight: 800; color: #ff6b6b;">1,000억</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px; text-align: center;">
+              <div style="font-size: 0.7rem; color: var(--text-dim);">CU 누적 판매</div>
+              <div style="font-size: 1.3rem; font-weight: 800; color: #ff6b6b;">800만개</div>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+            <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px; text-align: center;">
+              <div style="font-size: 0.7rem; color: var(--text-dim);">인스타 팔로워</div>
+              <div style="font-size: 1.1rem; font-weight: 700;">6.2만</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px; text-align: center;">
+              <div style="font-size: 0.7rem; color: var(--text-dim);">YT 광고 영상</div>
+              <div style="font-size: 1.1rem; font-weight: 700;">127개</div>
+            </div>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 8px;">핵심 전략</div>
+          <ul style="list-style: none; font-size: 0.85rem;">
+            <li style="padding: 4px 0; padding-left: 16px; position: relative;"><span style="position: absolute; left: 0;">1.</span><strong>카테고리 창조자</strong> — "저당 아이스크림 = 라라스윗"</li>
+            <li style="padding: 4px 0; padding-left: 16px; position: relative;"><span style="position: absolute; left: 0;">2.</span><strong>설득형 마케팅</strong> — 칼로리·당류 수치를 패키지 전면에</li>
+            <li style="padding: 4px 0; padding-left: 16px; position: relative;"><span style="position: absolute; left: 0;">3.</span><strong>CU 독점 선출시</strong> — 유통채널 자체가 마케팅 채널</li>
+            <li style="padding: 4px 0; padding-left: 16px; position: relative;"><span style="position: absolute; left: 0;">4.</span><strong>라라듀스 오디션</strong> — 고객이 신제품 투표 → 찐팬 팬덤</li>
+            <li style="padding: 4px 0; padding-left: 16px; position: relative;"><span style="position: absolute; left: 0;">5.</span><strong>중형 유튜버 반복 협업</strong> — 단발 대형보다 6~7회 반복이 효율적</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 크런틴 -->
+      <div class="card" style="border-top: 3px solid #a29bfe; padding: 0; overflow: hidden;">
+        <div style="background: linear-gradient(135deg, rgba(162,155,254,0.15), transparent); padding: 20px 20px 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 1.3rem; font-weight: 800;">크런틴</div>
+            <span style="background: rgba(162,155,254,0.2); color: #a29bfe; padding: 2px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">로켓 성장</span>
+          </div>
+          <div style="color: var(--text-dim); font-size: 0.8rem; margin-top: 4px;">CRUNTEIN | 2024.09~ | 유어유니콘</div>
+        </div>
+        <div style="padding: 0 20px 20px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0;">
+            <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px; text-align: center;">
+              <div style="font-size: 0.7rem; color: var(--text-dim);">2026 매출 목표</div>
+              <div style="font-size: 1.3rem; font-weight: 800; color: #a29bfe;">210억</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px; text-align: center;">
+              <div style="font-size: 0.7rem; color: var(--text-dim);">와디즈 펀딩</div>
+              <div style="font-size: 1.3rem; font-weight: 800; color: #a29bfe;">3.3억</div>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+            <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px; text-align: center;">
+              <div style="font-size: 0.7rem; color: var(--text-dim);">메타 활성 광고</div>
+              <div style="font-size: 1.1rem; font-weight: 700;">180개</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px; text-align: center;">
+              <div style="font-size: 0.7rem; color: var(--text-dim);">올영 라이브 단건</div>
+              <div style="font-size: 1.1rem; font-weight: 700;">2.4억</div>
+            </div>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 8px;">핵심 전략</div>
+          <ul style="list-style: none; font-size: 0.85rem;">
+            <li style="padding: 4px 0; padding-left: 16px; position: relative;"><span style="position: absolute; left: 0;">1.</span><strong>무료체험팩</strong> — "드셔보시고 결정하세요" 리스크 제거</li>
+            <li style="padding: 4px 0; padding-left: 16px; position: relative;"><span style="position: absolute; left: 0;">2.</span><strong>셀럽(기은세)</strong> → 라이프스타일 신뢰 전이</li>
+            <li style="padding: 4px 0; padding-left: 16px; position: relative;"><span style="position: absolute; left: 0;">3.</span><strong>식감 차별화</strong> — 크런치볼로 밍밍한 쉐이크 문제 해결</li>
+            <li style="padding: 4px 0; padding-left: 16px; position: relative;"><span style="position: absolute; left: 0;">4.</span><strong>올리브영 입점</strong> → 오프라인 접점 + 라이브커머스</li>
+            <li style="padding: 4px 0; padding-left: 16px; position: relative;"><span style="position: absolute; left: 0;">5.</span><strong>번들 할인(3+1, 5+2)</strong> — 객단가 높이며 단가 낮추기</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 잇더핏 -->
+      <div class="card" style="border-top: 3px solid #00cec9; padding: 0; overflow: hidden;">
+        <div style="background: linear-gradient(135deg, rgba(0,206,201,0.15), transparent); padding: 20px 20px 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 1.3rem; font-weight: 800;">잇더핏</div>
+            <span style="background: rgba(0,206,201,0.2); color: #00cec9; padding: 2px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">D2C 효율왕</span>
+          </div>
+          <div style="color: var(--text-dim); font-size: 0.8rem; margin-top: 4px;">EAT THE FIT | 데이바이미 | 7명</div>
+        </div>
+        <div style="padding: 0 20px 20px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0;">
+            <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px; text-align: center;">
+              <div style="font-size: 0.7rem; color: var(--text-dim);">누적 판매량</div>
+              <div style="font-size: 1.3rem; font-weight: 800; color: #00cec9;">940만+</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px; text-align: center;">
+              <div style="font-size: 0.7rem; color: var(--text-dim);">팀 규모</div>
+              <div style="font-size: 1.3rem; font-weight: 800; color: #00cec9;">7명</div>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+            <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px; text-align: center;">
+              <div style="font-size: 0.7rem; color: var(--text-dim);">판매 채널</div>
+              <div style="font-size: 1.1rem; font-weight: 700;">6개+</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px; text-align: center;">
+              <div style="font-size: 0.7rem; color: var(--text-dim);">무신사 리뷰</div>
+              <div style="font-size: 1.1rem; font-weight: 700;">941건</div>
+            </div>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 8px;">핵심 전략</div>
+          <ul style="list-style: none; font-size: 0.85rem;">
+            <li style="padding: 4px 0; padding-left: 16px; position: relative;"><span style="position: absolute; left: 0;">1.</span><strong>"속세맛" 포지셔닝</strong> — 건강식의 "맛없다" 편견 정면 공격</li>
+            <li style="padding: 4px 0; padding-left: 16px; position: relative;"><span style="position: absolute; left: 0;">2.</span><strong>940만 사회적 증명</strong> — 숫자 자체가 광고 소재</li>
+            <li style="padding: 4px 0; padding-left: 16px; position: relative;"><span style="position: absolute; left: 0;">3.</span><strong>대표 퍼스널 브랜딩</strong> — 창업자가 직접 마케팅 채널</li>
+            <li style="padding: 4px 0; padding-left: 16px; position: relative;"><span style="position: absolute; left: 0;">4.</span><strong>멀티채널 키워드 점유</strong> — 무신사+컬리+해외까지</li>
+            <li style="padding: 4px 0; padding-left: 16px; position: relative;"><span style="position: absolute; left: 0;">5.</span><strong>스타터→번들 퍼널</strong> — 27,900원 진입 → 42,000원 업셀</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Channel comparison chart -->
+    <div class="grid-2" style="margin-bottom: 24px;">
+      <div class="chart-container">
+        <h3>3개 브랜드 채널 투자 비교</h3>
+        <div class="chart-wrapper">
+          <canvas id="newBrandChannelChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-container">
+        <h3>성장 퍼널 비교</h3>
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <!-- 라라스윗 퍼널 -->
+          <div>
+            <div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; color: #ff6b6b;">라라스윗 퍼널</div>
+            <div style="display: flex; gap: 4px; align-items: center; font-size: 0.75rem; flex-wrap: wrap;">
+              <span style="background: rgba(255,107,107,0.2); color: #ff6b6b; padding: 4px 10px; border-radius: 6px;">와디즈 2억</span>
+              <span style="color: var(--text-dim);">→</span>
+              <span style="background: rgba(255,107,107,0.15); color: #ff6b6b; padding: 4px 10px; border-radius: 6px;">CU 독점 출시</span>
+              <span style="color: var(--text-dim);">→</span>
+              <span style="background: rgba(255,107,107,0.15); color: #ff6b6b; padding: 4px 10px; border-radius: 6px;">매출 1위 달성</span>
+              <span style="color: var(--text-dim);">→</span>
+              <span style="background: rgba(255,107,107,0.15); color: #ff6b6b; padding: 4px 10px; border-radius: 6px;">전 채널 확장</span>
+              <span style="color: var(--text-dim);">→</span>
+              <span style="background: rgba(255,107,107,0.2); color: #ff6b6b; padding: 4px 10px; border-radius: 6px; font-weight: 700;">1,000억</span>
+            </div>
+          </div>
+          <!-- 크런틴 퍼널 -->
+          <div>
+            <div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; color: #a29bfe;">크런틴 퍼널</div>
+            <div style="display: flex; gap: 4px; align-items: center; font-size: 0.75rem; flex-wrap: wrap;">
+              <span style="background: rgba(162,155,254,0.2); color: #a29bfe; padding: 4px 10px; border-radius: 6px;">와디즈 3.3억</span>
+              <span style="color: var(--text-dim);">→</span>
+              <span style="background: rgba(162,155,254,0.15); color: #a29bfe; padding: 4px 10px; border-radius: 6px;">셀럽(기은세)</span>
+              <span style="color: var(--text-dim);">→</span>
+              <span style="background: rgba(162,155,254,0.15); color: #a29bfe; padding: 4px 10px; border-radius: 6px;">무료체험팩</span>
+              <span style="color: var(--text-dim);">→</span>
+              <span style="background: rgba(162,155,254,0.15); color: #a29bfe; padding: 4px 10px; border-radius: 6px;">올리브영</span>
+              <span style="color: var(--text-dim);">→</span>
+              <span style="background: rgba(162,155,254,0.2); color: #a29bfe; padding: 4px 10px; border-radius: 6px; font-weight: 700;">210억</span>
+            </div>
+          </div>
+          <!-- 잇더핏 퍼널 -->
+          <div>
+            <div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; color: #00cec9;">잇더핏 퍼널</div>
+            <div style="display: flex; gap: 4px; align-items: center; font-size: 0.75rem; flex-wrap: wrap;">
+              <span style="background: rgba(0,206,201,0.2); color: #00cec9; padding: 4px 10px; border-radius: 6px;">D2C 자사몰</span>
+              <span style="color: var(--text-dim);">→</span>
+              <span style="background: rgba(0,206,201,0.15); color: #00cec9; padding: 4px 10px; border-radius: 6px;">속세맛 카피</span>
+              <span style="color: var(--text-dim);">→</span>
+              <span style="background: rgba(0,206,201,0.15); color: #00cec9; padding: 4px 10px; border-radius: 6px;">인플루언서 확산</span>
+              <span style="color: var(--text-dim);">→</span>
+              <span style="background: rgba(0,206,201,0.15); color: #00cec9; padding: 4px 10px; border-radius: 6px;">멀티채널</span>
+              <span style="color: var(--text-dim);">→</span>
+              <span style="background: rgba(0,206,201,0.2); color: #00cec9; padding: 4px 10px; border-radius: 6px; font-weight: 700;">940만 판매</span>
+            </div>
+          </div>
+          <!-- 윤식단 제안 퍼널 -->
+          <div style="border-top: 1px solid var(--border); padding-top: 16px; margin-top: 4px;">
+            <div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; color: var(--green);">윤식단 제안 퍼널</div>
+            <div style="display: flex; gap: 4px; align-items: center; font-size: 0.75rem; flex-wrap: wrap;">
+              <span style="background: rgba(0,184,148,0.2); color: var(--green); padding: 4px 10px; border-radius: 6px;">USP 강화</span>
+              <span style="color: var(--text-dim);">→</span>
+              <span style="background: rgba(0,184,148,0.15); color: var(--green); padding: 4px 10px; border-radius: 6px;">체험 패키지</span>
+              <span style="color: var(--text-dim);">→</span>
+              <span style="background: rgba(0,184,148,0.15); color: var(--green); padding: 4px 10px; border-radius: 6px;">숏폼+바이럴</span>
+              <span style="color: var(--text-dim);">→</span>
+              <span style="background: rgba(0,184,148,0.15); color: var(--green); padding: 4px 10px; border-radius: 6px;">쿠팡 입점</span>
+              <span style="color: var(--text-dim);">→</span>
+              <span style="background: rgba(0,184,148,0.2); color: var(--green); padding: 4px 10px; border-radius: 6px; font-weight: 700;">스케일업</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 7: Benchmarking -->
+  <div class="section fade-in">
+    <div class="section-title"><span class="num">7</span> 윤식단 벤치마킹 제안</div>
+
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <!-- BM 1 -->
+      <div class="card" style="border-left: 4px solid #ff6b6b;">
+        <div style="display: flex; gap: 16px; align-items: flex-start;">
+          <div style="min-width: 60px; text-align: center;">
+            <div style="font-size: 0.7rem; color: var(--text-dim);">출처</div>
+            <div style="font-size: 0.9rem; font-weight: 700; color: #ff6b6b;">라라스윗</div>
+          </div>
+          <div>
+            <h4 style="font-size: 1rem; margin-bottom: 6px;">"설득형 마케팅" — 패키지에 수치를 전면 배치</h4>
+            <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 10px;">라라스윗은 F&B 비주얼 공식을 거부하고 칼로리·당류 수치를 패키지 전면에 대형으로 표기한다. 패키지 자체가 광고 소재가 되는 구조. 윤식단의 "단백질 50g / 당류 1g"은 이보다 더 강력한 수치인데, 현재 충분히 활용되지 않고 있다.</p>
+            <div style="background: rgba(0,184,148,0.1); border-radius: 8px; padding: 12px; font-size: 0.85rem;">
+              <strong style="color: var(--green);">윤식단 적용:</strong> 모든 상세페이지, 썸네일, 릴스 첫 3초, 택배 박스에 <strong>"단백질 50g / 당류 1g"</strong>을 가장 큰 폰트로 배치. 패키지 리디자인 시 수치 전면 표기 우선.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BM 2 -->
+      <div class="card" style="border-left: 4px solid #a29bfe;">
+        <div style="display: flex; gap: 16px; align-items: flex-start;">
+          <div style="min-width: 60px; text-align: center;">
+            <div style="font-size: 0.7rem; color: var(--text-dim);">출처</div>
+            <div style="font-size: 0.9rem; font-weight: 700; color: #a29bfe;">크런틴</div>
+          </div>
+          <div>
+            <h4 style="font-size: 1rem; margin-bottom: 6px;">"무료체험팩" — 첫 구매 리스크를 제로로</h4>
+            <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 10px;">크런틴은 "드셔보시고 결정하세요"라는 CTA로 무료체험팩을 제공하여 이메일/회원 확보 → 재구매 전환의 퍼널을 만든다. 도시락은 단가가 높아 첫 구매 장벽이 크런틴보다 훨씬 높다.</p>
+            <div style="background: rgba(0,184,148,0.1); border-radius: 8px; padding: 12px; font-size: 0.85rem;">
+              <strong style="color: var(--green);">윤식단 적용:</strong> "첫 체험 3팩 + 무료배송" 스타터 패키지를 원가 수준(1만원대)으로 출시. 메타 광고 CTA를 "체험팩 신청"으로 통일. 체험 → 정기구독 전환 퍼널 설계.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BM 3 -->
+      <div class="card" style="border-left: 4px solid #00cec9;">
+        <div style="display: flex; gap: 16px; align-items: flex-start;">
+          <div style="min-width: 60px; text-align: center;">
+            <div style="font-size: 0.7rem; color: var(--text-dim);">출처</div>
+            <div style="font-size: 0.9rem; font-weight: 700; color: #00cec9;">잇더핏</div>
+          </div>
+          <div>
+            <h4 style="font-size: 1rem; margin-bottom: 6px;">"속세맛 카피" — 건강식의 맛 편견을 정면 공격</h4>
+            <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 10px;">잇더핏은 "콘*라이크 말아먹는 맛", "찐한 초코맛" 등 실제 인기 식품과 비교하는 카피로 "건강식 = 맛없다"를 부순다. 죄책감을 없애면서 구매 욕구를 자극하는 가장 직관적인 카피 전략.</p>
+            <div style="background: rgba(0,184,148,0.1); border-radius: 8px; padding: 12px; font-size: 0.85rem;">
+              <strong style="color: var(--green);">윤식단 적용:</strong> "편의점 도시락 맛인데 단백질 50g" / "치킨마요 도시락 뺨치는 저당 도시락" — 실제 친숙한 음식과 맛을 비교하는 카피를 릴스/광고 후킹에 활용.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BM 4 -->
+      <div class="card" style="border-left: 4px solid #ff6b6b;">
+        <div style="display: flex; gap: 16px; align-items: flex-start;">
+          <div style="min-width: 60px; text-align: center;">
+            <div style="font-size: 0.7rem; color: var(--text-dim);">출처</div>
+            <div style="font-size: 0.9rem; font-weight: 700; color: #ff6b6b;">라라스윗</div>
+          </div>
+          <div>
+            <h4 style="font-size: 1rem; margin-bottom: 6px;">"중형 유튜버 반복 협업" — 단발 대형보다 효율적</h4>
+            <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 10px;">달라스튜디오 1회(87만뷰)보다 노빠꾸탁재훈 7회(평균 24만뷰), 떵개떵 6회(평균 14만뷰) 반복 협업이 브랜드 신뢰 누적에 더 효율적. 단발은 인지도, 반복은 전환에 기여.</p>
+            <div style="background: rgba(0,184,148,0.1); border-radius: 8px; padding: 12px; font-size: 0.85rem;">
+              <strong style="color: var(--green);">윤식단 적용:</strong> 구독자 5-20만 다이어트/식단 유튜버 3명을 선정하여 월 1회 × 6개월 반복 협업 계약. "윤식단 한 달 식단 일기", "저당 도시락 7일 챌린지" 시리즈로 연속성 확보.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BM 5 -->
+      <div class="card" style="border-left: 4px solid #00cec9;">
+        <div style="display: flex; gap: 16px; align-items: flex-start;">
+          <div style="min-width: 60px; text-align: center;">
+            <div style="font-size: 0.7rem; color: var(--text-dim);">출처</div>
+            <div style="font-size: 0.9rem; font-weight: 700; color: #00cec9;">잇더핏</div>
+          </div>
+          <div>
+            <h4 style="font-size: 1rem; margin-bottom: 6px;">"누적 판매량 = 광고 소재" — 숫자로 신뢰 구축</h4>
+            <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 10px;">잇더핏은 "누적 940만 돌파"를 모든 광고 소재 상단에 배치. 숫자 자체가 사회적 증명이 되어 신규 고객의 불안감을 낮추고 구매 결정을 쉽게 만든다.</p>
+            <div style="background: rgba(0,184,148,0.1); border-radius: 8px; padding: 12px; font-size: 0.85rem;">
+              <strong style="color: var(--green);">윤식단 적용:</strong> 누적 판매 식수, 재구매율, 리뷰 4.92점 등 검증 가능한 숫자를 모든 채널 첫 줄에 배치. "리뷰 평점 4.92 / 재구매율 ○○%" 형식의 사회적 증명 배너 제작.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BM 6 -->
+      <div class="card" style="border-left: 4px solid #a29bfe;">
+        <div style="display: flex; gap: 16px; align-items: flex-start;">
+          <div style="min-width: 60px; text-align: center;">
+            <div style="font-size: 0.7rem; color: var(--text-dim);">출처</div>
+            <div style="font-size: 0.9rem; font-weight: 700; color: #a29bfe;">크런틴</div>
+          </div>
+          <div>
+            <h4 style="font-size: 1rem; margin-bottom: 6px;">"틱톡 내돈내산 키워드 시딩" — 진정성 바이럴 설계</h4>
+            <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 10px;">크런틴은 틱톡에서 "크런틴 내돈내산", "크런틴 쉰내" 등 소비자 언어를 활용한 discover 태그를 형성. 자연 발생처럼 보이지만 전략적 시딩 가능성이 높다.</p>
+            <div style="background: rgba(0,184,148,0.1); border-radius: 8px; padding: 12px; font-size: 0.85rem;">
+              <strong style="color: var(--green);">윤식단 적용:</strong> 틱톡에서 "윤식단 내돈내산", "저당 도시락 솔직후기", "윤식단 혈당 측정" 등 키워드로 마이크로 크리에이터 5-10명에게 내돈내산 형식 콘텐츠를 의뢰. discover 태그 형성 유도.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BM 7 -->
+      <div class="card" style="border-left: 4px solid #fdcb6e;">
+        <div style="display: flex; gap: 16px; align-items: flex-start;">
+          <div style="min-width: 60px; text-align: center;">
+            <div style="font-size: 0.7rem; color: var(--text-dim);">출처</div>
+            <div style="font-size: 0.9rem; font-weight: 700; color: #fdcb6e;">공통</div>
+          </div>
+          <div>
+            <h4 style="font-size: 1rem; margin-bottom: 6px;">"카테고리 = 브랜드" 등식 만들기</h4>
+            <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 10px;">라라스윗 = 저당 아이스크림, 잇더핏 = 맛있는 단백질쉐이크, 크런틴 = 바삭한 단백질쉐이크. 세 브랜드 모두 카테고리 자체를 브랜드로 만드는 데 성공했다.</p>
+            <div style="background: rgba(0,184,148,0.1); border-radius: 8px; padding: 12px; font-size: 0.85rem;">
+              <strong style="color: var(--green);">윤식단 적용:</strong> <strong>"저당 단백질 도시락 = 윤식단"</strong> 등식을 모든 채널에서 반복. 상품명, 블로그 제목, 릴스 캡션, 해시태그에서 "저당 단백질 도시락"을 일관되게 사용하여 카테고리 키워드를 브랜드와 동일시.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 8: Action Plan (Updated) -->
+  <div class="section fade-in">
+    <div class="section-title"><span class="num">8</span> 종합 액션 플랜 (벤치마킹 반영)</div>
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <div class="action-card">
+        <div class="action-num">1</div>
+        <div class="action-body">
+          <h4>상품명에 "저당 단백질 도시락" 앞배치</h4>
+          <p>네이버/쿠팡 검색 노출 즉시 개선. 복합 키워드 블루오션 선점.</p>
+          <div class="action-tags">
+            <span class="action-tag tag-easy">난이도 낮음</span>
+            <span class="action-tag tag-channel">네이버</span>
+            <span class="action-tag tag-channel">쿠팡</span>
+          </div>
+        </div>
+      </div>
+      <div class="action-card">
+        <div class="action-num">2</div>
+        <div class="action-body">
+          <h4>네이버 브랜드 검색광고 집행 (월 30~50만)</h4>
+          <p>"윤식단" 키워드 경쟁사 광고 차단. 브랜드 검색 시 자사 콘텐츠 최상단 확보.</p>
+          <div class="action-tags">
+            <span class="action-tag tag-easy">난이도 낮음</span>
+            <span class="action-tag tag-channel">네이버</span>
+          </div>
+        </div>
+      </div>
+      <div class="action-card">
+        <div class="action-num">3</div>
+        <div class="action-body">
+          <h4>네이버 블로그 체험단 월 20~30건 시작</h4>
+          <p>"저당 도시락 추천", "단백질 도시락 후기" 등 구매의도 키워드 검색 유입 확보. 현재 0 → 즉시 격차 해소.</p>
+          <div class="action-tags">
+            <span class="action-tag tag-easy">난이도 낮음</span>
+            <span class="action-tag tag-channel">네이버 바이럴</span>
+          </div>
+        </div>
+      </div>
+      <div class="action-card">
+        <div class="action-num">4</div>
+        <div class="action-body">
+          <h4>틱톡 계정 개설 + 마이크로 크리에이터 월 5~10명 협찬</h4>
+          <p>경쟁사 모두 미진입 상태. 저당/단백질 식품은 자연 바이럴 가능한 카테고리. 지금이 선점 적기.</p>
+          <div class="action-tags">
+            <span class="action-tag tag-easy">난이도 낮음</span>
+            <span class="action-tag tag-channel">틱톡</span>
+          </div>
+        </div>
+      </div>
+      <div class="action-card">
+        <div class="action-num">5</div>
+        <div class="action-body">
+          <h4>인스타 릴스 비중 70%+ 전환 + ManyChat 퍼널</h4>
+          <p>480개 게시물 대비 22K 팔로워 = 오가닉만으로는 한계. 릴스 전환 + 댓글 DM 할인코드 자동화.</p>
+          <div class="action-tags">
+            <span class="action-tag tag-medium">난이도 중간</span>
+            <span class="action-tag tag-channel">인스타그램</span>
+          </div>
+        </div>
+      </div>
+      <div class="action-card">
+        <div class="action-num">6</div>
+        <div class="action-body">
+          <h4>"여름 전 완성 4~6주 패키지" 시즌 프로모션</h4>
+          <p>5~6월 연중 피크 시즌 대응. "지금 시작해서 6월까지 변화" 메시지로 구독 전환 유도.</p>
+          <div class="action-tags">
+            <span class="action-tag tag-medium">난이도 중간</span>
+            <span class="action-tag tag-channel">전 채널</span>
+          </div>
+        </div>
+      </div>
+      <div class="action-card">
+        <div class="action-num">7</div>
+        <div class="action-body">
+          <h4>쿠팡 로켓그로스 입점</h4>
+          <p>냉동 도시락 카테고리에서 로켓배송 배지 없으면 구조적 노출 불리. "저당 도시락" 키워드로 먼저 진입.</p>
+          <div class="action-tags">
+            <span class="action-tag tag-medium">난이도 중간</span>
+            <span class="action-tag tag-channel">쿠팡</span>
+          </div>
+        </div>
+      </div>
+      <div class="action-card">
+        <div class="action-num">8</div>
+        <div class="action-body">
+          <h4>유튜브 쇼츠 채널 + 다이어트 유튜버 2~3명 협찬</h4>
+          <p>"저당 도시락 7일 챌린지" 형식. 영상 자산 축적 + 중장기 검색 유입 구축.</p>
+          <div class="action-tags">
+            <span class="action-tag tag-medium">난이도 중간</span>
+            <span class="action-tag tag-channel">유튜브</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Callout -->
+  <div class="callout fade-in">
+    <h3>핵심 메시지</h3>
+    <p>라라스윗(1,000억)·크런틴(210억)·잇더핏(940만 판매)은 모두<br>
+    <strong style="color: #fff;">"수치 기반 설득 + 체험 퍼널 + 숏폼 바이럴"</strong> 공식으로 급성장했습니다.<br><br>
+    윤식단의 "단백질 50g / 당류 1g"은 이들보다 더 강력한 USP입니다.<br>
+    부족한 것은 제품이 아니라 <strong style="color: #ff6b6b;">채널 투자와 퍼널 설계</strong>입니다.<br><br>
+    <strong style="color: #fff;">5~6월 피크 시즌 전에 체험팩 + 숏폼 + 바이럴을 즉시 실행하세요.</strong></p>
+  </div>
+
+</div>
+
+<script>
+// Chart.js defaults
+Chart.defaults.color = '#8b8d9a';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+Chart.defaults.font.family = "'Pretendard', -apple-system, sans-serif";
+
+// 1. Growth Chart (Horizontal Bar)
+new Chart(document.getElementById('growthChart'), {
+  type: 'bar',
+  data: {
+    labels: ['RTD 단백질 음료', '고단백 냉동식사', '닭가슴살 섭취', '샐러드 간편식', '비빔밥류', '냉동식품 전체'],
+    datasets: [{
+      data: [81, 28, 26.7, 22.2, 13.7, 7.3],
+      backgroundColor: ['#6c5ce7', '#00cec9', '#55efc4', '#fdcb6e', '#e17055', '#8b8d9a'],
+      borderRadius: 6,
+      barThickness: 28
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: { label: (ctx) => `+${ctx.raw}%` }
+      }
+    },
+    scales: {
+      x: {
+        ticks: { callback: v => v + '%' },
+        grid: { color: 'rgba(255,255,255,0.04)' }
+      },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// 2. Trend Radar
+new Chart(document.getElementById('trendRadar'), {
+  type: 'radar',
+  data: {
+    labels: ['저속노화/혈당', '고단백 냉동 도시락', '봄/여름 시즌', '혼웰식', '저당 간식', '실온 보관'],
+    datasets: [{
+      label: '시장 규모',
+      data: [9, 9, 9, 7, 7, 6],
+      borderColor: '#6c5ce7',
+      backgroundColor: 'rgba(108,92,231,0.15)',
+      pointBackgroundColor: '#6c5ce7'
+    }, {
+      label: '윤식단 적합도',
+      data: [10, 10, 9, 8, 8, 5],
+      borderColor: '#00cec9',
+      backgroundColor: 'rgba(0,206,201,0.1)',
+      pointBackgroundColor: '#00cec9'
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      r: {
+        min: 0,
+        max: 10,
+        ticks: { stepSize: 2, color: '#555' },
+        grid: { color: 'rgba(255,255,255,0.06)' },
+        pointLabels: { font: { size: 11 } }
+      }
+    },
+    plugins: { legend: { position: 'bottom', labels: { padding: 16 } } }
+  }
+});
+
+// 3. Channel Investment (Polar Area)
+new Chart(document.getElementById('channelChart'), {
+  type: 'polarArea',
+  data: {
+    labels: ['검색 키워드', '네이버 바이럴', '인스타그램', '유튜브', '틱톡', '쿠팡'],
+    datasets: [{
+      data: [4, 0.5, 5, 0.5, 0.2, 2],
+      backgroundColor: [
+        'rgba(253,203,110,0.6)',
+        'rgba(214,48,49,0.6)',
+        'rgba(253,203,110,0.6)',
+        'rgba(214,48,49,0.6)',
+        'rgba(214,48,49,0.6)',
+        'rgba(225,112,85,0.6)'
+      ],
+      borderColor: 'transparent'
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      r: {
+        min: 0,
+        max: 10,
+        ticks: { display: false },
+        grid: { color: 'rgba(255,255,255,0.06)' }
+      }
+    },
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 } } },
+      tooltip: {
+        callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw}/10` }
+      }
+    }
+  }
+});
+
+// 4. Competitor Radar
+new Chart(document.getElementById('compRadar'), {
+  type: 'radar',
+  data: {
+    labels: ['검색 키워드', '네이버 바이럴', '인스타그램', '유튜브', '틱톡', '쿠팡'],
+    datasets: [{
+      label: '윤식단',
+      data: [4, 1, 4, 1, 0, 2],
+      borderColor: '#6c5ce7',
+      backgroundColor: 'rgba(108,92,231,0.15)',
+      pointBackgroundColor: '#6c5ce7',
+      borderWidth: 2
+    }, {
+      label: '랭킹닭컴',
+      data: [8, 7, 9, 6, 2, 7],
+      borderColor: '#e17055',
+      backgroundColor: 'rgba(225,112,85,0.08)',
+      pointBackgroundColor: '#e17055',
+      borderWidth: 2
+    }, {
+      label: '다노',
+      data: [7, 6, 8, 8, 3, 5],
+      borderColor: '#fdcb6e',
+      backgroundColor: 'rgba(253,203,110,0.08)',
+      pointBackgroundColor: '#fdcb6e',
+      borderWidth: 2
+    }, {
+      label: '식스밀',
+      data: [7, 5, 5, 4, 1, 9],
+      borderColor: '#00cec9',
+      backgroundColor: 'rgba(0,206,201,0.08)',
+      pointBackgroundColor: '#00cec9',
+      borderWidth: 2
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      r: {
+        min: 0,
+        max: 10,
+        ticks: { stepSize: 2, color: '#555' },
+        grid: { color: 'rgba(255,255,255,0.06)' },
+        pointLabels: { font: { size: 11 } }
+      }
+    },
+    plugins: { legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 } } } }
+  }
+});
+
+// 5. Keyword Bubble Chart
+new Chart(document.getElementById('keywordBubble'), {
+  type: 'bubble',
+  data: {
+    datasets: [
+      { label: '저당 단백질 도시락', data: [{ x: 15, y: 5, r: 22 }], backgroundColor: 'rgba(108,92,231,0.7)' },
+      { label: '단백질 도시락', data: [{ x: 35, y: 5, r: 20 }], backgroundColor: 'rgba(0,206,201,0.7)' },
+      { label: '저당 도시락', data: [{ x: 18, y: 5, r: 18 }], backgroundColor: 'rgba(85,239,196,0.7)' },
+      { label: '다이어트 도시락', data: [{ x: 55, y: 4, r: 24 }], backgroundColor: 'rgba(253,203,110,0.7)' },
+      { label: '고단백 도시락', data: [{ x: 15, y: 5, r: 16 }], backgroundColor: 'rgba(162,155,254,0.7)' },
+      { label: '당뇨 식단', data: [{ x: 12, y: 4, r: 15 }], backgroundColor: 'rgba(0,184,148,0.7)' },
+      { label: '냉동 도시락', data: [{ x: 45, y: 3, r: 20 }], backgroundColor: 'rgba(225,112,85,0.5)' },
+      { label: '식단 배달', data: [{ x: 35, y: 3, r: 18 }], backgroundColor: 'rgba(139,141,154,0.5)' },
+      { label: '저탄수 식단', data: [{ x: 5, y: 3, r: 10 }], backgroundColor: 'rgba(139,141,154,0.4)' },
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        title: { display: true, text: '월간 검색량 (추정, 천건)', color: '#8b8d9a' },
+        min: 0, max: 60,
+        grid: { color: 'rgba(255,255,255,0.04)' }
+      },
+      y: {
+        title: { display: true, text: '전환의도 (5점)', color: '#8b8d9a' },
+        min: 2, max: 6,
+        ticks: { stepSize: 1 },
+        grid: { color: 'rgba(255,255,255,0.04)' }
+      }
+    },
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 10, font: { size: 10 }, usePointStyle: true } },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => `${ctx.dataset.label}: 검색량 ${ctx.raw.x}K, 전환의도 ${ctx.raw.y}/5`
+        }
+      }
+    }
+  }
+});
+
+// 6. Position Chart (Scatter)
+new Chart(document.getElementById('positionChart'), {
+  type: 'scatter',
+  data: {
+    datasets: [
+      { label: '윤식단', data: [{ x: 9, y: 9 }], backgroundColor: '#6c5ce7', pointRadius: 14, pointHoverRadius: 18 },
+      { label: '식스밀', data: [{ x: 3, y: 9.5 }], backgroundColor: '#00cec9', pointRadius: 12, pointHoverRadius: 16 },
+      { label: '그리팅', data: [{ x: 9, y: 5 }], backgroundColor: '#55efc4', pointRadius: 11, pointHoverRadius: 15 },
+      { label: '허닭', data: [{ x: 4, y: 7 }], backgroundColor: '#fdcb6e', pointRadius: 12, pointHoverRadius: 16 },
+      { label: '랭킹닭컴', data: [{ x: 3, y: 8 }], backgroundColor: '#e17055', pointRadius: 14, pointHoverRadius: 18 },
+      { label: '다노', data: [{ x: 6, y: 6 }], backgroundColor: '#fab1a0', pointRadius: 11, pointHoverRadius: 15 },
+      { label: '무화당', data: [{ x: 10, y: 3 }], backgroundColor: '#81ecec', pointRadius: 9, pointHoverRadius: 13 },
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        title: { display: true, text: '저당 소구 강도 →', color: '#8b8d9a' },
+        min: 0, max: 11,
+        grid: { color: 'rgba(255,255,255,0.04)' }
+      },
+      y: {
+        title: { display: true, text: '고단백 소구 강도 →', color: '#8b8d9a' },
+        min: 0, max: 11,
+        grid: { color: 'rgba(255,255,255,0.04)' }
+      }
+    },
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 }, usePointStyle: true } },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => `${ctx.dataset.label}: 저당 ${ctx.raw.x}/10, 고단백 ${ctx.raw.y}/10`
+        }
+      }
+    }
+  }
+});
+
+// 7. New Brand Channel Comparison
+new Chart(document.getElementById('newBrandChannelChart'), {
+  type: 'bar',
+  data: {
+    labels: ['검색 키워드', '네이버 바이럴', '인스타그램', '유튜브', '틱톡', '메타 광고'],
+    datasets: [{
+      label: '라라스윗',
+      data: [8, 7, 8, 7, 5, 7],
+      backgroundColor: 'rgba(255,107,107,0.7)',
+      borderRadius: 4,
+      barPercentage: 0.7
+    }, {
+      label: '크런틴',
+      data: [6, 5, 6, 5, 6, 9],
+      backgroundColor: 'rgba(162,155,254,0.7)',
+      borderRadius: 4,
+      barPercentage: 0.7
+    }, {
+      label: '잇더핏',
+      data: [7, 5, 7, 3, 2, 6],
+      backgroundColor: 'rgba(0,206,201,0.7)',
+      borderRadius: 4,
+      barPercentage: 0.7
+    }, {
+      label: '윤식단',
+      data: [4, 1, 4, 1, 0, 2],
+      backgroundColor: 'rgba(0,184,148,0.7)',
+      borderRadius: 4,
+      barPercentage: 0.7
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: { grid: { display: false } },
+      y: {
+        min: 0, max: 10,
+        ticks: { stepSize: 2 },
+        grid: { color: 'rgba(255,255,255,0.04)' }
+      }
+    },
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 }, usePointStyle: true } }
+    }
+  }
+});
+
+// Scroll Animation
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

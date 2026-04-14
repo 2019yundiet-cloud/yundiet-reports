@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>잇더핏 마케팅 구조 분석 | 2026 Q2</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0f1117;--card:#1a1d27;--border:#2a2d3a;--accent:#00cec9;--accent2:#00b5b0;--text:#e8e8ee;--text-dim:#8b8d9a;--green:#00b894;--red:#d63031;--yellow:#fdcb6e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+.header{background:linear-gradient(135deg,#1a1d27 0%,#0a3d3c 50%,#1a1d27 100%);padding:60px 40px;text-align:center;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.header h1{font-size:2.2rem;font-weight:800;background:linear-gradient(135deg,#fff,#00cec9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;position:relative}
+.header .sub{color:var(--text-dim);font-size:1rem;margin-top:8px;position:relative}
+.badge{display:inline-block;margin-top:14px;padding:6px 16px;background:rgba(0,206,201,0.2);border:1px solid rgba(0,206,201,0.4);border-radius:20px;font-size:0.85rem;color:#00cec9;position:relative}
+.container{max-width:1300px;margin:0 auto;padding:40px 24px}
+.section{margin-bottom:50px}
+.stitle{font-size:1.3rem;font-weight:700;margin-bottom:20px;padding-left:14px;border-left:4px solid var(--accent);display:flex;align-items:center;gap:10px}
+.stitle .n{background:var(--accent);color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;transition:transform .2s}
+.card:hover{transform:translateY(-2px)}
+.kpi{text-align:center}
+.kpi-label{font-size:.78rem;color:var(--text-dim);margin-bottom:6px}
+.kpi-val{font-size:2rem;font-weight:800}
+.kpi-sub{font-size:.82rem;margin-top:4px}
+.chart-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px}
+.chart-box h3{font-size:1rem;margin-bottom:16px}
+.cw{position:relative;height:300px}
+.cw-lg{position:relative;height:380px}
+.tag{display:inline-block;padding:2px 10px;border-radius:6px;font-size:.75rem;font-weight:600;margin-right:4px;margin-bottom:4px}
+.tag-a{background:rgba(0,206,201,.15);color:#00cec9}
+.tag-g{background:rgba(0,184,148,.15);color:var(--green)}
+.tag-y{background:rgba(253,203,110,.15);color:var(--yellow)}
+.tag-b{background:rgba(108,92,231,.15);color:#a29bfe}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 14px;font-size:.78rem;color:var(--text-dim);text-transform:uppercase;border-bottom:2px solid var(--border)}
+td{padding:12px 14px;font-size:.88rem;border-bottom:1px solid rgba(255,255,255,.05)}
+.funnel{display:flex;gap:4px;align-items:center;font-size:.78rem;flex-wrap:wrap;margin-top:10px}
+.funnel span{padding:5px 12px;border-radius:6px}
+.insight-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;border-left:4px solid var(--accent)}
+.insight-card h4{font-size:.95rem;margin-bottom:6px}
+.insight-card p{font-size:.85rem;color:var(--text-dim)}
+.apply{background:rgba(0,184,148,.08);border-radius:8px;padding:10px 14px;margin-top:10px;font-size:.85rem}
+.apply strong{color:var(--green)}
+.callout{background:linear-gradient(135deg,rgba(0,206,201,.1),rgba(0,181,176,.05));border:1px solid rgba(0,206,201,.3);border-radius:14px;padding:28px;text-align:center;margin-top:40px}
+.callout h3{font-size:1.15rem;margin-bottom:10px;color:#00cec9}
+.callout p{color:var(--text-dim);font-size:.92rem;max-width:680px;margin:0 auto}
+.fade-in{opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+@media(max-width:768px){.grid-2,.grid-3{grid-template-columns:1fr}.grid-4,.grid-5{grid-template-columns:1fr 1fr}.header{padding:40px 20px}.header h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>잇더핏 마케팅 구조 분석</h1>
+  <div class="sub">EAT THE FIT | 단백질 쉐이크 파우치 | 윤식단 벤치마킹용</div>
+  <div class="badge">2026년 4월 기준 | 경쟁마케팅-분석 에이전트</div>
+</div>
+
+<div class="container">
+
+  <!-- KPIs -->
+  <div class="grid-5 fade-in" style="margin-bottom:40px;">
+    <div class="card kpi">
+      <div class="kpi-label">누적 판매</div>
+      <div class="kpi-val" style="color:#00cec9">940만+</div>
+      <div class="kpi-sub" style="color:var(--green)">사회적 증명의 핵심 자산</div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-label">팀 규모</div>
+      <div class="kpi-val" style="color:#00cec9">7명</div>
+      <div class="kpi-sub">린 조직 운영</div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-label">판매 채널</div>
+      <div class="kpi-val" style="color:#00cec9">6개+</div>
+      <div class="kpi-sub">자사몰 + 멀티플랫폼</div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-label">무신사 리뷰</div>
+      <div class="kpi-val" style="color:#00cec9">941건</div>
+      <div class="kpi-sub">평점 4.92 / 5.0</div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-label">리뷰 평점</div>
+      <div class="kpi-val" style="color:#00cec9">4.92</div>
+      <div class="kpi-sub" style="color:var(--yellow)">최상위 고객 만족도</div>
+    </div>
+  </div>
+
+  <!-- Section 1: Brand Overview -->
+  <div class="section fade-in">
+    <div class="stitle"><span class="n">1</span> 브랜드 개요</div>
+    <div class="grid-2">
+      <div class="card">
+        <h4 style="margin-bottom:12px;">기본 정보</h4>
+        <table>
+          <tr><td style="color:var(--text-dim)">회사</td><td>데이바이미</td></tr>
+          <tr><td style="color:var(--text-dim)">대표</td><td>강미서 (@miseo_is)</td></tr>
+          <tr><td style="color:var(--text-dim)">브랜드</td><td>잇더핏 (EAT THE FIT)</td></tr>
+          <tr><td style="color:var(--text-dim)">리브랜딩</td><td>델리스푼 → 잇더핏</td></tr>
+          <tr><td style="color:var(--text-dim)">투자</td><td>Pre-A 투자 유치</td></tr>
+          <tr><td style="color:var(--text-dim)">카테고리</td><td>단백질 쉐이크 파우치</td></tr>
+          <tr><td style="color:var(--text-dim)">슬로건</td><td>"콘*라이크 말아먹는 맛" (속세맛)</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h4 style="margin-bottom:12px;">타겟 고객</h4>
+        <div class="cw">
+          <canvas id="targetChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Core Products -->
+  <div class="section fade-in">
+    <div class="stitle"><span class="n">2</span> 핵심 제품 라인업</div>
+    <div class="grid-2">
+      <div class="card">
+        <h4 style="margin-bottom:12px;">단백질 쉐이크 파우치 6종</h4>
+        <table>
+          <thead><tr><th>패키지</th><th>가격</th><th>역할</th></tr></thead>
+          <tbody>
+            <tr><td><strong>스타터패키지</strong></td><td style="color:#00cec9">27,900원</td><td>첫구매 진입 장벽 제거</td></tr>
+            <tr><td><strong>스위치온플랜</strong></td><td style="color:#00cec9">42,000원</td><td>업셀 번들 (정기 전환 유도)</td></tr>
+            <tr><td>개별 파우치</td><td>5,000~6,000원대</td><td>단품 체험</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:16px;">
+          <div style="font-size:.82rem;color:var(--text-dim);margin-bottom:8px;">퍼널 구조</div>
+          <div class="funnel">
+            <span style="background:rgba(0,206,201,.2);color:#00cec9">스타터 27,900원</span>
+            <span style="color:var(--text-dim)">→</span>
+            <span style="background:rgba(0,206,201,.15);color:#00cec9">맛 경험 & 만족</span>
+            <span style="color:var(--text-dim)">→</span>
+            <span style="background:rgba(0,206,201,.25);color:#00cec9;font-weight:700">스위치온 42,000원</span>
+          </div>
+        </div>
+      </div>
+      <div class="chart-box">
+        <h3>제품 퍼널 구조 (가격 포지셔닝)</h3>
+        <div class="cw">
+          <canvas id="productChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Growth Funnel -->
+  <div class="section fade-in">
+    <div class="stitle"><span class="n">3</span> 성장 퍼널</div>
+    <div class="grid-2">
+      <div class="chart-box">
+        <h3>성장 단계별 전략</h3>
+        <div style="display:flex;flex-direction:column;gap:20px;margin-top:10px;">
+          <div>
+            <div style="font-size:.82rem;color:var(--text-dim);margin-bottom:6px;">Phase 1 — D2C 자사몰 기반 구축</div>
+            <div class="funnel">
+              <span style="background:rgba(0,206,201,.2);color:#00cec9">eatthefit.com 론칭</span>
+              <span style="color:var(--text-dim)">→</span>
+              <span style="background:rgba(0,206,201,.15);color:#00cec9">D2C 직접 판매</span>
+              <span style="color:var(--text-dim)">→</span>
+              <span style="background:rgba(0,206,201,.15);color:#00cec9">고객 데이터 확보</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:.82rem;color:var(--text-dim);margin-bottom:6px;">Phase 2 — "속세맛" 카피로 확산</div>
+            <div class="funnel">
+              <span style="background:rgba(0,206,201,.2);color:#00cec9">"콘*라이크 맛" 카피</span>
+              <span style="color:var(--text-dim)">→</span>
+              <span style="background:rgba(0,206,201,.15);color:#00cec9">건강식 편견 파괴</span>
+              <span style="color:var(--text-dim)">→</span>
+              <span style="background:rgba(0,206,201,.15);color:#00cec9">바이럴 확산</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:.82rem;color:var(--text-dim);margin-bottom:6px;">Phase 3 — 인플루언서 협업</div>
+            <div class="funnel">
+              <span style="background:rgba(0,206,201,.2);color:#00cec9">인플루언서 시딩</span>
+              <span style="color:var(--text-dim)">→</span>
+              <span style="background:rgba(0,206,201,.15);color:#00cec9">SNS 자발 후기</span>
+              <span style="color:var(--text-dim)">→</span>
+              <span style="background:rgba(0,206,201,.15);color:#00cec9">신뢰 축적</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:.82rem;color:var(--text-dim);margin-bottom:6px;">Phase 4 — 멀티채널 확장</div>
+            <div class="funnel">
+              <span style="background:rgba(0,206,201,.2);color:#00cec9">무신사/컬리</span>
+              <span style="color:var(--text-dim)">→</span>
+              <span style="background:rgba(0,206,201,.15);color:#00cec9">카카오/해외</span>
+              <span style="color:var(--text-dim)">→</span>
+              <span style="background:rgba(0,206,201,.25);color:#00cec9;font-weight:700">940만+ 판매</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-box">
+        <h3>성장 퍼널 시각화</h3>
+        <div class="cw-lg">
+          <canvas id="funnelChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Channel Analysis -->
+  <div class="section fade-in">
+    <div class="stitle"><span class="n">4</span> 채널별 마케팅 구조</div>
+    <div class="grid-2" style="margin-bottom:20px;">
+      <div class="chart-box">
+        <h3>채널 투자 수준 (10점 척도) vs 윤식단</h3>
+        <div class="cw">
+          <canvas id="channelRadar"></canvas>
+        </div>
+      </div>
+      <div class="chart-box">
+        <h3>광고 카피 & 메시지 전략</h3>
+        <div style="display:flex;flex-direction:column;gap:16px;margin-top:8px;">
+          <div style="background:rgba(0,206,201,.08);border-radius:10px;padding:14px;">
+            <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:4px;">핵심 카피 1</div>
+            <div style="font-size:.95rem;font-weight:600;color:#00cec9">"맛은 똑같은데 칼로리와 당류..."</div>
+            <div style="font-size:.78rem;color:var(--text-dim);margin-top:4px;">속세맛 포지셔닝 — 맛 비교를 통한 설득</div>
+          </div>
+          <div style="background:rgba(0,206,201,.08);border-radius:10px;padding:14px;">
+            <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:4px;">핵심 카피 2</div>
+            <div style="font-size:.95rem;font-weight:600;color:#00cec9">"누적 940만 돌파"</div>
+            <div style="font-size:.78rem;color:var(--text-dim);margin-top:4px;">숫자 자체가 광고 소재 — 사회적 증명</div>
+          </div>
+          <div style="background:rgba(0,206,201,.08);border-radius:10px;padding:14px;">
+            <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:4px;">핵심 카피 3</div>
+            <div style="font-size:.95rem;font-weight:600;color:#00cec9">"5kg 쌉가능"</div>
+            <div style="font-size:.78rem;color:var(--text-dim);margin-top:4px;">결과 지향적 카피 — 구체적 숫자로 기대 효과 제시</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Channel Detail Cards -->
+    <div class="grid-3">
+      <div class="card" style="border-top:3px solid #00cec9">
+        <h4 style="font-size:.9rem;margin-bottom:10px;">검색 키워드 (7/10)</h4>
+        <div style="font-size:.85rem;color:var(--text-dim);margin-bottom:8px;">
+          "단백질 쉐이크 파우치" 카테고리 내 상위 노출
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">
+          <span class="tag tag-a">단백질 쉐이크</span>
+          <span class="tag tag-a">잇더핏</span>
+          <span class="tag tag-a">다이어트 쉐이크</span>
+          <span class="tag tag-y">단백질 파우치</span>
+        </div>
+      </div>
+      <div class="card" style="border-top:3px solid #00cec9">
+        <h4 style="font-size:.9rem;margin-bottom:10px;">인스타그램 (7/10)</h4>
+        <div style="font-size:.85rem;color:var(--text-dim);margin-bottom:8px;">
+          대표 퍼스널 브랜딩 중심 운영
+        </div>
+        <ul style="list-style:none;font-size:.82rem;">
+          <li style="padding:3px 0">- <strong>강미서 대표</strong> @miseo_is 직접 운영</li>
+          <li style="padding:3px 0">- <strong>속세맛 비주얼</strong>: 일반 음식과 비교 콘텐츠</li>
+          <li style="padding:3px 0">- <strong>리얼 후기</strong> 중심 피드 구성</li>
+          <li style="padding:3px 0">- 대표 일상 + 브랜드 스토리 혼합</li>
+        </ul>
+      </div>
+      <div class="card" style="border-top:3px solid #00cec9">
+        <h4 style="font-size:.9rem;margin-bottom:10px;">메타 광고 (6/10)</h4>
+        <div style="font-size:.85rem;color:var(--text-dim);margin-bottom:8px;">
+          수치 기반 설득형 광고 소재 운용
+        </div>
+        <ul style="list-style:none;font-size:.82rem;">
+          <li style="padding:3px 0">- <strong>상시 30-40% 할인</strong> 프로모션 연동</li>
+          <li style="padding:3px 0">- <strong>"940만 돌파"</strong> 사회적 증명 소재</li>
+          <li style="padding:3px 0">- <strong>첫구매 무료배송</strong> CTA 강조</li>
+          <li style="padding:3px 0">- 타임특가 긴급성 활용</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: Sales Channels -->
+  <div class="section fade-in">
+    <div class="stitle"><span class="n">5</span> 유통 채널 구조</div>
+    <div class="grid-2">
+      <div class="chart-box">
+        <h3>유통 채널 맵</h3>
+        <div class="cw">
+          <canvas id="distChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <h4 style="margin-bottom:12px;">판매 채널 상세</h4>
+        <table>
+          <thead><tr><th>채널</th><th>URL / 플랫폼</th><th>역할</th></tr></thead>
+          <tbody>
+            <tr><td><strong>자사몰</strong></td><td style="color:#00cec9">eatthefit.com</td><td>D2C 핵심, 데이터 허브</td></tr>
+            <tr><td>구 자사몰</td><td style="color:var(--text-dim)">delispoon.co.kr</td><td>리브랜딩 전 도메인</td></tr>
+            <tr><td><strong>마켓컬리</strong></td><td>컬리</td><td>프리미엄 건강식 고객</td></tr>
+            <tr><td><strong>무신사</strong></td><td>뷰티관</td><td style="color:#00cec9">리뷰 941건 / 4.92점</td></tr>
+            <tr><td>카카오선물하기</td><td>카카오</td><td>선물 수요 포착</td></tr>
+            <tr><td>한품/wooltari</td><td>해외</td><td>해외 교민 시장 진출</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6: Key Strategies -->
+  <div class="section fade-in">
+    <div class="stitle"><span class="n">6</span> 핵심 전략 5가지</div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="insight-card">
+        <h4>1. "속세맛" 포지셔닝 — 건강식 맛없다는 편견 정면 공격</h4>
+        <p>"콘*라이크 말아먹는 맛"이라는 카피로 건강식의 가장 큰 장벽인 '맛'을 정면 돌파. 일반 음식과의 맛 비교를 통해 "맛은 똑같은데 칼로리와 당류만 다르다"는 메시지를 반복 각인시킨다.</p>
+        <div class="apply"><strong>윤식단 적용:</strong> "속세맛" 전략을 벤치마킹하여 "편의점 도시락 맛인데 단백질 50g" 같은 비교 카피 개발. 맛 비교가 곧 설득이라는 공식 차용.</div>
+      </div>
+      <div class="insight-card">
+        <h4>2. 940만 사회적 증명 — 누적 판매량 숫자가 곧 광고</h4>
+        <p>"누적 940만 돌파"라는 숫자를 모든 채널, 모든 소재에 반복 노출. 판매량 자체가 신뢰의 근거이자 광고 카피가 되는 구조. 대형 숫자는 소비자의 의심을 선제적으로 해소한다.</p>
+        <div class="apply"><strong>윤식단 적용:</strong> 누적 판매량, 누적 리뷰 수, 재구매율 등 "큰 숫자"를 발굴하여 모든 광고 소재 첫 줄에 배치. 숫자가 곧 신뢰.</div>
+      </div>
+      <div class="insight-card">
+        <h4>3. 대표 퍼스널 브랜딩 — 강미서 대표가 직접 마케팅 채널</h4>
+        <p>강미서 대표(@miseo_is)가 직접 인스타그램에서 브랜드 스토리를 전달. 창업자의 얼굴과 일상이 브랜드 신뢰도를 높이고, 대표 자체가 인플루언서 역할을 수행하며 마케팅 비용을 절감한다.</p>
+        <div class="apply"><strong>윤식단 적용:</strong> 대표 또는 핵심 인물의 퍼스널 브랜딩 계정 운영. "만드는 사람의 얼굴이 보이는 브랜드"로 신뢰 구축.</div>
+      </div>
+      <div class="insight-card">
+        <h4>4. 멀티채널 키워드 점유 — 리뷰 축적으로 검색 장악</h4>
+        <p>무신사(941건), 컬리, 카카오선물하기, 해외(한품/wooltari)까지 모든 채널에서 리뷰를 축적. 각 플랫폼 내 검색 결과에서 리뷰 수와 평점이 곧 검색 순위로 직결되는 구조를 만들었다.</p>
+        <div class="apply"><strong>윤식단 적용:</strong> 입점 채널별 리뷰 100건 달성 프로젝트 운영. 리뷰 요청 자동화 + 포토리뷰 인센티브로 채널별 검색 경쟁력 확보.</div>
+      </div>
+      <div class="insight-card">
+        <h4>5. 스타터 → 번들 퍼널 — 첫구매에서 업셀까지</h4>
+        <p>스타터패키지 27,900원으로 진입 장벽을 낮추고, 만족한 고객을 스위치온플랜 42,000원 번들로 업셀. 첫구매 무료배송 + 상시 할인으로 전환율을 극대화하는 깔대기 구조.</p>
+        <div class="apply"><strong>윤식단 적용:</strong> "첫 주문 체험 세트" (1~2만원대)를 진입 상품으로 설계하고, 만족 후 정기배송/대용량 번들로 업셀하는 퍼널 구축.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 7: Promo Strategy -->
+  <div class="section fade-in">
+    <div class="stitle"><span class="n">7</span> 프로모션 전략</div>
+    <div class="grid-3">
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:8px;">💰</div>
+        <h4 style="font-size:.9rem;margin-bottom:6px;">상시 30-40% 할인</h4>
+        <p style="font-size:.82rem;color:var(--text-dim)">상시 할인으로 가격 저항 제거. 정가 대비 체감 할인율로 즉시 구매 유도.</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:8px;">🚚</div>
+        <h4 style="font-size:.9rem;margin-bottom:6px;">첫구매 무료배송</h4>
+        <p style="font-size:.82rem;color:var(--text-dim)">첫 구매 고객 진입 장벽 완전 제거. 배송비 부담 없이 체험 유도.</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:8px;">⏰</div>
+        <h4 style="font-size:.9rem;margin-bottom:6px;">타임특가</h4>
+        <p style="font-size:.82rem;color:var(--text-dim)">한정 시간 추가 할인으로 긴급성 조성. 망설이는 고객의 즉시 전환 유도.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 8: Insights for 윤식단 -->
+  <div class="section fade-in">
+    <div class="stitle"><span class="n">8</span> 윤식단 적용 인사이트 TOP 5</div>
+    <div class="grid-2" style="gap:14px;">
+      <div class="card" style="border-left:4px solid var(--green);">
+        <h4 style="font-size:.9rem;margin-bottom:8px;color:var(--green)">1. "속세맛" 카피 벤치마킹</h4>
+        <p style="font-size:.85rem;color:var(--text-dim)">건강식의 맛 편견을 정면 공격하는 카피 전략 도입. "편의점 도시락 맛 그대로, 단백질만 50g" 같은 비교 구조의 카피를 개발하여 맛과 영양의 양립을 강조.</p>
+      </div>
+      <div class="card" style="border-left:4px solid var(--green);">
+        <h4 style="font-size:.9rem;margin-bottom:8px;color:var(--green)">2. 누적 숫자 사회적 증명</h4>
+        <p style="font-size:.85rem;color:var(--text-dim)">윤식단의 누적 판매량, 리뷰 수, 재구매율 등 "큰 숫자"를 발굴하여 모든 광고 소재 및 상세페이지에 반복 노출. 숫자가 곧 신뢰.</p>
+      </div>
+      <div class="card" style="border-left:4px solid var(--green);">
+        <h4 style="font-size:.9rem;margin-bottom:8px;color:var(--green)">3. 첫구매 체험 패키지</h4>
+        <p style="font-size:.85rem;color:var(--text-dim)">잇더핏의 스타터패키지(27,900원)처럼 저가 체험 세트를 설계. 첫 진입 장벽을 낮추고 만족 → 정기배송/번들 업셀 퍼널을 구축.</p>
+      </div>
+      <div class="card" style="border-left:4px solid var(--green);">
+        <h4 style="font-size:.9rem;margin-bottom:8px;color:var(--green)">4. 멀티채널 입점 리뷰 전략</h4>
+        <p style="font-size:.85rem;color:var(--text-dim)">무신사/컬리/카카오 등 각 플랫폼별 리뷰 100건 이상 확보 프로젝트. 리뷰가 곧 검색 순위이고, 검색 순위가 곧 매출.</p>
+      </div>
+      <div class="card" style="border-left:4px solid var(--green);grid-column:1/-1;">
+        <h4 style="font-size:.9rem;margin-bottom:8px;color:var(--green)">5. 대표 퍼스널 브랜딩</h4>
+        <p style="font-size:.85rem;color:var(--text-dim)">강미서 대표처럼 윤식단의 핵심 인물이 직접 SNS에서 브랜드 스토리를 전달. "만드는 사람의 얼굴이 보이는 브랜드"는 소규모 팀의 최고 마케팅 자산.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Callout -->
+  <div class="callout fade-in">
+    <h3>윤식단이 잇더핏에서 배울 핵심 한 줄</h3>
+    <p>"숫자가 곧 신뢰이고, 맛 비교가 곧 설득이다."<br><br>
+    잇더핏은 7명의 린 조직으로 <strong style="color:#fff">누적 940만 판매</strong>를 달성했다.<br>
+    핵심은 <strong style="color:#00cec9">"속세맛"이라는 단 한 단어의 포지셔닝</strong>과<br>
+    <strong style="color:#00cec9">"940만"이라는 숫자의 사회적 증명</strong>이다.</p>
+  </div>
+
+</div>
+
+<script>
+Chart.defaults.color='#8b8d9a';Chart.defaults.borderColor='rgba(255,255,255,0.06)';Chart.defaults.font.family="'Pretendard',-apple-system,sans-serif";
+
+// Target Customer
+new Chart(document.getElementById('targetChart'),{type:'doughnut',data:{labels:['1순위: 2030 여성 다이어터','2순위: 운동 관심층','3순위: 아침대용 직장인'],datasets:[{data:[55,28,17],backgroundColor:['#00cec9','#00b5b0','#fdcb6e'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:10,font:{size:11}}}}}});
+
+// Product Funnel
+new Chart(document.getElementById('productChart'),{type:'bar',data:{labels:['개별 파우치','스타터패키지','스위치온플랜'],datasets:[{label:'가격(원)',data:[5500,27900,42000],backgroundColor:['rgba(0,206,201,.4)','rgba(0,206,201,.6)','rgba(0,206,201,.9)'],borderRadius:6,barThickness:50}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw.toLocaleString()+'원'}}},scales:{x:{ticks:{callback:v=>(v/1000)+'K'},grid:{color:'rgba(255,255,255,.04)'}},y:{grid:{display:false}}}}});
+
+// Growth Funnel
+new Chart(document.getElementById('funnelChart'),{type:'bar',data:{labels:['D2C 자사몰','속세맛 카피','인플루언서 확산','멀티채널 입점','940만 달성'],datasets:[{label:'성장 단계',data:[100,200,400,700,940],backgroundColor:['rgba(0,206,201,.3)','rgba(0,206,201,.4)','rgba(0,206,201,.55)','rgba(0,206,201,.7)','rgba(0,206,201,.9)'],borderRadius:6,barThickness:40}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'Phase '+(ctx.dataIndex+1)}}},scales:{y:{ticks:{callback:v=>v+'만'},grid:{color:'rgba(255,255,255,.04)'}},x:{grid:{display:false}}}}});
+
+// Channel Radar
+new Chart(document.getElementById('channelRadar'),{type:'radar',data:{labels:['검색 키워드','네이버 바이럴','인스타그램','유튜브','틱톡','메타 광고'],datasets:[{label:'잇더핏',data:[7,5,7,3,2,6],borderColor:'#00cec9',backgroundColor:'rgba(0,206,201,.15)',pointBackgroundColor:'#00cec9',borderWidth:2},{label:'윤식단',data:[4,1,4,1,0,1],borderColor:'#00b894',backgroundColor:'rgba(0,184,148,.1)',pointBackgroundColor:'#00b894',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:10,ticks:{stepSize:2,color:'#555'},grid:{color:'rgba(255,255,255,.06)'},pointLabels:{font:{size:11}}}},plugins:{legend:{position:'bottom',labels:{padding:12}}}}});
+
+// Distribution
+new Chart(document.getElementById('distChart'),{type:'polarArea',data:{labels:['자사몰 (D2C 핵심)','무신사','마켓컬리','카카오선물하기','해외 (한품/wooltari)','구 자사몰'],datasets:[{data:[10,8,7,5,4,2],backgroundColor:['rgba(0,206,201,.7)','rgba(0,181,176,.55)','rgba(253,203,110,.5)','rgba(162,155,254,.5)','rgba(85,239,196,.4)','rgba(139,141,154,.3)'],borderColor:'transparent'}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{ticks:{display:false},grid:{color:'rgba(255,255,255,.06)'}}},plugins:{legend:{position:'bottom',labels:{padding:10,font:{size:10}}}}}});
+
+const obs=new IntersectionObserver(e=>{e.forEach(el=>{if(el.isIntersecting)el.target.classList.add('visible')})},{threshold:.1});document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
