@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>밸런시 경쟁사 마케팅 분석 — 2026 Q2</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d2e;
+    --card2: #1e2235;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --accent3: #43e97b;
+    --accent4: #f7971e;
+    --text: #e2e8f0;
+    --muted: #8892b0;
+    --border: #2d3154;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', -apple-system, sans-serif; min-height: 100vh; }
+
+  .hero {
+    background: linear-gradient(135deg, #0f1117 0%, #1a1d2e 50%, #151824 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 40px 36px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -80px; right: -80px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(108,99,255,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-badge { display: inline-block; background: rgba(108,99,255,0.2); border: 1px solid rgba(108,99,255,0.4); color: var(--accent); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; }
+  .hero h1 { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 8px; }
+  .hero h1 span { color: var(--accent); }
+  .hero-meta { color: var(--muted); font-size: 14px; display: flex; gap: 20px; flex-wrap: wrap; margin-top: 16px; }
+  .hero-meta span::before { content: '• '; color: var(--accent); }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 40px; }
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+    position: relative; overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+  .kpi-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .kpi-card.purple::after { background: var(--accent); }
+  .kpi-card.red::after { background: var(--accent2); }
+  .kpi-card.green::after { background: var(--accent3); }
+  .kpi-card.orange::after { background: var(--accent4); }
+  .kpi-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .kpi-value { font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+  .kpi-sub { font-size: 12px; color: var(--muted); }
+  .kpi-card.purple .kpi-value { color: var(--accent); }
+  .kpi-card.red .kpi-value { color: var(--accent2); }
+  .kpi-card.green .kpi-value { color: var(--accent3); }
+  .kpi-card.orange .kpi-value { color: var(--accent4); }
+
+  .section-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+  .section-title .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px; }
+  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+  .chart-card h3 { font-size: 14px; color: var(--muted); margin-bottom: 20px; font-weight: 500; }
+  .chart-wrap { position: relative; height: 260px; }
+
+  .gap-section { margin-bottom: 40px; }
+  .gap-list { display: flex; flex-direction: column; gap: 12px; }
+  .gap-item {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 20px; display: flex; align-items: flex-start; gap: 16px;
+    transition: border-color 0.2s;
+  }
+  .gap-item:hover { border-color: var(--accent); }
+  .gap-rank {
+    width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; flex-shrink: 0;
+  }
+  .gap-rank.r1 { background: rgba(255,101,132,0.15); color: var(--accent2); }
+  .gap-rank.r2 { background: rgba(108,99,255,0.15); color: var(--accent); }
+  .gap-rank.r3 { background: rgba(247,151,30,0.15); color: var(--accent4); }
+  .gap-rank.r4 { background: rgba(67,233,123,0.15); color: var(--accent3); }
+  .gap-rank.r5 { background: rgba(100,116,139,0.15); color: #94a3b8; }
+  .gap-content h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .gap-content p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .gap-badge { margin-left: auto; background: rgba(255,101,132,0.1); border: 1px solid rgba(255,101,132,0.3); color: var(--accent2); padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+
+  .action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 40px; }
+  .action-card {
+    background: var(--card2); border: 1px solid var(--border); border-radius: 12px; padding: 20px;
+    transition: transform 0.2s;
+  }
+  .action-card:hover { transform: translateY(-2px); }
+  .action-priority { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+  .action-priority.p1 { color: var(--accent2); }
+  .action-priority.p2 { color: var(--accent4); }
+  .action-priority.p3 { color: var(--accent3); }
+  .action-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 8px; line-height: 1.4; }
+  .action-card p { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .action-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+  .tag { background: rgba(108,99,255,0.1); border: 1px solid rgba(108,99,255,0.2); color: #a5b4fc; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+
+  .competitor-table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
+  .competitor-table th { background: rgba(108,99,255,0.1); padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+  .competitor-table td { padding: 14px 16px; border-bottom: 1px solid rgba(45,49,84,0.5); font-size: 13px; vertical-align: middle; }
+  .competitor-table tr:hover td { background: rgba(108,99,255,0.03); }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .pill.danger { background: rgba(255,101,132,0.15); color: var(--accent2); }
+  .pill.warning { background: rgba(247,151,30,0.15); color: var(--accent4); }
+  .pill.success { background: rgba(67,233,123,0.15); color: var(--accent3); }
+  .pill.neutral { background: rgba(148,163,184,0.1); color: #94a3b8; }
+
+  .footer { text-align: center; padding: 32px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; }
+
+  @media (max-width: 768px) {
+    .charts-row { grid-template-columns: 1fr; }
+    .hero { padding: 32px 20px 24px; }
+    .hero h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">경쟁사 마케팅 분석</div>
+  <h1>윤식단 <span>밸런시</span> — 경쟁사 대비 마케팅 갭 분석</h1>
+  <div class="hero-meta">
+    <span>분석일: 2026-04-19</span>
+    <span>카테고리: 건강 HMR 볶음밥</span>
+    <span>경쟁사: 더단백·랩노쉬·다신샵·미트리·아임닭</span>
+    <span>채널: Meta·쿠팡·인스타·네이버</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi-card purple">
+      <div class="kpi-label">HMR 시장 규모 (2026)</div>
+      <div class="kpi-value">7.1조</div>
+      <div class="kpi-sub">전년 대비 +4.4% 성장</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">쿠팡 노출 현황</div>
+      <div class="kpi-value">0</div>
+      <div class="kpi-sub">경쟁사 대비 검색 노출 없음</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">진입 장벽 배율</div>
+      <div class="kpi-value">40×</div>
+      <div class="kpi-sub">다신샵 990원 vs 밸런시 39,900원</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Meta 광고 선점 기회</div>
+      <div class="kpi-value">공백</div>
+      <div class="kpi-sub">카테고리 내 2개월+ 소재 없음</div>
+    </div>
+  </div>
+
+  <!-- Charts Row 1 -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <h3>📡 경쟁사 채널 커버리지 비교 (레이더)</h3>
+      <div class="chart-wrap">
+        <canvas id="radarChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>📊 경쟁사 SNS 팔로워 현황 (인스타그램)</h3>
+      <div class="chart-wrap">
+        <canvas id="barChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row 2 -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <h3>⭐ 경쟁사 쿠팡 리뷰 누적 수</h3>
+      <div class="chart-wrap">
+        <canvas id="reviewChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>💰 첫 구매 진입 가격 비교 (원)</h3>
+      <div class="chart-wrap">
+        <canvas id="priceChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- 마케팅 갭 -->
+  <div class="gap-section">
+    <div class="section-title"><span class="dot"></span>윤식단이 경쟁사 대비 못하고 있는 것 Top 5</div>
+    <div class="gap-list">
+      <div class="gap-item">
+        <div class="gap-rank r1">1</div>
+        <div class="gap-content">
+          <h4>쿠팡 미입점 — 가장 치명적</h4>
+          <p>미트리 19,000건 리뷰·아임닭 풀 입점으로 냉동볶음밥 검색을 독점 중. 밸런시는 "건강 볶음밥" 검색 시 노출 0건. 구매 의도가 가장 높은 채널에 없다.</p>
+        </div>
+        <div class="gap-badge">즉시 해결 필요</div>
+      </div>
+      <div class="gap-item">
+        <div class="gap-rank r2">2</div>
+        <div class="gap-content">
+          <h4>Meta 광고 부재 — 선점 기회 소멸 중</h4>
+          <p>건강 볶음밥 카테고리 전반에서 2개월+ 장기 집행 소재를 가진 경쟁사가 없다. 지금 진입하면 카테고리 광고 점유율 독점 가능.</p>
+        </div>
+        <div class="gap-badge">선점 기회</div>
+      </div>
+      <div class="gap-item">
+        <div class="gap-rank r3">3</div>
+        <div class="gap-content">
+          <h4>단품 체험 SKU 없음 — 진입 장벽 40배</h4>
+          <p>다신샵 첫 구매 990원 vs 밸런시 39,900원. 처음 사보고 싶어도 4만원 결제는 부담. 신규 고객 획득 구조가 없다.</p>
+        </div>
+      </div>
+      <div class="gap-item">
+        <div class="gap-rank r4">4</div>
+        <div class="gap-content">
+          <h4>"곡물볶음밥" SEO 키워드 무방비</h4>
+          <p>경쟁사들이 "닭가슴살 볶음밥"을 점령한 동안 "곡물볶음밥" 키워드는 거의 공백 상태. 체험단 10명만 투입해도 3개월 내 네이버 상위 독점 가능.</p>
+        </div>
+      </div>
+      <div class="gap-item">
+        <div class="gap-rank r5">5</div>
+        <div class="gap-content">
+          <h4>인플루언서 체험단 UGC 없음</h4>
+          <p>미트리(팔로워 546명)가 SNS를 방치하는 동안 릴스로 볶음밥 카테고리 SNS를 선점할 수 있는 절호의 타이밍.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 경쟁사 테이블 -->
+  <div class="section-title"><span class="dot"></span>경쟁사별 마케팅 구조 요약</div>
+  <table class="competitor-table">
+    <thead>
+      <tr>
+        <th>브랜드</th>
+        <th>핵심 포지셔닝</th>
+        <th>쿠팡</th>
+        <th>Meta 광고</th>
+        <th>SNS 강도</th>
+        <th>밸런시 위협도</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>더단백</strong> (빙그레)</td>
+        <td>단백질 드링크·바 전문</td>
+        <td><span class="pill success">완비</span></td>
+        <td><span class="pill warning">운영중</span></td>
+        <td><span class="pill success">강</span></td>
+        <td><span class="pill neutral">간접 경쟁</span></td>
+      </tr>
+      <tr>
+        <td><strong>랩노쉬</strong></td>
+        <td>마시는 식사, 완판 마케팅</td>
+        <td><span class="pill warning">일부</span></td>
+        <td><span class="pill success">강</span></td>
+        <td><span class="pill success">강</span></td>
+        <td><span class="pill warning">중간</span></td>
+      </tr>
+      <tr>
+        <td><strong>다신샵</strong></td>
+        <td>다이어트 전문몰 (300만 회원)</td>
+        <td><span class="pill neutral">자사몰 중심</span></td>
+        <td><span class="pill warning">운영중</span></td>
+        <td><span class="pill warning">중</span></td>
+        <td><span class="pill danger">직접 경쟁</span></td>
+      </tr>
+      <tr>
+        <td><strong>미트리</strong></td>
+        <td>닭가슴살 볶음밥 1위 (리뷰 19,000건)</td>
+        <td><span class="pill success">입점</span></td>
+        <td><span class="pill neutral">비활성</span></td>
+        <td><span class="pill danger">약 (546명)</span></td>
+        <td><span class="pill danger">직접 경쟁</span></td>
+      </tr>
+      <tr>
+        <td><strong>아임닭</strong></td>
+        <td>닭가슴살 HMR 멀티채널 강자</td>
+        <td><span class="pill success">완비</span></td>
+        <td><span class="pill success">강</span></td>
+        <td><span class="pill success">강</span></td>
+        <td><span class="pill danger">직접 경쟁</span></td>
+      </tr>
+      <tr style="background: rgba(108,99,255,0.05);">
+        <td><strong>밸런시 (우리)</strong></td>
+        <td>곡물볶음밥, 건강 HMR 신규</td>
+        <td><span class="pill danger">미입점</span></td>
+        <td><span class="pill danger">없음</span></td>
+        <td><span class="pill danger">없음</span></td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 액션 플랜 -->
+  <div class="section-title"><span class="dot"></span>밸런시 마케팅 액션 플랜 Top 5</div>
+  <div class="action-grid">
+    <div class="action-card">
+      <div class="action-priority p1">🔴 즉시 (이번 주)</div>
+      <h4>쿠팡 로켓그로스 입점 + CPC 광고</h4>
+      <p>"건강 볶음밥", "곡물볶음밥", "다이어트 볶음밥" 키워드 집중. 초기 리뷰 50개 확보 전까지 CPC 투입. 상품명에 키워드 최적화 필수.</p>
+      <div class="action-tags"><span class="tag">쿠팡</span><span class="tag">SEO</span><span class="tag">즉시</span></div>
+    </div>
+    <div class="action-card">
+      <div class="action-priority p1">🔴 즉시 (이번 주)</div>
+      <h4>Meta 릴스 광고 A/B 테스트 시작</h4>
+      <p>일 3~5만원, 소재 3종 동시 테스트. ①칼로리 강조 ②맛 강조 ③식단 편의성. 2개월 내 효율 소재 확보.</p>
+      <div class="action-tags"><span class="tag">Meta</span><span class="tag">Instagram</span><span class="tag">A/B테스트</span></div>
+    </div>
+    <div class="action-card">
+      <div class="action-priority p2">🟡 단기 (2주 내)</div>
+      <h4>단품 체험 SKU 9,900원 출시</h4>
+      <p>첫 구매 진입 장벽을 40배에서 4배로 낮춤. 1종 체험팩으로 신규 고객 전환율 구조적 개선. 다신샵 990원 대비 맛·품질로 승부.</p>
+      <div class="action-tags"><span class="tag">자사몰</span><span class="tag">쿠팡</span><span class="tag">프라이싱</span></div>
+    </div>
+    <div class="action-card">
+      <div class="action-priority p2">🟡 단기 (2주 내)</div>
+      <h4>마이크로 인플루언서 20명 UGC 협찬</h4>
+      <p>팔로워 1~5만, 다이어트/식단/홈트 카테고리 타겟. 콘텐츠 = Meta 광고 소재로 재활용. 리뷰·콘텐츠·광고 동시 해결.</p>
+      <div class="action-tags"><span class="tag">인플루언서</span><span class="tag">UGC</span><span class="tag">릴스</span></div>
+    </div>
+    <div class="action-card">
+      <div class="action-priority p3">🟢 중기 (1개월)</div>
+      <h4>"곡물볶음밥" 네이버 SEO 체험단 10명</h4>
+      <p>경쟁사가 점령 못 한 "곡물볶음밥" 키워드 선점. 3개월 내 네이버 블로그 상위 독점 가능. 롱테일 키워드 병행.</p>
+      <div class="action-tags"><span class="tag">네이버</span><span class="tag">SEO</span><span class="tag">블로그</span></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  윤식단 밸런시 경쟁사 마케팅 분석 리포트 · 2026-04-19 · Claude AI 생성
+</div>
+
+<script>
+const commonOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { labels: { color: '#8892b0', font: { size: 11 } } } }
+};
+
+// 레이더 차트
+new Chart(document.getElementById('radarChart'), {
+  type: 'radar',
+  data: {
+    labels: ['쿠팡', 'Meta광고', '네이버SEO', '인스타SNS', '가격경쟁력', '리뷰UGC'],
+    datasets: [
+      { label: '미트리', data: [80, 10, 50, 5, 70, 90], borderColor: '#6c63ff', backgroundColor: 'rgba(108,99,255,0.1)', pointBackgroundColor: '#6c63ff' },
+      { label: '다신샵', data: [30, 50, 80, 55, 95, 70], borderColor: '#ff6584', backgroundColor: 'rgba(255,101,132,0.1)', pointBackgroundColor: '#ff6584' },
+      { label: '밸런시(현재)', data: [0, 0, 5, 5, 20, 0], borderColor: '#43e97b', backgroundColor: 'rgba(67,233,123,0.1)', pointBackgroundColor: '#43e97b', borderDash: [4,4] },
+      { label: '밸런시(목표)', data: [70, 60, 60, 50, 55, 50], borderColor: '#f7971e', backgroundColor: 'rgba(247,151,30,0.05)', pointBackgroundColor: '#f7971e', borderDash: [2,2] },
+    ]
+  },
+  options: { ...commonOptions, scales: { r: { grid: { color: '#2d3154' }, pointLabels: { color: '#8892b0', font: { size: 11 } }, ticks: { display: false }, angleLines: { color: '#2d3154' }, suggestedMin: 0, suggestedMax: 100 } } }
+});
+
+// 인스타 팔로워
+new Chart(document.getElementById('barChart'), {
+  type: 'bar',
+  data: {
+    labels: ['다신샵', '랩노쉬', '아임닭', '더단백', '미트리', '밸런시'],
+    datasets: [{ label: '팔로워 수', data: [7560, 5200, 12000, 8900, 546, 0], backgroundColor: ['#6c63ff','#6c63ff','#6c63ff','#6c63ff','#ff6584','#43e97b'], borderRadius: 6 }]
+  },
+  options: { ...commonOptions, scales: { x: { ticks: { color: '#8892b0' }, grid: { color: '#1e2235' } }, y: { ticks: { color: '#8892b0' }, grid: { color: '#2d3154' } } }, plugins: { legend: { display: false } } }
+});
+
+// 쿠팡 리뷰
+new Chart(document.getElementById('reviewChart'), {
+  type: 'bar',
+  data: {
+    labels: ['미트리', '아임닭', '다신샵', '더단백', '밸런시'],
+    datasets: [{ label: '누적 리뷰 수', data: [19000, 8500, 4200, 3100, 0], backgroundColor: ['#f7971e','#6c63ff','#6c63ff','#6c63ff','#ff6584'], borderRadius: 6 }]
+  },
+  options: { ...commonOptions, indexAxis: 'y', scales: { x: { ticks: { color: '#8892b0' }, grid: { color: '#2d3154' } }, y: { ticks: { color: '#8892b0' }, grid: { color: '#1e2235' } } }, plugins: { legend: { display: false } } }
+});
+
+// 진입가격
+new Chart(document.getElementById('priceChart'), {
+  type: 'bar',
+  data: {
+    labels: ['다신샵', '랩노쉬', '아임닭', '미트리', '밸런시'],
+    datasets: [{ label: '첫 구매 최저가 (원)', data: [990, 9900, 14900, 16900, 39900], backgroundColor: (ctx) => ctx.dataIndex === 4 ? '#ff6584' : '#6c63ff', borderRadius: 6 }]
+  },
+  options: { ...commonOptions, scales: { x: { ticks: { color: '#8892b0' }, grid: { color: '#1e2235' } }, y: { ticks: { color: '#8892b0', callback: v => v.toLocaleString()+'원' }, grid: { color: '#2d3154' } } }, plugins: { legend: { display: false } } }
+});
+</script>
+</body>
+</html>
