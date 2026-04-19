@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>단백밥 경쟁사 마케팅 분석 — 2026 Q2</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root { --bg:#0f1117;--card:#1a1d2e;--card2:#1e2235;--accent:#6c63ff;--accent2:#ff6584;--accent3:#43e97b;--accent4:#f7971e;--text:#e2e8f0;--muted:#8892b0;--border:#2d3154; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',-apple-system,sans-serif}
+  .hero{background:linear-gradient(135deg,#0f1117,#1a1d2e 50%,#151824);border-bottom:1px solid var(--border);padding:48px 40px 36px;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;top:-80px;right:-80px;width:320px;height:320px;background:radial-gradient(circle,rgba(108,99,255,.15),transparent 70%);border-radius:50%}
+  .hero-badge{display:inline-block;background:rgba(108,99,255,.2);border:1px solid rgba(108,99,255,.4);color:var(--accent);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:16px}
+  .hero h1{font-size:32px;font-weight:700;line-height:1.2;margin-bottom:8px}
+  .hero h1 span{color:var(--accent)}
+  .hero-meta{color:var(--muted);font-size:14px;display:flex;gap:20px;flex-wrap:wrap;margin-top:16px}
+  .hero-meta span::before{content:'• ';color:var(--accent)}
+  .container{max-width:1200px;margin:0 auto;padding:40px 24px}
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:40px}
+  .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+  .kpi-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+  .kpi-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+  .kpi-card.purple::after{background:var(--accent)}.kpi-card.red::after{background:var(--accent2)}.kpi-card.green::after{background:var(--accent3)}.kpi-card.orange::after{background:var(--accent4)}
+  .kpi-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+  .kpi-value{font-size:28px;font-weight:700;line-height:1;margin-bottom:4px}
+  .kpi-sub{font-size:12px;color:var(--muted)}
+  .kpi-card.purple .kpi-value{color:var(--accent)}.kpi-card.red .kpi-value{color:var(--accent2)}.kpi-card.green .kpi-value{color:var(--accent3)}.kpi-card.orange .kpi-value{color:var(--accent4)}
+  .section-title{font-size:18px;font-weight:600;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+  .section-title .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0}
+  .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:40px}
+  .chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px}
+  .chart-card h3{font-size:14px;color:var(--muted);margin-bottom:20px;font-weight:500}
+  .chart-wrap{position:relative;height:260px}
+  .gap-list{display:flex;flex-direction:column;gap:12px;margin-bottom:40px}
+  .gap-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;align-items:flex-start;gap:16px;transition:border-color .2s}
+  .gap-item:hover{border-color:var(--accent)}
+  .gap-rank{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+  .gap-rank.r1{background:rgba(255,101,132,.15);color:var(--accent2)}.gap-rank.r2{background:rgba(108,99,255,.15);color:var(--accent)}.gap-rank.r3{background:rgba(247,151,30,.15);color:var(--accent4)}.gap-rank.r4{background:rgba(67,233,123,.15);color:var(--accent3)}.gap-rank.r5{background:rgba(100,116,139,.15);color:#94a3b8}
+  .gap-content h4{font-size:14px;font-weight:600;margin-bottom:4px}
+  .gap-content p{font-size:13px;color:var(--muted);line-height:1.5}
+  .gap-badge{margin-left:auto;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0}
+  .gap-badge.red{background:rgba(255,101,132,.1);border:1px solid rgba(255,101,132,.3);color:var(--accent2)}
+  .gap-badge.orange{background:rgba(247,151,30,.1);border:1px solid rgba(247,151,30,.3);color:var(--accent4)}
+  .action-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:40px}
+  .action-card{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:20px;transition:transform .2s}
+  .action-card:hover{transform:translateY(-2px)}
+  .action-priority{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+  .action-priority.p1{color:var(--accent2)}.action-priority.p2{color:var(--accent4)}.action-priority.p3{color:var(--accent3)}
+  .action-card h4{font-size:14px;font-weight:600;margin-bottom:8px;line-height:1.4}
+  .action-card p{font-size:12px;color:var(--muted);line-height:1.6}
+  .action-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+  .tag{background:rgba(108,99,255,.1);border:1px solid rgba(108,99,255,.2);color:#a5b4fc;padding:2px 8px;border-radius:4px;font-size:11px}
+  .competitor-table{width:100%;border-collapse:collapse;margin-bottom:40px}
+  .competitor-table th{background:rgba(108,99,255,.1);padding:12px 16px;text-align:left;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+  .competitor-table td{padding:14px 16px;border-bottom:1px solid rgba(45,49,84,.5);font-size:13px;vertical-align:middle}
+  .competitor-table tr:hover td{background:rgba(108,99,255,.03)}
+  .pill{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600}
+  .pill.danger{background:rgba(255,101,132,.15);color:var(--accent2)}.pill.warning{background:rgba(247,151,30,.15);color:var(--accent4)}.pill.success{background:rgba(67,233,123,.15);color:var(--accent3)}.pill.neutral{background:rgba(148,163,184,.1);color:#94a3b8}
+  .highlight-row td{background:rgba(108,99,255,.05)}
+  .insight-box{background:linear-gradient(135deg,rgba(108,99,255,.1),rgba(67,233,123,.05));border:1px solid rgba(108,99,255,.3);border-radius:12px;padding:24px;margin-bottom:40px}
+  .insight-box h3{font-size:16px;font-weight:600;margin-bottom:12px;color:var(--accent)}
+  .insight-box p{font-size:14px;line-height:1.7;color:var(--text)}
+  .insight-box strong{color:var(--accent3)}
+  .footer{text-align:center;padding:32px;border-top:1px solid var(--border);color:var(--muted);font-size:12px}
+  @media(max-width:768px){.charts-row{grid-template-columns:1fr}.hero{padding:32px 20px 24px}.hero h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="hero-badge">경쟁사 마케팅 분석</div>
+  <h1>윤식단 <span>단백밥</span> — 경쟁사 대비 마케팅 갭 분석</h1>
+  <div class="hero-meta">
+    <span>분석일: 2026-04-19</span>
+    <span>카테고리: 고단백 즉석밥 HMR</span>
+    <span>경쟁사: 햇반 라이스플랜·더단백·단백하니·아임닭·하루단백쌀</span>
+    <span>단백밥 리뷰: 10,943개 (카테고리 1위)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="kpi-grid">
+    <div class="kpi-card green">
+      <div class="kpi-label">단백밥 리뷰 수</div>
+      <div class="kpi-value">10,943</div>
+      <div class="kpi-sub">카테고리 내 압도적 1위 — 미활용 중</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">햇반 라이스플랜 연매출</div>
+      <div class="kpi-value">700억</div>
+      <div class="kpi-sub">저속노화 키워드 선점 효과</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">저속노화 키워드 점유</div>
+      <div class="kpi-value">0%</div>
+      <div class="kpi-sub">윤식단 노출 없음 — 공략 필요</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-label">올리브영 채널</div>
+      <div class="kpi-value">부재</div>
+      <div class="kpi-sub">단백하니 독점 중 — 대안 채널 필요</div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <h3>📡 경쟁사 마케팅 채널 커버리지 비교 (레이더)</h3>
+      <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>📊 경쟁사 인스타그램 팔로워</h3>
+      <div class="chart-wrap"><canvas id="followerChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <h3>⭐ 쿠팡 리뷰 수 비교 (단백밥 카테고리)</h3>
+      <div class="chart-wrap"><canvas id="reviewChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>🔑 핵심 키워드 경쟁 강도 vs 윤식단 노출 현황</h3>
+      <div class="chart-wrap"><canvas id="keywordChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="section-title"><span class="dot"></span>윤식단이 경쟁사 대비 못하고 있는 것 Top 5</div>
+  <div class="gap-list">
+    <div class="gap-item">
+      <div class="gap-rank r1">1</div>
+      <div class="gap-content">
+        <h4>저속노화/헬시플레저 키워드 선점 실패</h4>
+        <p>CJ 햇반 라이스플랜이 "저속노화" 독점 (연매출 700억, 1,000만개 판매). 윤식단은 "단백밥" 자체 조어에 갇혀 소비자 실검 키워드 부재. 단, CJ가 정희원 박사 손절로 패키지 교체 중 → 지금이 공백 선점 타이밍.</p>
+      </div>
+      <div class="gap-badge red">즉시 공략</div>
+    </div>
+    <div class="gap-item">
+      <div class="gap-rank r2">2</div>
+      <div class="gap-content">
+        <h4>10,943개 리뷰 마케팅 자산 미활용</h4>
+        <p>카테고리 내 압도적 최다 리뷰 — 경쟁사 대비 10~20배. 그러나 "10,000명이 선택한 단백밥" 같은 후킹 카피가 광고·상세페이지 어디에도 없음. 가장 싸게 신뢰를 만드는 수단을 방치 중.</p>
+      </div>
+      <div class="gap-badge red">즉시 활용</div>
+    </div>
+    <div class="gap-item">
+      <div class="gap-rank r3">3</div>
+      <div class="gap-content">
+        <h4>전문가/셀럽 신뢰성 레버리지 없음</h4>
+        <p>햇반은 의사, 단백하니는 아이돌(TWS), 아임닭은 류승룡+AI 광고. "왜 이 단백밥이어야 하는가"에 대한 권위적 답변이 없음. 리뷰는 있지만 외부 신뢰 레이어 부재.</p>
+      </div>
+      <div class="gap-badge orange">단기 과제</div>
+    </div>
+    <div class="gap-item">
+      <div class="gap-rank r4">4</div>
+      <div class="gap-content">
+        <h4>올리브영·편의점 채널 부재</h4>
+        <p>단백하니 올리브영 독점 → 출시 직후 BEST 등극. 더단백 편의점 전국 유통. 2030 여성이 단백질 식품 구매하는 핵심 채널에 윤식단 없음. 충동 구매 접점 제로.</p>
+      </div>
+      <div class="gap-badge orange">중기 과제</div>
+    </div>
+    <div class="gap-item">
+      <div class="gap-rank r5">5</div>
+      <div class="gap-content">
+        <h4>숏폼 릴스 광고 소재 부재</h4>
+        <p>아임닭 #오늘도아임닭 Vlog 시리즈, 단백하니 아이돌 릴스. "운동 후 5분 단백밥" ASMR 형식 숏폼이 카테고리에서 효율 최고인데 윤식단 콘텐츠 없음.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight-box">
+    <h3>💡 핵심 결론</h3>
+    <p>윤식단 단백밥은 <strong>리뷰 10,943개라는 카테고리 내 최강의 소셜 프루프 자산</strong>을 보유하고 있으나, 이를 마케팅에 전혀 활용하지 않고 있습니다. CJ 햇반 라이스플랜이 정희원 박사 손절로 "저속노화" 키워드 공백을 만들고 있는 지금이 절호의 타이밍입니다.<br><br>
+    <strong>가장 시급한 단 하나의 액션</strong>: "10,000명이 선택한 단백밥" 카피로 Meta 광고를 즉시 교체하고, 저속노화 키워드 블로그 체험단을 동시 집행.</p>
+  </div>
+
+  <div class="section-title"><span class="dot"></span>경쟁사별 마케팅 구조 요약</div>
+  <table class="competitor-table">
+    <thead>
+      <tr>
+        <th>브랜드</th>
+        <th>핵심 키워드</th>
+        <th>쿠팡</th>
+        <th>올리브영</th>
+        <th>SNS 강도</th>
+        <th>전문가/셀럽</th>
+        <th>위협도</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>햇반 라이스플랜</strong></td>
+        <td>"저속노화" 독점</td>
+        <td><span class="pill success">완비</span></td>
+        <td><span class="pill warning">일부</span></td>
+        <td><span class="pill success">강</span></td>
+        <td><span class="pill warning">박사→교체중</span></td>
+        <td><span class="pill danger">최고</span></td>
+      </tr>
+      <tr>
+        <td><strong>단백하니 (CJ)</strong></td>
+        <td>"올리브영 단백질"</td>
+        <td><span class="pill neutral">없음</span></td>
+        <td><span class="pill danger">독점</span></td>
+        <td><span class="pill success">강</span></td>
+        <td><span class="pill success">TWS 아이돌</span></td>
+        <td><span class="pill danger">높음</span></td>
+      </tr>
+      <tr>
+        <td><strong>아임닭</strong></td>
+        <td>"닭가슴살 볶음밥"</td>
+        <td><span class="pill success">완비</span></td>
+        <td><span class="pill neutral">없음</span></td>
+        <td><span class="pill success">28K</span></td>
+        <td><span class="pill success">류승룡+AI</span></td>
+        <td><span class="pill warning">중간</span></td>
+      </tr>
+      <tr>
+        <td><strong>더:단백 (빙그레)</strong></td>
+        <td>"단백질 음료 1위"</td>
+        <td><span class="pill success">완비</span></td>
+        <td><span class="pill warning">일부</span></td>
+        <td><span class="pill success">26K</span></td>
+        <td><span class="pill neutral">없음</span></td>
+        <td><span class="pill warning">중간</span></td>
+      </tr>
+      <tr>
+        <td><strong>하루단백쌀</strong></td>
+        <td>"저탄수 당뇨밥"</td>
+        <td><span class="pill success">집중</span></td>
+        <td><span class="pill neutral">없음</span></td>
+        <td><span class="pill neutral">약</span></td>
+        <td><span class="pill neutral">없음</span></td>
+        <td><span class="pill warning">중간</span></td>
+      </tr>
+      <tr class="highlight-row">
+        <td><strong>단백밥 (윤식단)</strong></td>
+        <td>"단백밥" 한정</td>
+        <td><span class="pill warning">부분</span></td>
+        <td><span class="pill danger">없음</span></td>
+        <td><span class="pill warning">운영중</span></td>
+        <td><span class="pill danger">없음</span></td>
+        <td>— <span style="color:#43e97b;font-size:11px">리뷰 1위</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="section-title"><span class="dot"></span>단백밥 마케팅 액션 플랜 Top 5</div>
+  <div class="action-grid">
+    <div class="action-card">
+      <div class="action-priority p1">🔴 즉시 (이번 주)</div>
+      <h4>"10,000명이 선택한 단백밥" Meta 광고 소재 교체</h4>
+      <p>기존 할인/프로모션 중심 광고에서 리뷰 소셜 프루프 중심으로 전환. 실제 리뷰 문장 3개 발굴해 이미지 광고 소재 제작. 소재 제작비 100만원 이내.</p>
+      <div class="action-tags"><span class="tag">Meta</span><span class="tag">리뷰활용</span><span class="tag">즉시</span></div>
+    </div>
+    <div class="action-card">
+      <div class="action-priority p1">🔴 즉시 (2주 내)</div>
+      <h4>"저속노화 즉석밥" 네이버 블로그 체험단 50명</h4>
+      <p>CJ 정희원 박사 손절 공백 기간 활용. "저속노화 즉석밥 추천 단백밥" 키워드 블로그 50편 집중 배치. 네이버 쇼핑 광고 키워드 추가: 저속노화 밥·저속노화 즉석밥.</p>
+      <div class="action-tags"><span class="tag">네이버SEO</span><span class="tag">저속노화</span><span class="tag">체험단</span></div>
+    </div>
+    <div class="action-card">
+      <div class="action-priority p2">🟡 단기 (2주 내)</div>
+      <h4>쿠팡 제품 타이틀 + 키워드 광고 최적화</h4>
+      <p>타이틀 변경: "[단백질 50g] 윤식단 단백밥 고단백 즉석밥 | 10,943개 리뷰". 키워드 추가: 고단백 즉석밥·단백질 즉석밥·다이어트 즉석밥·저속노화 밥.</p>
+      <div class="action-tags"><span class="tag">쿠팡</span><span class="tag">SEO최적화</span><span class="tag">CPC</span></div>
+    </div>
+    <div class="action-card">
+      <div class="action-priority p2">🟡 단기 (4~8주)</div>
+      <h4>헬스 마이크로 인플루언서 10명 릴스 협찬</h4>
+      <p>팔로워 5~10만 헬스 계정 타겟. "운동 후 5분 단백밥 루틴" ASMR 형식. 댓글 키워드 → DM 할인코드 자동 발송(ManyChat). 월 300~500만원.</p>
+      <div class="action-tags"><span class="tag">인스타그램</span><span class="tag">릴스</span><span class="tag">오운완</span></div>
+    </div>
+    <div class="action-card">
+      <div class="action-priority p3">🟢 중기 (3~6개월)</div>
+      <h4>마켓컬리 입점 + 올리브영 간편팩 개발</h4>
+      <p>올리브영용 상온 보관 단백밥 믹스 or 소포장 파우치 개발. 마켓컬리는 기존 냉동 제품으로 단기 입점 가능. 2030 여성 고단백 식품 구매 채널 확보.</p>
+      <div class="action-tags"><span class="tag">올리브영</span><span class="tag">마켓컬리</span><span class="tag">채널확장</span></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  윤식단 단백밥 경쟁사 마케팅 분석 리포트 · 2026-04-19 · Claude AI 생성
+</div>
+
+<script>
+const opts = { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:'#8892b0', font:{ size:11 } } } } };
+
+new Chart(document.getElementById('radarChart'), {
+  type:'radar',
+  data:{
+    labels:['쿠팡유통','Meta광고','네이버SEO','SNS인스타','전문가협업','올리브영'],
+    datasets:[
+      {label:'햇반 라이스플랜',data:[90,70,90,60,85,40],borderColor:'#f7971e',backgroundColor:'rgba(247,151,30,.1)',pointBackgroundColor:'#f7971e'},
+      {label:'아임닭',data:[85,80,70,80,75,10],borderColor:'#6c63ff',backgroundColor:'rgba(108,99,255,.1)',pointBackgroundColor:'#6c63ff'},
+      {label:'단백하니',data:[10,70,50,80,90,95],borderColor:'#ff6584',backgroundColor:'rgba(255,101,132,.1)',pointBackgroundColor:'#ff6584'},
+      {label:'단백밥(현재)',data:[40,30,35,30,0,0],borderColor:'#43e97b',backgroundColor:'rgba(67,233,123,.08)',pointBackgroundColor:'#43e97b',borderDash:[4,4]},
+      {label:'단백밥(목표)',data:[70,65,70,60,40,30],borderColor:'#94a3b8',backgroundColor:'rgba(148,163,184,.05)',pointBackgroundColor:'#94a3b8',borderDash:[2,2]},
+    ]
+  },
+  options:{...opts, scales:{r:{grid:{color:'#2d3154'},pointLabels:{color:'#8892b0',font:{size:10}},ticks:{display:false},angleLines:{color:'#2d3154'},suggestedMin:0,suggestedMax:100}}}
+});
+
+new Chart(document.getElementById('followerChart'), {
+  type:'bar',
+  data:{
+    labels:['아임닭','더:단백','단백하니','하루단백쌀','단백밥'],
+    datasets:[{label:'인스타 팔로워',data:[28000,26000,5000,1000,0],backgroundColor:['#6c63ff','#6c63ff','#6c63ff','#6c63ff','#ff6584'],borderRadius:6}]
+  },
+  options:{...opts, scales:{x:{ticks:{color:'#8892b0'},grid:{color:'#1e2235'}},y:{ticks:{color:'#8892b0'},grid:{color:'#2d3154'}}},plugins:{legend:{display:false}}}
+});
+
+new Chart(document.getElementById('reviewChart'), {
+  type:'bar',
+  data:{
+    labels:['윤식단 단백밥','꼬기다','하루단백쌀','아임닭','디자인밀'],
+    datasets:[{label:'쿠팡 리뷰 수',data:[10943,502,504,3200,120],backgroundColor:['#43e97b','#6c63ff','#6c63ff','#6c63ff','#6c63ff'],borderRadius:6}]
+  },
+  options:{...opts, indexAxis:'y', scales:{x:{ticks:{color:'#8892b0'},grid:{color:'#2d3154'}},y:{ticks:{color:'#8892b0'},grid:{color:'#1e2235'}}},plugins:{legend:{display:false}}}
+});
+
+new Chart(document.getElementById('keywordChart'), {
+  type:'bar',
+  data:{
+    labels:['저속노화 즉석밥','고단백 즉석밥','단백질 즉석밥','다이어트 즉석밥','단백밥'],
+    datasets:[
+      {label:'경쟁 강도',data:[90,80,70,85,30],backgroundColor:'rgba(255,101,132,.5)',borderRadius:4},
+      {label:'윤식단 노출(%)',data:[0,20,15,10,90],backgroundColor:'rgba(67,233,123,.5)',borderRadius:4}
+    ]
+  },
+  options:{...opts, scales:{x:{ticks:{color:'#8892b0'},grid:{color:'#1e2235'}},y:{ticks:{color:'#8892b0'},grid:{color:'#2d3154'},max:100}}}
+});
+</script>
+</body>
+</html>
