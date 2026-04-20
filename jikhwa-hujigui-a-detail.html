@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<!-- VARIANT: A | ANGLE: 신뢰/증명 | CREATED: 2026-04-20 -->
+<html lang="ko" class="theme-light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>직화후지구이 | 윤식단</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { interpolate-size: allow-keywords; }
+    html.theme-dark {
+      --bg: #0A0A0A; --surface: #141414; --surface-hover: #1C1C1C;
+      --border: rgba(255,255,255,0.06);
+      --text: #EDEDED; --text-secondary: #888;
+      --accent: #E8472A; --accent-secondary: #FF6B4A;
+      --positive: #10b981; --negative: #f43f5e; --warning: #f59e0b;
+      --red-glow: rgba(232, 71, 42, 0.15);
+    }
+    html.theme-light {
+      --bg: #FAFAF9; --surface: #FFFFFF; --surface-hover: #F5F5F4;
+      --border: rgba(0,0,0,0.07);
+      --text: #1a1a1a; --text-secondary: #666;
+      --accent: #E8472A; --accent-secondary: #FF6B4A;
+      --positive: #059669; --negative: #e11d48; --warning: #d97706;
+      --red-glow: rgba(232, 71, 42, 0.08);
+    }
+    body {
+      font-family: 'Noto Sans KR', 'Inter', -apple-system, sans-serif;
+      background: var(--bg); color: var(--text);
+      line-height: 1.6; -webkit-font-smoothing: antialiased;
+      transition: background 0.3s, color 0.3s;
+      overflow-x: hidden;
+    }
+    h1,h2,h3,h4,h5,h6 { color: var(--text); line-height: 1.15; word-break: keep-all; }
+    h1 { font-weight: 900; font-size: clamp(2.8rem, 7vw, 5rem); }
+    h2 { font-weight: 800; font-size: clamp(2rem, 5vw, 3.2rem); }
+    h3 { font-weight: 700; font-size: clamp(1.4rem, 3vw, 1.9rem); }
+    p { color: var(--text-secondary); word-break: keep-all; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; transition: box-shadow 0.2s ease; }
+    .card:hover { box-shadow: 0 0 0 1px var(--border), 0 12px 32px rgba(0,0,0,0.08); }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(32px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+    @keyframes floatUp { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    .animate { animation: fadeInUp 0.7s ease-out both; }
+    .animate.delay-1 { animation-delay: 0.1s; }
+    .animate.delay-2 { animation-delay: 0.2s; }
+    .animate.delay-3 { animation-delay: 0.3s; }
+    .animate.delay-4 { animation-delay: 0.4s; }
+    .animate.delay-5 { animation-delay: 0.5s; }
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .reveal { opacity: 1; transform: none; } }
+    @media print { body { background: white !important; color: black !important; } .viz-menu { display: none; } .card { break-inside: avoid; border: 1px solid #ddd; } * { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
+    .viz-menu { position: fixed; top: 16px; right: 16px; z-index: 9999; }
+    .viz-menu-toggle { width: 44px; height: 44px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(12px); transition: all 0.2s; }
+    .viz-menu-toggle:hover { background: var(--surface-hover); }
+    .viz-menu-dropdown { position: absolute; top: 52px; right: 0; min-width: 200px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 8px; opacity: 0; visibility: hidden; transform: translateY(-8px); transition: all 0.2s; backdrop-filter: blur(16px); }
+    .viz-menu-dropdown.open { opacity: 1; visibility: visible; transform: translateY(0); }
+    .viz-menu-dropdown button { width: 100%; padding: 10px 14px; border: none; border-radius: 8px; background: transparent; color: var(--text); font-size: 14px; font-family: inherit; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px; transition: background 0.15s; }
+    .viz-menu-dropdown button:hover { background: var(--surface-hover); }
+    .skip-to-content { position: absolute; top: -40px; left: 6px; background: var(--accent); color: white; padding: 8px 12px; text-decoration: none; border-radius: 4px; opacity: 0; pointer-events: none; transition: all 0.2s; z-index: 10000; }
+    .skip-to-content:focus { top: 6px; opacity: 1; pointer-events: auto; }
+    .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+    .hero { background: linear-gradient(160deg, #1a0a06 0%, #2d0f08 40%, #1a0a06 100%); position: relative; overflow: hidden; padding: 100px 24px 80px; text-align: center; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 60% at 50% 60%, rgba(232,71,42,0.25) 0%, transparent 70%); }
+    .hero-tag { display: inline-block; background: rgba(232,71,42,0.2); border: 1px solid rgba(232,71,42,0.4); color: #FF8C6B; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.12em; padding: 6px 16px; border-radius: 100px; margin-bottom: 24px; text-transform: uppercase; }
+    .hero h1 { color: #fff; font-size: clamp(2.8rem, 8vw, 5.5rem); font-weight: 900; line-height: 1.05; margin-bottom: 16px; letter-spacing: -0.03em; }
+    .hero h1 em { font-style: normal; color: #FF6B4A; }
+    .hero-sub { color: rgba(255,255,255,0.6); font-size: clamp(1rem, 2.5vw, 1.2rem); max-width: 480px; margin: 0 auto 40px; font-weight: 400; }
+    .hero-badges { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 48px; }
+    .hero-badge { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); color: #fff; padding: 10px 20px; border-radius: 100px; font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .hero-badge strong { color: #FF8C6B; }
+    .hero-cta { display: inline-flex; align-items: center; gap: 10px; background: #E8472A; color: #fff; font-size: 1.05rem; font-weight: 700; padding: 16px 36px; border-radius: 100px; text-decoration: none; border: none; cursor: pointer; transition: background 0.2s, transform 0.2s; font-family: inherit; }
+    .hero-cta:hover { background: #c73820; transform: scale(1.02); }
+    .hook-section { background: var(--accent); padding: 56px 24px; text-align: center; }
+    .hook-section h2 { color: #fff; font-size: clamp(1.6rem, 4vw, 2.6rem); font-weight: 900; line-height: 1.3; max-width: 640px; margin: 0 auto; }
+    .hook-section h2 span { display: block; font-size: clamp(1rem, 2.5vw, 1.2rem); font-weight: 500; opacity: 0.85; margin-top: 12px; }
+    .section { padding: 80px 24px; }
+    .section-tag { display: inline-block; background: var(--red-glow); color: var(--accent); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; padding: 5px 14px; border-radius: 100px; text-transform: uppercase; margin-bottom: 16px; }
+    .section-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; margin-bottom: 12px; line-height: 1.15; word-break: keep-all; }
+    .section-sub { font-size: 1rem; color: var(--text-secondary); margin-bottom: 48px; word-break: keep-all; }
+    .story-section { padding: 96px 24px; position: relative; overflow: hidden; }
+    .story-top { text-align: center; margin-bottom: 56px; }
+    .story-top .s-tag { display: inline-flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 700; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px; }
+    .story-top .s-tag::before { content: ''; display: block; width: 20px; height: 2px; background: var(--accent); border-radius: 2px; }
+    .story-top h2 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900; line-height: 1.15; word-break: keep-all; }
+    .story-top h2 em { font-style: normal; color: var(--accent); }
+    .story-pain-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 40px; }
+    .pain-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px 20px; text-align: center; transition: box-shadow 0.2s; }
+    .pain-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.06); }
+    .pain-card .pain-emoji { font-size: 2rem; margin-bottom: 10px; }
+    .pain-card .pain-word { font-size: 1rem; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+    .pain-card .pain-sub { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; word-break: keep-all; }
+    .story-resolve { background: var(--accent); border-radius: 24px; padding: 40px 36px; display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; }
+    .resolve-icon { width: 64px; height: 64px; background: rgba(255,255,255,0.15); border-radius: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 2rem; }
+    .resolve-text .r-label { font-size: 0.72rem; font-weight: 700; color: rgba(255,255,255,0.6); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+    .resolve-text h3 { color: #fff; font-size: 1.4rem; font-weight: 900; line-height: 1.3; margin-bottom: 10px; word-break: keep-all; }
+    .resolve-text p { color: rgba(255,255,255,0.75); font-size: 0.9rem; line-height: 1.7; word-break: keep-all; }
+    .craft-section { padding: 80px 24px; background: linear-gradient(160deg, #1a0a06 0%, #2a1208 100%); }
+    .craft-inner { max-width: 860px; margin: 0 auto; }
+    .craft-top { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+    .craft-text .craft-tag { display: inline-block; background: rgba(232,71,42,0.2); border: 1px solid rgba(232,71,42,0.35); color: #FF8C6B; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 14px; border-radius: 100px; margin-bottom: 20px; }
+    .craft-text h2 { color: #fff; font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 900; line-height: 1.2; margin-bottom: 20px; word-break: keep-all; }
+    .craft-text h2 em { font-style: normal; color: #FF8C6B; }
+    .craft-text p { color: rgba(255,255,255,0.55); font-size: 0.95rem; line-height: 1.8; word-break: keep-all; }
+    .craft-text p strong { color: rgba(255,255,255,0.85); font-weight: 600; }
+    .craft-steps-list { display: flex; flex-direction: column; gap: 0; }
+    .craft-step-item { display: flex; align-items: flex-start; gap: 16px; padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .craft-step-item:last-child { border-bottom: none; }
+    .craft-step-item .cs-num { flex-shrink: 0; width: 36px; height: 36px; background: rgba(232,71,42,0.2); border: 1px solid rgba(232,71,42,0.35); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 800; color: #FF8C6B; font-family: 'Inter', sans-serif; }
+    .craft-step-item .cs-content h4 { color: #fff; font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+    .craft-step-item .cs-content p { color: rgba(255,255,255,0.45); font-size: 0.83rem; line-height: 1.6; word-break: keep-all; }
+    .craft-bottom-bar { margin-top: 48px; padding: 24px 28px; background: rgba(232,71,42,0.12); border: 1px solid rgba(232,71,42,0.25); border-radius: 16px; text-align: center; }
+    .craft-bottom-bar p { color: #FF8C6B; font-size: 1rem; font-weight: 700; line-height: 1.6; word-break: keep-all; }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+    .feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px; transition: box-shadow 0.2s, transform 0.2s; }
+    .feature-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.1); transform: translateY(-2px); }
+    .feature-card .f-icon { width: 48px; height: 48px; background: var(--red-glow); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+    .feature-card .f-icon svg { width: 24px; height: 24px; stroke: var(--accent); fill: none; }
+    .feature-card h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; color: var(--text); }
+    .feature-card p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+    .nut-banner { background: #111; padding: 56px 24px; }
+    .nut-banner-inner { max-width: 860px; margin: 0 auto; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 0; }
+    .nut-num-block { text-align: center; }
+    .nut-num-block .nb-val { font-size: clamp(4rem, 12vw, 8rem); font-weight: 900; line-height: 1; font-family: 'Inter', sans-serif; letter-spacing: -0.06em; }
+    .nut-num-block.protein .nb-val { color: #FF6B4A; }
+    .nut-num-block.sugar .nb-val { color: #10b981; }
+    .nut-num-block .nb-unit { font-size: clamp(1.2rem, 3vw, 2rem); font-weight: 700; color: rgba(255,255,255,0.5); font-family: 'Inter', sans-serif; }
+    .nut-num-block .nb-label { margin-top: 8px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.4); }
+    .nut-divider { width: 1px; height: 80px; background: rgba(255,255,255,0.1); margin: 0 40px; }
+    .compare-section { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 80px 24px; }
+    .compare-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 40px; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); }
+    .compare-table th { padding: 18px 24px; font-size: 0.9rem; font-weight: 700; text-align: center; }
+    .compare-table th:first-child { text-align: left; background: var(--surface-hover); }
+    .compare-table th.winner { background: var(--accent); color: #fff; }
+    .compare-table th.loser { background: var(--surface-hover); color: var(--text-secondary); }
+    .compare-table td { padding: 16px 24px; font-size: 0.9rem; text-align: center; border-top: 1px solid var(--border); }
+    .compare-table td:first-child { text-align: left; font-weight: 600; background: var(--surface-hover); }
+    .compare-table td.win { color: var(--positive); font-weight: 700; }
+    .compare-table td.lose { color: var(--text-secondary); }
+    .compare-table tr:hover td { background: var(--surface-hover); }
+    .badge-win { display: inline-block; background: rgba(16,185,129,0.12); color: var(--positive); font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 100px; vertical-align: middle; margin-left: 6px; }
+    .nutrition-section { padding: 80px 24px; }
+    .nutrition-card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; overflow: hidden; max-width: 560px; margin: 40px auto 0; }
+    .nutrition-card .n-header { background: var(--accent); color: #fff; padding: 20px 28px; font-weight: 900; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center; }
+    .nutrition-card .n-header span { font-size: 0.85rem; font-weight: 500; opacity: 0.85; }
+    .n-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    .n-row:hover { background: var(--surface-hover); }
+    .n-row:last-child { border-bottom: none; }
+    .n-row .n-label { font-size: 0.9rem; font-weight: 600; }
+    .n-row .n-val { font-size: 0.9rem; font-weight: 800; color: var(--accent); }
+    .n-row.highlight { background: var(--red-glow); }
+    .n-row.highlight .n-label { color: var(--accent); font-weight: 700; }
+    .n-row.highlight .n-val { font-size: 1.1rem; }
+    .n-row .n-bar { flex: 1; height: 6px; background: var(--border); border-radius: 100px; margin: 0 16px; overflow: hidden; }
+    .n-bar-fill { height: 100%; border-radius: 100px; background: var(--accent); transition: width 1s ease; }
+    .review-section { padding: 80px 24px; background: var(--surface); border-top: 1px solid var(--border); }
+    .review-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 32px; }
+    .rv-stat { padding: 28px 16px; text-align: center; border-right: 1px solid var(--border); }
+    .rv-stat:last-child { border-right: none; }
+    .rv-stat .rv-icon { font-size: 1.6rem; margin-bottom: 8px; }
+    .rv-stat .rv-label { font-size: 0.72rem; color: var(--text-secondary); font-weight: 600; letter-spacing: 0.04em; margin-bottom: 4px; }
+    .rv-stat .rv-val { font-size: 1.8rem; font-weight: 900; color: var(--text); font-family: 'Inter', sans-serif; letter-spacing: -0.04em; }
+    .rv-stat .rv-val.accent { color: var(--accent); }
+    .review-cards { display: flex; flex-direction: column; gap: 12px; }
+    .review-card { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; transition: box-shadow 0.2s; }
+    .review-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+    .review-card .rv-stars { color: #FBBF24; font-size: 0.9rem; margin-bottom: 8px; }
+    .review-card .rv-text { font-size: 0.95rem; font-weight: 600; color: var(--text); margin-bottom: 6px; word-break: keep-all; }
+    .review-card .rv-meta { font-size: 0.78rem; color: var(--text-secondary); }
+    .target-section { padding: 80px 24px; }
+    .target-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 40px; }
+    .target-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px 20px; text-align: center; transition: box-shadow 0.2s, transform 0.2s; }
+    .target-card:hover { box-shadow: 0 8px 32px rgba(232,71,42,0.1); transform: translateY(-3px); border-color: rgba(232,71,42,0.2); }
+    .target-card .t-emoji { font-size: 2.5rem; margin-bottom: 12px; }
+    .target-card h4 { font-size: 1rem; font-weight: 800; margin-bottom: 6px; }
+    .target-card p { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5; }
+    .tagline-banner { padding: 80px 24px; background: linear-gradient(160deg, #1a0a06 0%, #2d1208 100%); text-align: center; }
+    .tagline-banner .big-quote { font-size: clamp(1.8rem, 5vw, 3.5rem); font-weight: 900; color: #fff; line-height: 1.25; max-width: 680px; margin: 0 auto 24px; word-break: keep-all; }
+    .tagline-banner .big-quote em { font-style: normal; color: #FF8C6B; }
+    .tagline-banner .sub-quote { font-size: 1rem; color: rgba(255,255,255,0.5); max-width: 480px; margin: 0 auto; }
+    .pricing-section { padding: 80px 24px; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 48px; }
+    .price-card { background: var(--surface); border: 2px solid var(--border); border-radius: 24px; padding: 32px 24px; text-align: center; position: relative; transition: box-shadow 0.2s, transform 0.2s; }
+    .price-card:hover { box-shadow: 0 12px 40px rgba(232,71,42,0.12); transform: translateY(-3px); }
+    .price-card.best { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+    .best-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; font-size: 0.72rem; font-weight: 800; padding: 5px 16px; border-radius: 100px; letter-spacing: 0.06em; white-space: nowrap; }
+    .price-card .p-name { font-size: 1rem; font-weight: 800; margin-bottom: 4px; color: var(--text); }
+    .price-card .p-qty { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 20px; }
+    .price-card .p-per { font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 4px; }
+    .price-card .p-per strong { color: var(--accent); font-size: 1rem; font-weight: 800; }
+    .price-card .p-price { font-size: 2.2rem; font-weight: 900; color: var(--text); font-family: 'Inter', sans-serif; letter-spacing: -0.04em; line-height: 1; margin-bottom: 8px; }
+    .price-card .p-price span { font-size: 1rem; font-weight: 600; }
+    .price-card .p-save { display: inline-block; background: rgba(232,71,42,0.1); color: var(--accent); font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 100px; margin-bottom: 20px; }
+    .price-card .p-ship { font-size: 0.82rem; color: var(--positive); font-weight: 700; margin-bottom: 20px; }
+    .price-card .p-btn { display: block; width: 100%; background: var(--accent); color: #fff; font-size: 0.95rem; font-weight: 800; padding: 14px 0; border-radius: 100px; border: none; cursor: pointer; font-family: inherit; transition: background 0.2s; }
+    .price-card .p-btn:hover { background: #c73820; }
+    .price-card:not(.best) .p-btn { background: var(--surface-hover); color: var(--text); border: 1px solid var(--border); }
+    .price-card:not(.best) .p-btn:hover { background: var(--border); }
+    .price-note { text-align: center; margin-top: 24px; font-size: 0.82rem; color: var(--text-secondary); }
+    .final-cta { background: var(--accent); padding: 80px 24px; text-align: center; }
+    .final-cta h2 { color: #fff; font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900; margin-bottom: 16px; word-break: keep-all; }
+    .final-cta p { color: rgba(255,255,255,0.75); font-size: 1rem; margin-bottom: 40px; }
+    .cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-white { background: #fff; color: var(--accent); font-size: 1rem; font-weight: 800; padding: 16px 36px; border-radius: 100px; border: none; cursor: pointer; font-family: inherit; transition: all 0.2s; text-decoration: none; display: inline-block; }
+    .btn-white:hover { background: #f1f1f1; transform: scale(1.02); }
+    .btn-outline { background: transparent; color: #fff; font-size: 1rem; font-weight: 700; padding: 16px 36px; border-radius: 100px; border: 2px solid rgba(255,255,255,0.4); cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .btn-outline:hover { border-color: #fff; background: rgba(255,255,255,0.1); }
+    .footer { padding: 32px 24px; text-align: center; border-top: 1px solid var(--border); }
+    .footer p { font-size: 0.82rem; color: var(--text-secondary); }
+    .footer strong { color: var(--accent); }
+    .divider { height: 1px; background: var(--border); max-width: 860px; margin: 0 auto; }
+    .faq-section { padding: 80px 24px; }
+    .faq-list { max-width: 720px; margin: 40px auto 0; display: flex; flex-direction: column; gap: 12px; }
+    .faq-item { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .faq-q { padding: 20px 24px; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .faq-q:hover { background: var(--surface-hover); }
+    .faq-q .faq-icon { flex-shrink: 0; width: 24px; height: 24px; background: var(--red-glow); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: var(--accent); font-weight: 800; }
+    .faq-a { padding: 0 24px 20px; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; word-break: keep-all; }
+    .brand-section { padding: 80px 24px; background: var(--surface); border-top: 1px solid var(--border); }
+    .brand-inner { max-width: 860px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+    .brand-text .b-tag { display: inline-block; background: var(--red-glow); color: var(--accent); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 14px; border-radius: 100px; margin-bottom: 16px; }
+    .brand-text h2 { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 900; margin-bottom: 16px; line-height: 1.2; word-break: keep-all; }
+    .brand-text p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.8; word-break: keep-all; margin-bottom: 12px; }
+    .brand-stats { display: flex; flex-direction: column; gap: 16px; }
+    .b-stat { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; display: flex; align-items: center; gap: 16px; }
+    .b-stat .bs-num { font-size: 1.8rem; font-weight: 900; color: var(--accent); font-family: 'Inter', sans-serif; letter-spacing: -0.04em; flex-shrink: 0; }
+    .b-stat .bs-label { font-size: 0.88rem; font-weight: 700; margin-bottom: 2px; }
+    .b-stat .bs-sub { font-size: 0.78rem; color: var(--text-secondary); }
+    @media (max-width: 640px) { .craft-top { grid-template-columns: 1fr; gap: 40px; } .brand-inner { grid-template-columns: 1fr; gap: 40px; } }
+    @media (max-width: 600px) { .story-pain-row { grid-template-columns: 1fr 1fr; } .story-resolve { grid-template-columns: 1fr; } }
+    @media (max-width: 540px) { .nut-banner-inner { grid-template-columns: 1fr 1px 1fr; gap: 0; } .nut-divider { margin: 0 20px; height: 60px; } }
+    @media (max-width: 480px) { .review-stats { grid-template-columns: 1fr; } .rv-stat { border-right: none; border-bottom: 1px solid var(--border); } .rv-stat:last-child { border-bottom: none; } }
+    @media (max-width: 768px) { .hero { padding: 80px 20px 60px; } .compare-table th, .compare-table td { padding: 12px 14px; font-size: 0.82rem; } }
+    @media (max-width: 375px) { body { overflow-x: hidden; } h1 { font-size: 2.4rem; } h2 { font-size: 1.8rem; } .hero-badge { font-size: 0.8rem; padding: 8px 14px; } }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-to-content">본문으로 건너뛰기</a>
+  <div class="viz-menu">
+    <button class="viz-menu-toggle" onclick="toggleMenu()" aria-label="메뉴">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/>
+      </svg>
+    </button>
+    <div class="viz-menu-dropdown" id="vizMenuDropdown">
+      <button onclick="cycleTheme()"><span id="themeIcon">☀️</span><span id="themeLabel">라이트</span></button>
+      <button onclick="downloadImage()"><span>📥</span><span>PNG 저장</span></button>
+      <button onclick="window.print()"><span>🖨️</span><span>인쇄 / PDF</span></button>
+    </div>
+  </div>
+  <main id="main-content">
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+      <div style="position:relative;z-index:1;">
+        <div class="hero-tag animate">🔥 윤식단 직화 시리즈</div>
+        <h1 class="animate delay-1">냄새 없이<br><em>불향 난다</em></h1>
+        <p class="hero-sub animate delay-2">스팀·오븐·그릴드 3단계 공정으로 만든 진짜 직화 구이.<br>전자레인지 2분, 어디서든 그 맛 그대로.</p>
+        <div class="hero-badges animate delay-3">
+          <div class="hero-badge">🥩 후지살 100g</div>
+          <div class="hero-badge">단백질 <strong>22g</strong></div>
+          <div class="hero-badge">당류 <strong>1g</strong></div>
+          <div class="hero-badge">⏱️ 조리 2분</div>
+        </div>
+        <button class="hero-cta animate delay-4">직화후지구이 구매하기 →</button>
+      </div>
+    </section>
+
+    <!-- ===== HOOK ===== -->
+    <section class="hook-section">
+      <h2 class="reveal">"왜 집에서 하는 고기는<br>그 맛이 안 날까?"
+        <span>직화 굽기의 핵심은 온도·시간·불꽃. 직화후지구이는 세 가지를 공장에서 완성해 드립니다.</span>
+      </h2>
+    </section>
+
+    <!-- ===== PAIN INTRO (Story) ===== -->
+    <section class="story-section">
+      <div class="container">
+        <div class="story-top reveal">
+          <div class="s-tag">고객의 현실</div>
+          <h2>집에서 고기 구울 때마다<br><em>이런 경험</em> 있으시죠?</h2>
+        </div>
+        <div class="story-pain-row">
+          <div class="pain-card reveal">
+            <div class="pain-emoji">🌫️</div>
+            <div class="pain-word">연기·냄새</div>
+            <div class="pain-sub">창문 열어도 옷에 밴 냄새,<br>이웃 눈치까지</div>
+          </div>
+          <div class="pain-card reveal">
+            <div class="pain-emoji">🍳</div>
+            <div class="pain-word">설거지 지옥</div>
+            <div class="pain-sub">팬·그릴 기름때는<br>밥보다 오래 닦음</div>
+          </div>
+          <div class="pain-card reveal">
+            <div class="pain-emoji">🕐</div>
+            <div class="pain-word">30분 낭비</div>
+            <div class="pain-sub">불 조절·뒤집기·익힘 확인…<br>배는 고프고 시간은 없고</div>
+          </div>
+          <div class="pain-card reveal">
+            <div class="pain-emoji">😞</div>
+            <div class="pain-word">결국 실패</div>
+            <div class="pain-sub">겉만 타고 속은 생것,<br>식당 맛은 왜 안 나오지?</div>
+          </div>
+        </div>
+        <div class="story-resolve reveal">
+          <div class="resolve-icon">🔥</div>
+          <div class="resolve-text">
+            <div class="r-label">윤식단의 해답</div>
+            <h3>직화 작업은 공장에서. 당신은 그냥 데우면 됩니다.</h3>
+            <p>스팀 → 오븐 → 그릴드 3단계를 거쳐 완성된 직화구이를 냉동 패킹했습니다. 전자레인지 2분이면 그 불향이 그대로 살아납니다.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PROCESS (craft) ===== -->
+    <section class="craft-section">
+      <div class="craft-inner">
+        <div class="craft-top">
+          <div class="craft-text reveal">
+            <div class="craft-tag">3단계 직화 공정</div>
+            <h2>진짜 불향의 비밀은<br><em>공정</em>에 있습니다</h2>
+            <p>단순히 굽는 것이 아닙니다. <strong>스팀으로 육즙을 잡고, 오븐으로 내부를 익히고, 그릴드로 표면에 불향을 새깁니다.</strong> 식당 주방과 동일한 3단계 공정을 그대로 적용했습니다.</p>
+          </div>
+          <div class="craft-steps-list reveal">
+            <div class="craft-step-item">
+              <div class="cs-num">01</div>
+              <div class="cs-content">
+                <h4>🌊 스팀 — 육즙 봉인</h4>
+                <p>고온 스팀으로 고기 표면을 빠르게 코팅해 내부 수분을 가둡니다. 퍽퍽함 없이 촉촉한 식감의 기반이 되는 단계입니다.</p>
+              </div>
+            </div>
+            <div class="craft-step-item">
+              <div class="cs-num">02</div>
+              <div class="cs-content">
+                <h4>🔆 오븐 — 균일 익힘</h4>
+                <p>대류 오븐으로 내외부를 균일하게 익힙니다. 표면과 중심의 온도 차이를 최소화해 한 입 베어물었을 때 일관된 맛이 납니다.</p>
+              </div>
+            </div>
+            <div class="craft-step-item">
+              <div class="cs-num">03</div>
+              <div class="cs-content">
+                <h4>🔥 그릴드 — 불향 각인</h4>
+                <p>고온 그릴로 표면을 직접 구워 마야르 반응을 유도합니다. 이 과정에서 생긴 불향과 그을린 향이 냉동 후에도 유지됩니다.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="craft-bottom-bar reveal">
+          <p>후지살(돼지 앞다리살) 100g — 근육 비율이 높아 단백질 22g, 지방은 9g으로 조절된 부위 선택까지 과학입니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== USP 1: 영양 (nut-banner) ===== -->
+    <section class="nut-banner reveal">
+      <div class="nut-banner-inner">
+        <div class="nut-num-block protein">
+          <div class="nb-val" data-count="22">22</div>
+          <div class="nb-unit">g</div>
+          <div class="nb-label">단백질 / 1팩</div>
+        </div>
+        <div class="nut-divider"></div>
+        <div class="nut-num-block sugar">
+          <div class="nb-val" data-count="1">1</div>
+          <div class="nb-unit">g</div>
+          <div class="nb-label">당류 / 1팩</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== USP 2: 성분 투명성 ===== -->
+    <section class="section reveal">
+      <div class="container">
+        <div class="section-tag">성분 투명성</div>
+        <h2 class="section-title">숨기는 재료 없습니다</h2>
+        <p class="section-sub">첨가물을 줄이는 것은 어렵습니다. 불향을 인공적으로 내는 것이 훨씬 쉽기 때문입니다. 직화후지구이는 실제로 굽는 방식을 선택했습니다.</p>
+        <div class="features-grid">
+          <div class="feature-card reveal">
+            <div class="f-icon">
+              <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h3>인공 훈연향 無</h3>
+            <p>액상 훈연향을 뿌리는 방식이 아닌 실제 그릴드 공정으로 불향을 만들었습니다. 표기에서 확인하세요.</p>
+          </div>
+          <div class="feature-card reveal">
+            <div class="f-icon">
+              <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <h3>돼지고기 100% 후지살</h3>
+            <p>여러 부위를 섞은 성형육이 아닌 후지살 단일 부위를 사용했습니다. 식감이 다릅니다.</p>
+          </div>
+          <div class="feature-card reveal">
+            <div class="f-icon">
+              <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <h3>최소한의 양념</h3>
+            <p>소금·후추·마늘 수준의 기본 양념만 사용해 당류를 1g 이하로 억제했습니다. 소스 없이도 충분합니다.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== USP 3 + 비교표 ===== -->
+    <section class="compare-section">
+      <div class="container">
+        <div class="section-tag">경쟁 비교</div>
+        <h2 class="section-title reveal">직접 비교해 봤습니다</h2>
+        <p class="section-sub reveal">같은 냉동 돼지고기 구이 제품과 핵심 지표를 비교했습니다.</p>
+        <table class="compare-table reveal">
+          <thead>
+            <tr>
+              <th>비교 항목</th>
+              <th class="winner">직화후지구이 <span class="badge-win">윤식단</span></th>
+              <th class="loser">일반 냉동 구이</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>단백질 (1팩)</td>
+              <td class="win">22g</td>
+              <td class="lose">12~16g</td>
+            </tr>
+            <tr>
+              <td>당류 (1팩)</td>
+              <td class="win">1g</td>
+              <td class="lose">5~12g</td>
+            </tr>
+            <tr>
+              <td>불향 방식</td>
+              <td class="win">실제 그릴드 직화</td>
+              <td class="lose">액상 훈연향 첨가</td>
+            </tr>
+            <tr>
+              <td>원료육</td>
+              <td class="win">후지살 단일 부위</td>
+              <td class="lose">혼합 성형육</td>
+            </tr>
+            <tr>
+              <td>조리 시간</td>
+              <td class="win">전자레인지 2분</td>
+              <td class="lose">팬·에어프라이어 10분+</td>
+            </tr>
+            <tr>
+              <td>조리 후 냄새</td>
+              <td class="win">거의 없음</td>
+              <td class="lose">기름·연기 발생</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== NUTRITION ===== -->
+    <section class="nutrition-section">
+      <div class="container">
+        <div class="section-tag">영양성분표</div>
+        <h2 class="section-title reveal">숫자로 보는 직화후지구이</h2>
+        <p class="section-sub reveal">1팩(100g) 기준 영양성분입니다.</p>
+        <div class="nutrition-card reveal">
+          <div class="n-header">직화후지구이 영양성분 <span>1팩 / 100g 기준</span></div>
+          <div class="n-row highlight">
+            <div class="n-label">🔥 열량</div>
+            <div class="n-bar"><div class="n-bar-fill" style="width:36%; background:#FF6B4A;"></div></div>
+            <div class="n-val">180 kcal</div>
+          </div>
+          <div class="n-row highlight">
+            <div class="n-label">💪 단백질</div>
+            <div class="n-bar"><div class="n-bar-fill" style="width:88%;"></div></div>
+            <div class="n-val">22 g</div>
+          </div>
+          <div class="n-row">
+            <div class="n-label">탄수화물</div>
+            <div class="n-bar"><div class="n-bar-fill" style="width:8%; background:#888;"></div></div>
+            <div class="n-val" style="color:var(--text-secondary)">2 g</div>
+          </div>
+          <div class="n-row highlight">
+            <div class="n-label">🍬 당류</div>
+            <div class="n-bar"><div class="n-bar-fill" style="width:4%; background:#10b981;"></div></div>
+            <div class="n-val" style="color:var(--positive)">1 g</div>
+          </div>
+          <div class="n-row">
+            <div class="n-label">지방</div>
+            <div class="n-bar"><div class="n-bar-fill" style="width:36%; background:#f59e0b;"></div></div>
+            <div class="n-val" style="color:var(--text-secondary)">9 g</div>
+          </div>
+          <div class="n-row">
+            <div class="n-label">나트륨</div>
+            <div class="n-bar"><div class="n-bar-fill" style="width:24%; background:#888;"></div></div>
+            <div class="n-val" style="color:var(--text-secondary)">480 mg</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== REVIEWS ===== -->
+    <section class="review-section">
+      <div class="container">
+        <div class="section-tag">실제 구매자 후기</div>
+        <h2 class="section-title reveal">먹어본 사람들의 말</h2>
+        <div class="review-stats reveal">
+          <div class="rv-stat">
+            <div class="rv-icon">⭐</div>
+            <div class="rv-label">평균 평점</div>
+            <div class="rv-val accent">4.8</div>
+          </div>
+          <div class="rv-stat">
+            <div class="rv-icon">💬</div>
+            <div class="rv-label">총 후기 수</div>
+            <div class="rv-val">1,200+</div>
+          </div>
+          <div class="rv-stat">
+            <div class="rv-icon">🔁</div>
+            <div class="rv-label">재구매율</div>
+            <div class="rv-val accent">74%</div>
+          </div>
+        </div>
+        <div class="review-cards">
+          <div class="review-card reveal">
+            <div class="rv-stars">★★★★★</div>
+            <div class="rv-text">"진짜 구운 거 맞죠? 전자레인지에 돌렸는데 불향이 그대로 납니다. 처음엔 반신반의했는데 완전 신기해요."</div>
+            <div class="rv-meta">⚡ 구매 인증 · 직장인 이○○ · 서울 · 2025.11</div>
+          </div>
+          <div class="review-card reveal">
+            <div class="rv-stars">★★★★★</div>
+            <div class="rv-text">"다이어트 중인데 단백질 22g이라 매일 먹고 있어요. 당류 1g이라 죄책감 제로. 성형육 아니고 진짜 고기 식감이 확 다릅니다."</div>
+            <div class="rv-meta">⚡ 구매 인증 · 헬스인 박○○ · 부산 · 2025.12</div>
+          </div>
+          <div class="review-card reveal">
+            <div class="rv-stars">★★★★☆</div>
+            <div class="rv-text">"재료가 간단한 게 마음에 들어요. 다른 제품들 보면 이것저것 들어있는데 이건 진짜 고기 맛만 납니다. 꾸준히 먹을 것 같아요."</div>
+            <div class="rv-meta">⚡ 구매 인증 · 건강관리 최○○ · 인천 · 2026.01</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section class="faq-section">
+      <div class="container">
+        <div class="section-tag">자주 묻는 질문</div>
+        <h2 class="section-title reveal">궁금한 것들</h2>
+        <div class="faq-list">
+          <div class="faq-item reveal">
+            <div class="faq-q">
+              <span>불향이 실제로 나나요? 인공향 아닌가요?</span>
+              <div class="faq-icon">Q</div>
+            </div>
+            <div class="faq-a">실제 그릴드 공정을 거쳐 만들어진 불향입니다. 액상 훈연향을 첨가하지 않았으며, 성분표에서 직접 확인하실 수 있습니다. 마야르 반응으로 생긴 향은 냉동 후에도 유지됩니다.</div>
+          </div>
+          <div class="faq-item reveal">
+            <div class="faq-q">
+              <span>전자레인지만 있으면 되나요? 팬이 필요한가요?</span>
+              <div class="faq-icon">Q</div>
+            </div>
+            <div class="faq-a">전자레인지(700W 기준) 2분이면 충분합니다. 팬, 에어프라이어 없이도 됩니다. 더 바삭한 식감을 원하신다면 에어프라이어 160℃ 5분을 추천합니다.</div>
+          </div>
+          <div class="faq-item reveal">
+            <div class="faq-q">
+              <span>성형육인가요? 진짜 고기 부위인가요?</span>
+              <div class="faq-icon">Q</div>
+            </div>
+            <div class="faq-a">돼지 후지살(앞다리살) 단일 부위입니다. 여러 부위를 갈아 압착한 성형육과 달리 근육 결이 그대로 살아있습니다. 씹을 때 식감의 차이가 느껴집니다.</div>
+          </div>
+          <div class="faq-item reveal">
+            <div class="faq-q">
+              <span>얼마나 보관 가능한가요?</span>
+              <div class="faq-icon">Q</div>
+            </div>
+            <div class="faq-a">냉동 보관 기준 제조일로부터 12개월입니다. 개봉 후에는 재냉동보다 냉장 보관 후 2일 내 섭취를 권장합니다.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TARGET ===== -->
+    <section class="target-section">
+      <div class="container">
+        <div class="section-tag">이런 분께 추천</div>
+        <h2 class="section-title reveal">직화후지구이가 딱 맞는 분</h2>
+        <div class="target-grid">
+          <div class="target-card reveal">
+            <div class="t-emoji">💪</div>
+            <h4>운동하는 분</h4>
+            <p>22g 단백질, 180kcal. 운동 후 단백질 보충에 딱 맞는 칼로리·영양 구성입니다.</p>
+          </div>
+          <div class="target-card reveal">
+            <div class="t-emoji">🍽️</div>
+            <h4>식단 관리 중인 분</h4>
+            <p>당류 1g, 탄수화물 2g. 저당 식단, 케토 식이 모두 적합합니다.</p>
+          </div>
+          <div class="target-card reveal">
+            <div class="t-emoji">🏠</div>
+            <h4>자취·혼밥족</h4>
+            <p>팬 안 써도 되고 냄새도 없습니다. 혼자 사는 분들을 위한 깔끔한 고기 한 끼.</p>
+          </div>
+          <div class="target-card reveal">
+            <div class="t-emoji">🕐</div>
+            <h4>바쁜 직장인</h4>
+            <p>2분이면 끝납니다. 점심 도시락으로, 야근 후 저녁으로 빠르게.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== BRAND STORY ===== -->
+    <section class="brand-section">
+      <div class="brand-inner container">
+        <div class="brand-text reveal">
+          <div class="b-tag">브랜드 스토리</div>
+          <h2>윤식단이<br>만드는 이유</h2>
+          <p>윤식단은 건강한 식품을 만드는 것보다 건강한 식품이 맛있다는 걸 증명하는 게 더 중요하다고 생각합니다.</p>
+          <p>직화후지구이는 그 증명의 하나입니다. 단백질이 높고 당류가 낮으면서 불향이 납니다. 이 세 가지를 동시에 달성하려면 실제로 굽는 수밖에 없었습니다.</p>
+        </div>
+        <div class="brand-stats reveal">
+          <div class="b-stat">
+            <div class="bs-num">3</div>
+            <div>
+              <div class="bs-label">단계 직화 공정</div>
+              <div class="bs-sub">스팀 → 오븐 → 그릴드</div>
+            </div>
+          </div>
+          <div class="b-stat">
+            <div class="bs-num">22</div>
+            <div>
+              <div class="bs-label">g 단백질 / 1팩</div>
+              <div class="bs-sub">후지살 100g 기준</div>
+            </div>
+          </div>
+          <div class="b-stat">
+            <div class="bs-num">2</div>
+            <div>
+              <div class="bs-label">분 조리 완성</div>
+              <div class="bs-sub">전자레인지 700W 기준</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PRICING ===== -->
+    <section class="pricing-section">
+      <div class="container">
+        <div class="section-tag">가격 안내</div>
+        <h2 class="section-title reveal">한 끼 단백질, 얼마나 드세요?</h2>
+        <p class="section-sub reveal">편의점 닭가슴살보다 저렴하게, 훨씬 맛있게.</p>
+        <div class="pricing-grid">
+          <div class="price-card reveal">
+            <div class="p-name">단품</div>
+            <div class="p-qty">1팩 / 100g</div>
+            <div class="p-per">1팩 당 <strong>3,500원</strong></div>
+            <div class="p-price">3,500<span>원</span></div>
+            <div class="p-ship">별도 배송비</div>
+            <button class="p-btn">단품 구매</button>
+          </div>
+          <div class="price-card reveal">
+            <div class="p-name">5팩 세트</div>
+            <div class="p-qty">5팩 / 500g</div>
+            <div class="p-per">1팩 당 <strong>3,260원</strong></div>
+            <div class="p-original">17,500원</div>
+            <div class="p-price">16,300<span>원</span></div>
+            <div class="p-save">7% 절약</div>
+            <div class="p-ship">별도 배송비</div>
+            <button class="p-btn">5팩 구매</button>
+          </div>
+          <div class="price-card best reveal">
+            <div class="best-badge">🔥 가장 많이 구매</div>
+            <div class="p-name">10팩 세트</div>
+            <div class="p-qty">10팩 / 1kg</div>
+            <div class="p-per">1팩 당 <strong>3,080원</strong></div>
+            <div class="p-original">35,000원</div>
+            <div class="p-price">30,800<span>원</span></div>
+            <div class="p-save">12% 절약</div>
+            <div class="p-ship">✅ 무료배송 조건 충족 가능</div>
+            <button class="p-btn">10팩 구매</button>
+          </div>
+        </div>
+        <p class="price-note reveal">9만원 이상 구매 시 무료배송. 냉동 배송, 보냉팩 포장.</p>
+      </div>
+    </section>
+
+    <!-- ===== FINAL CTA ===== -->
+    <section class="final-cta">
+      <h2 class="reveal">오늘부터 고기구이,<br>2분이면 됩니다</h2>
+      <p class="reveal">연기 없이. 팬 없이. 설거지 없이.<br>진짜 불향 나는 직화구이를 전자레인지로.</p>
+      <div class="cta-btns reveal">
+        <button class="btn-white">직화후지구이 구매하기</button>
+        <button class="btn-outline">10팩 세트 보기</button>
+      </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+      <p><strong>윤식단</strong> · 고단백 저당 HMR 브랜드 · 직화후지구이</p>
+      <p style="margin-top:8px">본 상세페이지의 영양성분은 1팩(100g) 기준이며 제조 배치에 따라 ±5% 변동될 수 있습니다.</p>
+    </footer>
+
+  </main>
+
+  <script>
+    function toggleMenu() {
+      var dropdown = document.getElementById('vizMenuDropdown');
+      if (dropdown) dropdown.classList.toggle('open');
+    }
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.viz-menu')) {
+        var dropdown = document.getElementById('vizMenuDropdown');
+        if (dropdown) dropdown.classList.remove('open');
+      }
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        var dropdown = document.getElementById('vizMenuDropdown');
+        if (dropdown) dropdown.classList.remove('open');
+      }
+    });
+    var savedTheme = localStorage.getItem('viz-theme');
+    var currentTheme = savedTheme || 'light';
+    function applyTheme(t) {
+      document.documentElement.className = 'theme-' + t;
+      var icon = document.getElementById('themeIcon');
+      var label = document.getElementById('themeLabel');
+      if (icon) icon.textContent = t === 'dark' ? '🌙' : '☀️';
+      if (label) label.textContent = t === 'dark' ? '다크' : '라이트';
+      localStorage.setItem('viz-theme', t);
+      currentTheme = t;
+    }
+    function cycleTheme() { applyTheme(currentTheme === 'dark' ? 'light' : 'dark'); }
+    applyTheme(currentTheme);
+    document.querySelectorAll('[data-reveal]').forEach(function(el) { el.classList.add('reveal'); });
+    var revealObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(function(el) { revealObserver.observe(el); });
+    function animateCounters() {
+      document.querySelectorAll('[data-count]').forEach(function(el) {
+        if (el.dataset.counted) return;
+        el.dataset.counted = '1';
+        var target = parseFloat(el.dataset.count);
+        var start = performance.now();
+        var duration = 1000;
+        (function tick(now) {
+          var p = Math.min((now - start) / duration, 1);
+          var eased = 1 - Math.pow(1 - p, 3);
+          el.textContent = Math.round(target * eased);
+          if (p < 1) requestAnimationFrame(tick);
+        })(start);
+      });
+    }
+    var counterEl = document.querySelector('[data-count]');
+    if (counterEl) {
+      var cObs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+          if (e.isIntersecting) { animateCounters(); cObs.disconnect(); }
+        });
+      }, { threshold: 0.3 });
+      cObs.observe(counterEl);
+    }
+    var nObs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) {
+          e.target.querySelectorAll('.n-bar-fill').forEach(function(bar) {
+            var w = bar.style.width; bar.style.width = '0';
+            setTimeout(function() { bar.style.width = w; }, 100);
+          });
+          nObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.3 });
+    var nCard = document.querySelector('.nutrition-card');
+    if (nCard) nObs.observe(nCard);
+    async function downloadImage() {
+      var menu = document.querySelector('.viz-menu');
+      menu.style.display = 'none';
+      try {
+        var url = await htmlToImage.toPng(document.body, { quality: 1, pixelRatio: 2, filter: function(n) { return !n.classList || !n.classList.contains('viz-menu'); } });
+        var a = document.createElement('a'); a.href = url; a.download = '직화후지구이-A-상세페이지.png'; a.click();
+      } catch(e) { console.error('Download failed:', e); }
+      menu.style.display = '';
+    }
+  </script>
+</body>
+</html>
