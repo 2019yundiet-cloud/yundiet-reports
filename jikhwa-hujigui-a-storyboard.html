@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<!-- VARIANT: A | ANGLE: 신뢰/증명 | CREATED: 2026-04-20 -->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>직화후지구이 A안 스토리보드 — 신뢰/증명</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root {
+    --bg: #0d0d0d; --surface: #1a1a1a; --surface2: #252525;
+    --text: #f0f0f0; --text2: #aaa; --border: #333;
+    --accent: #e8721a; --accent2: #f5a623;
+    --anchor: #e8721a; --bridge: #5b8dd9; --support: #5a5a5a; --closer: #2ecc71;
+    --act1: #e8721a; --act2: #d4532a; --act3: #5b8dd9; --act4: #9b59b6; --act5: #2ecc71;
+  }
+  .light {
+    --bg: #f7f5f2; --surface: #fff; --surface2: #f0ede8;
+    --text: #1a1a1a; --text2: #666; --border: #ddd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; line-height: 1.6; }
+  /* HEADER */
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .badge-a { background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 1px; }
+  .header h1 { font-size: 15px; font-weight: 700; }
+  .header-sub { font-size: 12px; color: var(--text2); }
+  .theme-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+  /* META CARDS */
+  .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; padding: 20px 24px; }
+  .meta-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .meta-label { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+  .meta-value { font-size: 14px; font-weight: 700; }
+  .meta-value.orange { color: var(--accent); }
+  /* CHART */
+  .chart-section { padding: 0 24px 20px; }
+  .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .chart-title { font-size: 13px; font-weight: 700; margin-bottom: 16px; color: var(--text2); }
+  /* ACT TIMELINE */
+  .act-timeline { display: flex; gap: 0; padding: 0 24px 20px; overflow-x: auto; }
+  .act-block { flex: 1; min-width: 120px; padding: 12px 14px; border-radius: 0; border-right: 1px solid var(--border); }
+  .act-block:first-child { border-radius: 10px 0 0 10px; }
+  .act-block:last-child { border-radius: 0 10px 10px 0; border-right: none; }
+  .act-block.act1 { background: rgba(232,114,26,0.15); border-top: 3px solid var(--act1); }
+  .act-block.act2 { background: rgba(212,83,42,0.12); border-top: 3px solid var(--act2); }
+  .act-block.act3 { background: rgba(91,141,217,0.12); border-top: 3px solid var(--act3); }
+  .act-block.act4 { background: rgba(155,89,182,0.12); border-top: 3px solid var(--act4); }
+  .act-block.act5 { background: rgba(46,204,113,0.12); border-top: 3px solid var(--act5); }
+  .act-name { font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+  .act-sections { font-size: 10px; color: var(--text2); }
+  .act-desc { font-size: 10px; color: var(--text2); margin-top: 4px; }
+  /* SECTIONS */
+  .sections { padding: 0 24px 40px; display: flex; flex-direction: column; gap: 12px; }
+  .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .section-card.anchor { border-left: 4px solid var(--anchor); }
+  .section-card.bridge { border-left: 4px solid var(--bridge); }
+  .section-card.support { border-left: 4px solid var(--support); }
+  .section-card.closer { border-left: 4px solid var(--closer); }
+  .section-header { padding: 14px 18px 10px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; cursor: pointer; }
+  .section-num { font-size: 11px; color: var(--text2); min-width: 28px; }
+  .section-title-wrap { flex: 1; }
+  .section-name { font-size: 14px; font-weight: 700; }
+  .section-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .tag { font-size: 10px; padding: 2px 8px; border-radius: 12px; }
+  .tag-role { background: var(--surface2); color: var(--text2); }
+  .tag-act { color: #fff; font-weight: 700; }
+  .tag-act1 { background: var(--act1); }
+  .tag-act2 { background: var(--act2); }
+  .tag-act3 { background: var(--act3); }
+  .tag-act4 { background: var(--act4); }
+  .tag-act5 { background: var(--act5); }
+  .tag-scan { background: rgba(91,141,217,0.2); color: #5b8dd9; }
+  .tag-layer { background: rgba(232,114,26,0.15); color: var(--accent); }
+  .emotion-bar-wrap { display: flex; align-items: center; gap: 8px; min-width: 80px; }
+  .emotion-bar { height: 6px; border-radius: 3px; background: var(--border); overflow: hidden; width: 60px; }
+  .emotion-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent2), var(--accent)); }
+  .emotion-num { font-size: 11px; font-weight: 700; color: var(--accent); min-width: 20px; text-align: right; }
+  .section-body { padding: 0 18px 14px; border-top: 1px solid var(--border); }
+  .section-body.hidden { display: none; }
+  .body-row { margin-top: 12px; }
+  .body-label { font-size: 10px; color: var(--text2); font-weight: 700; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .copy-box { background: var(--surface2); border-radius: 8px; padding: 12px 14px; font-size: 13px; line-height: 1.7; color: var(--text); }
+  .insight-list { list-style: none; }
+  .insight-list li { font-size: 12px; color: var(--text2); padding: 4px 0; padding-left: 14px; position: relative; }
+  .insight-list li::before { content: '·'; position: absolute; left: 0; color: var(--accent); }
+  .visual-box { background: rgba(91,141,217,0.08); border: 1px dashed rgba(91,141,217,0.3); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #5b8dd9; }
+  .chevron { font-size: 12px; color: var(--text2); transition: transform 0.2s; }
+  .chevron.open { transform: rotate(180deg); }
+  /* FOOTER */
+  .footer { padding: 20px 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text2); display: flex; justify-content: space-between; align-items: center; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <span class="badge-a">A안</span>
+    <div>
+      <div class="header h1" style="font-size:15px;font-weight:700;">직화후지구이 스토리보드</div>
+      <div class="header-sub">신뢰/증명 각도 · 19개 섹션 · 5 ACT</div>
+    </div>
+  </div>
+  <button class="theme-btn" onclick="document.body.classList.toggle('light')">🌗 테마</button>
+</div>
+
+<!-- META -->
+<div class="meta-grid">
+  <div class="meta-card"><div class="meta-label">VARIANT</div><div class="meta-value orange">A — 신뢰/증명</div></div>
+  <div class="meta-card"><div class="meta-label">히어로 카피</div><div class="meta-value">냄새 없이 불향 난다</div></div>
+  <div class="meta-card"><div class="meta-label">핵심 갈등</div><div class="meta-value">고기 선택지 없음</div></div>
+  <div class="meta-card"><div class="meta-label">클라이맥스</div><div class="meta-value">#04 Process (9/10)</div></div>
+  <div class="meta-card"><div class="meta-label">섹션 수</div><div class="meta-value">19개</div></div>
+  <div class="meta-card"><div class="meta-label">핵심 증거</div><div class="meta-value">단백질 22g · 3단계 공정</div></div>
+</div>
+
+<!-- EMOTION CHART -->
+<div class="chart-section">
+  <div class="chart-wrap">
+    <div class="chart-title">감정 흐름 곡선 (A안 신뢰/증명)</div>
+    <canvas id="emotionChart" height="80"></canvas>
+  </div>
+</div>
+
+<!-- ACT TIMELINE -->
+<div class="act-timeline">
+  <div class="act-block act1">
+    <div class="act-name" style="color:var(--act1)">ACT 1 · 첫인상</div>
+    <div class="act-sections">S01–02</div>
+    <div class="act-desc">호기심→기대 유발</div>
+  </div>
+  <div class="act-block act2">
+    <div class="act-name" style="color:var(--act2)">ACT 2 · 공감·해결</div>
+    <div class="act-sections">S03–04</div>
+    <div class="act-desc">공감→공정 클라이맥스</div>
+  </div>
+  <div class="act-block act3">
+    <div class="act-name" style="color:var(--act3)">ACT 3 · 상세탐색</div>
+    <div class="act-sections">S05–09</div>
+    <div class="act-desc">USP·영양·비교 증명</div>
+  </div>
+  <div class="act-block act4">
+    <div class="act-name" style="color:var(--act4)">ACT 4 · 확신</div>
+    <div class="act-sections">S10–16</div>
+    <div class="act-desc">후기·FAQ·타겟 호명</div>
+  </div>
+  <div class="act-block act5">
+    <div class="act-name" style="color:var(--act5)">ACT 5 · 전환</div>
+    <div class="act-sections">S17–19</div>
+    <div class="act-desc">가격·배송·CTA</div>
+  </div>
+</div>
+
+<!-- SECTIONS -->
+<div class="sections" id="sections"></div>
+
+<div class="footer">
+  <span>직화후지구이 Phase 2.5 스토리보드 A안 · 2026-04-20</span>
+  <span>노션: Phase 2.5 스토리 (A안)</span>
+</div>
+
+<script>
+// 감정 데이터
+const emotionData = {
+  labels: ['S01\nHero','S02\nHook','S03\nPain','S04\nProcess★','S05\nUSP1','S06\nUSP2','S07\nUSP3','S08\nNutrition','S09\nComparison','S10\nR1','S11\nR2','S12\nR3','S13\nFAQ1','S14\nFAQ2','S15\nTarget','S16\nBrand','S17\nPricing','S18\nDelivery','S19\nCTA'],
+  values: [9,8,7,9,7,8,7,5,7,7,7,6,6,5,7,6,6,4,9]
+};
+
+const ctx = document.getElementById('emotionChart').getContext('2d');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: emotionData.labels,
+    datasets: [{
+      data: emotionData.values,
+      borderColor: '#e8721a',
+      backgroundColor: 'rgba(232,114,26,0.08)',
+      borderWidth: 2,
+      pointBackgroundColor: emotionData.values.map(v => v >= 9 ? '#e8721a' : v >= 7 ? '#f5a623' : '#555'),
+      pointRadius: emotionData.values.map(v => v >= 9 ? 7 : 4),
+      fill: true,
+      tension: 0.4
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { min: 1, max: 10, ticks: { color: '#888', stepSize: 2 }, grid: { color: '#2a2a2a' } },
+      x: { ticks: { color: '#888', font: { size: 9 } }, grid: { color: '#2a2a2a' } }
+    }
+  }
+});
+
+// 섹션 데이터
+const sections = [
+  {
+    num:'01', name:'Hero', role:'anchor', act:'1',
+    emotion: 9,
+    scan: 'S', layer: 'L5',
+    copy: '냄새 없이 불향 난다\n스팀, 오븐, 그릴드 — 3단계 공정으로 만든 직화 돼지고기 구이. 전자레인지 2분, 어디서든 진짜 구이감.',
+    psychology: '유입 직후. "전자레인지인데 불향?" 인지 부조화 유발. 3초 이탈 또는 스크롤 결정 순간.',
+    hook: '"냄새 없이 불향"이라는 역설적 조합이 이미지-텍스트 갈등 생성. 스크롤 호기심 점화.',
+    pain2copy: '닭가슴살 피로 → "불향" / 냄새 걱정 → "냄새 없이" / 전자레인지 편견 → 3단계 공정',
+    visual: '풀프레임 불향 고기 클로즈업. 어두운 배경 불꽃 반사. 대형 볼드 타이포 오버레이. 스모크 이펙트 살짝.'
+  },
+  {
+    num:'02', name:'Hook', role:'anchor', act:'1',
+    emotion: 8,
+    scan: 'S', layer: 'L3',
+    copy: '전자레인지 고기구이, 이게 진짜 될까요?\n스팀으로 속을 익히고, 오븐으로 수분을 잡고, 그릴드로 불향을 입혔습니다. 냉동 상태에서 전자레인지 2분이면 — 팬 없이, 냄새 없이, 구이감 그대로 완성됩니다.',
+    psychology: '고객의 의심을 헤드라인에 담아 "나를 알고 있네" 공감 → 신뢰 전환.',
+    hook: '의문형 헤드가 고객 의심을 선제 제거. "스팀→오븐→그릴드" 3동사 병렬 리듬감.',
+    pain2copy: '전자레인지 불신 → 공정 3단계 논리 / 냄새 걱정 → "냄새 없이" 확약',
+    visual: '3단계 공정 미니 인포그래픽. 전자레인지 앞 완성 고기 컷. 밝고 식욕 자극.'
+  },
+  {
+    num:'03', name:'Pain Intro', role:'bridge', act:'2',
+    emotion: 7,
+    scan: 'C', layer: 'L5',
+    copy: '고기가 먹고 싶은데, 선택지가 없었습니다\n고시원에서 고기를 굽는 건 민폐. 퇴근 후 팬을 꺼내는 건 귀찮음. 닭가슴살은 이미 질렸고. 배달을 시키면 1끼에 만 원이 넘습니다.',
+    psychology: '"맞아, 나도 이런 적 있어" 기억 소환. 고객이 브랜드와 같은 문제를 가졌다는 연대감.',
+    hook: '4가지 상황 나열이 타겟 페르소나 전부를 포괄. 마지막 "빈칸을 채우기 위해" 해결 선언.',
+    pain2copy: '냄새 걱정 → "민폐" / 귀찮음 → "팬을 꺼내는 건" / 닭가슴살 피로 → 직접 언급 / 비용 → "만 원"',
+    visual: '채도 낮은 좁은 부엌/고시원 이미지. 연기, 기름 튄 팬. 어두운 톤.'
+  },
+  {
+    num:'04', name:'Process ★클라이맥스', role:'anchor', act:'2',
+    emotion: 9,
+    scan: 'A', layer: 'L1',
+    copy: '전자레인지로 불향이 나는 이유 — 3단계 공정\nSTEP 1. 스팀 — 후지살 내부까지 고르게 익혀 육즙을 가둡니다\nSTEP 2. 오븐 — 표면 수분을 날려 고기 본연의 질감을 살립니다\nSTEP 3. 그릴드 — 직화 불향을 입혀 전자레인지 조리 후에도 구이감이 유지됩니다',
+    psychology: '"왜 가능한지" 납득 욕구 해소. 의심 → 이해 → 신뢰 전환.',
+    hook: '3단계 각각 "왜"가 설명된다. 동사로 끝나는 리듬감. A안 최고 설득 섹션.',
+    pain2copy: '전자레인지 불신 → 공정에서 이미 불향 주입 논리 / 편견 해소',
+    visual: '스팀→오븐→그릴드 3단계 인포그래픽. 따뜻한 황금색 고기 단면 컷. 클린 배경.'
+  },
+  {
+    num:'05', name:'USP1 — 공법', role:'support', act:'3',
+    emotion: 7,
+    scan: 'A', layer: 'L1',
+    copy: '불향은 공정에서 납니다\n스팀+오븐+그릴드 3단계 공정은 냉동 상태에서도 그 구이감을 그대로 살리기 위한 설계입니다. 국내 간편식 시장에서 불향 3단계 공정을 적용한 제품은 직화후지구이가 처음입니다.',
+    psychology: '"시장 최초"라는 선언이 대체 불가능성 인식 생성.',
+    hook: '"시장 최초" 클레임이 경쟁 불가 포지셔닝. "설계입니다"가 의도성·전문성 강조.',
+    pain2copy: '전자레인지 불향 가능? → "공정에서 납니다" 논리 완성',
+    visual: '공정 다이어그램 상세. 브랜드 컬러 강조. "시장 최초" 배지.'
+  },
+  {
+    num:'06', name:'USP2 — 냄새', role:'anchor', act:'3',
+    emotion: 8,
+    scan: 'A', layer: 'L3',
+    copy: '고시원에서 고기를 먹어도 됩니다\n직화후지구이는 조리 공정이 공장에서 완료된 상태입니다. 전자레인지에서 데우는 것뿐이기 때문에 고기 냄새가 거의 발생하지 않습니다. 고시원, 자취방, 사무실 어디서든 눈치 없이.',
+    psychology: '"고시원에서 먹어도 됩니다" — 허락 선언이 타겟 해방감 자극.',
+    hook: '공장 완조리 = 냄새 없음이라는 논리 체인. 구체 공간 3개 호명.',
+    pain2copy: '냄새 눈치 → "눈치 없이" / 공간 제약 → 3개 공간 직접 해소',
+    visual: '고시원 복도 또는 원룸. 밝은 공기, 열린 창문. 안도감 톤.'
+  },
+  {
+    num:'07', name:'USP3 — 단백질', role:'support', act:'3',
+    emotion: 7,
+    scan: 'A', layer: 'L1',
+    copy: '돼지고기로 단백질 22g\n후지살(돼지 앞다리살)은 지방이 적고 단백질 함량이 높은 부위입니다. 1팩 100g에 단백질 22g — 닭가슴살 대비 손색없는 수치이면서, 맛은 비교가 안 됩니다. 칼로리 180kcal, 당류 1g.',
+    psychology: '"닭가슴살 수준"이라는 기준과 비교해 기대 이상 인식.',
+    hook: '"맛은 비교가 안 됩니다" 단호한 1인칭 확신. 수치 3개 압축.',
+    pain2copy: '닭가슴살 대안 탐색 → "22g / 칼로리 180 / 당류 1g"',
+    visual: '단백질 바 인포그래픽. 닭가슴살 vs 직화후지구이 비교. 대형 "22g".'
+  },
+  {
+    num:'08', name:'Nutrition', role:'support', act:'3',
+    emotion: 5,
+    scan: 'N', layer: 'L1',
+    copy: '수치로 확인하세요\n단백질 22g / 칼로리 180kcal / 당류 1g / 1팩 100g 기준 — 닭가슴살 한 개 분량의 단백질',
+    psychology: '이성 판단 모드. 빠른 스캔으로 구매 검증.',
+    hook: '"수치로 확인하세요"라는 직접 지시어. 스캔 친화 레이아웃.',
+    pain2copy: '영양 확인 니즈 → 3개 수치 클린 정리',
+    visual: '클린 영양 카드. 흰 배경 숫자 강조. 스캔 친화적.'
+  },
+  {
+    num:'09', name:'Comparison', role:'anchor', act:'3',
+    emotion: 7,
+    scan: 'N', layer: 'L1',
+    copy: '직화후지구이가 다른 이유\n일반 냉동 돼지고기 구이 vs 직화후지구이',
+    psychology: '구매 결정 전 최후의 이성 검토. 비교표가 가장 직관적 설득.',
+    hook: '"다른 이유"라는 차별화 전제. 불향 유지/냄새/공정 구체 항목 비교.',
+    pain2copy: '경쟁 제품 의심 → 비교표로 즉각 해소',
+    visual: '2컬럼 비교표. 체크/엑스 아이콘. 브랜드 컬러 강조.'
+  },
+  {
+    num:'10', name:'Review 1', role:'support', act:'4',
+    emotion: 7,
+    scan: 'N', layer: 'L4',
+    copy: '"고시원에서 고기구이가 될 줄은 몰랐어요. 냄새 진짜 안 나고, 불향은 확실히 납니다." — 고시원 거주 직장인, 28세',
+    psychology: '"될 줄은 몰랐어요" 의외성이 진정성 신호. 타겟 페르소나 직접 호명.',
+    hook: '냄새 확인 + 불향 확인 이중 증거. "진짜"라는 구어적 표현.',
+    pain2copy: '냄새 걱정 → "진짜 안 나고" / 불향 의심 → "확실히 납니다"',
+    visual: '리뷰 카드 UI. 별점 5개. 고시원 느낌 아이콘.'
+  },
+  {
+    num:'11', name:'Review 2', role:'support', act:'4',
+    emotion: 7,
+    scan: 'N', layer: 'L4',
+    copy: '"닭가슴살 질려서 찾다가 발견했는데 이거 계속 시키게 되더라고요. 전자레인지로 이렇게 맛있을 수 있구나." — 헬스 3년차, 32세',
+    psychology: '"계속 시키게 되더라고요" — 재구매가 최강의 사회적 증거.',
+    hook: '닭가슴살 피로 직접 언급. "이렇게 맛있을 수 있구나" 기대 이상 반응.',
+    pain2copy: '닭가슴살 피로 → 직접 대안 / 전자레인지 맛 의심 → "이렇게 맛있을 수 있구나"',
+    visual: '리뷰 카드 UI. 헬스인 느낌 아이콘. 배경색 변화.'
+  },
+  {
+    num:'12', name:'Review 3', role:'support', act:'4',
+    emotion: 6,
+    scan: 'N', layer: 'L4',
+    copy: '"퇴근하고 팬 씻기 싫어서 시작했는데 단백질도 챙겨지고 진짜 편해요." — 1인 가구 자취생, 26세',
+    psychology: '"팬 씻기 싫어서"라는 솔직 동기가 진정성. 단백질 보너스 발견.',
+    hook: '솔직한 구매 동기. "단백질도 챙겨지고" — 기대 이상 부가가치.',
+    pain2copy: '설거지 귀찮음 → "팬 씻기 싫어서" 직접 호명',
+    visual: '3개 리뷰 마무리. 캐러셀 또는 카드 나열.'
+  },
+  {
+    num:'13', name:'FAQ1 — 구이감', role:'support', act:'4',
+    emotion: 6,
+    scan: 'N', layer: 'L5',
+    copy: 'Q. 전자레인지로 진짜 구이감이 날까요?\nA. 네, 납니다. 구이감은 조리 방식이 아니라 공정에서 결정됩니다. 스팀+오븐+그릴드 3단계로 불향을 입힌 상태로 냉동되기 때문에, 전자레인지 2분 후에도 구이 식감과 불향이 유지됩니다.',
+    psychology: '모든 설명 읽었지만 "그래도 전자레인지인데…" 마지막 의심 해소.',
+    hook: '"구이감은 조리 방식이 아니라 공정에서 결정됩니다" — 핵심 논리 압축.',
+    pain2copy: '전자레인지 편견 → "공정에서 결정됩니다" 역전',
+    visual: 'Q&A 아코디언 카드. 공정 미니 인포.'
+  },
+  {
+    num:'14', name:'FAQ2 — 용량', role:'support', act:'4',
+    emotion: 5,
+    scan: 'N', layer: 'L2',
+    copy: 'Q. 100g이면 너무 적은 거 아닌가요?\nA. 후지살 100g은 단백질 22g이 들어있는 밀도 높은 한 끼 반찬입니다. 밥이나 다른 반찬과 함께 드시면 충분합니다. 가볍게 드실 분들은 1팩, 운동 후에는 2팩.',
+    psychology: '용량 의심 + 구매 수량 결정 유도.',
+    hook: '"밀도 높은 한 끼 반찬" 포지셔닝. 1팩/2팩 구분으로 세트 유도.',
+    pain2copy: '용량 의심 → "밀도 높은" 질적 설명 / 2팩 언급 → 세트 구매 유도',
+    visual: 'FAQ 카드. 100g 사이즈 시각화.'
+  },
+  {
+    num:'15', name:'Target', role:'bridge', act:'4',
+    emotion: 7,
+    scan: 'N', layer: 'L4',
+    copy: '이런 분들이 찾고 있었습니다\n① 고시원·원룸에서 고기를 먹고 싶은데 냄새가 걱정인 분\n② 닭가슴살에 지쳐서 단백질 대안을 찾고 있는 헬스인\n③ 퇴근 후 설거지 없이 빠르게 단백질을 채우고 싶은 직장인',
+    psychology: '"찾고 있었습니다" — 고객이 원해서 찾아온 것이라는 능동적 프레이밍.',
+    hook: '3개 페르소나 중 하나라도 해당 → "나다" 반응.',
+    pain2copy: '구매 망설임 → 3가지 상황 호명으로 자기 확인',
+    visual: '3개 페르소나 카드. 아이콘 + 한줄 설명.'
+  },
+  {
+    num:'16', name:'Brand Story', role:'support', act:'4',
+    emotion: 6,
+    scan: 'S', layer: 'L5',
+    copy: '왜 직화 공정을 선택했을까요\n간편식 시장에는 고기 제품이 많습니다. 하지만 전자레인지로 데웠을 때 진짜 구이감이 나는 제품은 없었습니다. 윤식단은 그 문제를 공정으로 풀었습니다.',
+    psychology: '"고객 문제를 공정으로 풀었다" — 기술 자랑이 아닌 고객 문제 해결 의지.',
+    hook: '시장 공백 언급으로 브랜드 존재 이유 설명.',
+    pain2copy: '"왜 만들었나" 동기 → 시장 공백 + 고객 문제 인식 공유',
+    visual: '윤식단 브랜드 이미지. 브랜드 컬러 배경.'
+  },
+  {
+    num:'17', name:'Pricing', role:'bridge', act:'5',
+    emotion: 6,
+    scan: 'N', layer: 'L1',
+    copy: '단백질 22g의 가격\n단품 1팩 — 3,500원 / 단백질 22g\n10팩 세트 — 30,800원 / 1팩당 3,080원',
+    psychology: '"단백질 22g의 가격"이라는 프레이밍 — 제품 가격이 아니라 단백질 단가.',
+    hook: '닭가슴살 한 개와 비교해 합리적으로 느껴지는 프레이밍.',
+    pain2copy: '가격 저항 → "22g 기준" 가치 환산 / 세트 강조',
+    visual: '가격 카드. 단품/세트 두 가지. 세트 강조.'
+  },
+  {
+    num:'18', name:'Delivery', role:'support', act:'5',
+    emotion: 4,
+    scan: 'N', layer: 'L2',
+    copy: '9만원 이상 무료배송\n10팩 세트 기준 30,800원. 다른 제품과 함께 9만원 이상 구성하시면 배송비 없이 받으실 수 있습니다.',
+    psychology: '구매 의사 있지만 "배송비 얼마야?" 마지막 실용 체크.',
+    hook: '무료배송 조건을 "다른 제품과 함께"로 크로스셀 기회 전환.',
+    pain2copy: '배송비 걱정 → 조건 명시 / 크로스셀 암시',
+    visual: '배송 정보 카드. 심플 아이콘.'
+  },
+  {
+    num:'19', name:'Final CTA ★', role:'closer', act:'5',
+    emotion: 9,
+    scan: 'N', layer: 'L5',
+    copy: '오늘부터 고기구이, 2분이면 됩니다\n스팀+오븐+그릴드 3단계 공정 / 단백질 22g / 냄새 없이 어디서든\n[직화후지구이 구매하기]',
+    psychology: '19개 섹션 여정 완료. 모든 의심 해소. "사자"로 전환하는 마지막 밀기.',
+    hook: '"오늘부터" 즉시성. "2분이면" 행동 장벽 최소화. 핵심 USP 3가지 압축.',
+    pain2copy: '행동 장벽 → "2분이면" 최소화 / 전 여정 요약 → 3단계+22g+냄새없음',
+    visual: '풀스크린 대형 CTA. 제품 사진. 강조 버튼 브랜드 컬러.'
+  }
+];
+
+function getRoleClass(role) {
+  return role === 'anchor' ? 'anchor' : role === 'bridge' ? 'bridge' : role === 'closer' ? 'closer' : 'support';
+}
+function getRoleLabel(role) {
+  return {anchor:'앵커',bridge:'브릿지',support:'서포트',closer:'클로저'}[role] || role;
+}
+function getActClass(act) { return 'act'+act; }
+
+const container = document.getElementById('sections');
+sections.forEach((s, i) => {
+  const card = document.createElement('div');
+  card.className = `section-card ${getRoleClass(s.role)}`;
+  const pct = (s.emotion / 10) * 100;
+  card.innerHTML = `
+    <div class="section-header" onclick="toggleBody(${i})">
+      <div class="section-num">#${s.num}</div>
+      <div class="section-title-wrap">
+        <div class="section-name">${s.name}</div>
+        <div class="section-meta">
+          <span class="tag tag-role">${getRoleLabel(s.role)}</span>
+          <span class="tag tag-act tag-${getActClass(s.act)}">ACT ${s.act}</span>
+          <span class="tag tag-scan">SCAN·${s.scan}</span>
+          <span class="tag tag-layer">${s.layer}</span>
+        </div>
+      </div>
+      <div class="emotion-bar-wrap">
+        <div class="emotion-bar"><div class="emotion-fill" style="width:${pct}%"></div></div>
+        <div class="emotion-num">${s.emotion}</div>
+      </div>
+      <div class="chevron" id="chev-${i}">▼</div>
+    </div>
+    <div class="section-body hidden" id="body-${i}">
+      <div class="body-row"><div class="body-label">카피</div><div class="copy-box">${s.copy.replace(/\n/g,'<br>')}</div></div>
+      <div class="body-row"><div class="body-label">고객 심리</div><ul class="insight-list"><li>${s.psychology}</li></ul></div>
+      <div class="body-row"><div class="body-label">후킹 메커니즘</div><ul class="insight-list"><li>${s.hook}</li></ul></div>
+      <div class="body-row"><div class="body-label">페인→카피→전환</div><ul class="insight-list"><li>${s.pain2copy}</li></ul></div>
+      <div class="body-row"><div class="body-label">비주얼 방향</div><div class="visual-box">${s.visual}</div></div>
+    </div>
+  `;
+  container.appendChild(card);
+});
+
+function toggleBody(i) {
+  const body = document.getElementById('body-'+i);
+  const chev = document.getElementById('chev-'+i);
+  body.classList.toggle('hidden');
+  chev.classList.toggle('open');
+}
+</script>
+</body>
+</html>
