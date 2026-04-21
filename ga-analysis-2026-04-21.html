@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>윤식단 자사몰 GA4 진단 대시보드 | 2026-04-21</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --brand-green: #2D5016;
+    --brand-cream: #F5F0E8;
+    --brand-beige: #E8DFD0;
+    --brand-gold: #C9A961;
+    --brand-dark: #1a1a1a;
+    --ok: #1e8449;
+    --warn: #d68910;
+    --bad: #a93226;
+    --info: #2874a6;
+    --muted: #6e6e6e;
+    --border: #e5e1d6;
+    --card: #ffffff;
+    --bg: #f9f6ef;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--brand-dark);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .container { max-width: 1400px; margin: 0 auto; padding: 32px 24px 80px; }
+  header {
+    background: linear-gradient(135deg, var(--brand-green) 0%, #3a6320 100%);
+    color: var(--brand-cream);
+    padding: 36px 24px;
+    border-radius: 16px;
+    margin-bottom: 28px;
+    box-shadow: 0 4px 20px rgba(45,80,22,0.15);
+  }
+  header h1 { margin: 0 0 6px; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+  header .sub { opacity: 0.85; font-size: 14px; }
+  header .meta { margin-top: 10px; display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; opacity: 0.9; }
+  header .meta span { background: rgba(255,255,255,0.12); padding: 4px 12px; border-radius: 12px; }
+
+  section { margin-bottom: 36px; }
+  section h2 {
+    font-size: 20px; font-weight: 700;
+    border-left: 4px solid var(--brand-green);
+    padding-left: 12px; margin-bottom: 14px;
+  }
+
+  /* KPI 카드 */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .kpi-card .label { font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+  .kpi-card .value { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+  .kpi-card .sub { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+  .kpi-card.alert { border-top: 3px solid var(--bad); }
+  .kpi-card.warn { border-top: 3px solid var(--warn); }
+  .kpi-card.ok { border-top: 3px solid var(--ok); }
+
+  /* 퍼널 */
+  .funnel-wrap { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+  .funnel-row {
+    display: grid;
+    grid-template-columns: 160px 1fr 120px 120px;
+    gap: 12px; align-items: center;
+    padding: 10px 0; border-bottom: 1px dashed var(--border);
+  }
+  .funnel-row:last-child { border: none; }
+  .funnel-row .step { font-weight: 700; font-size: 14px; }
+  .funnel-row .bar-wrap { background: var(--bg); border-radius: 8px; height: 28px; overflow: hidden; position: relative; }
+  .funnel-row .bar { height: 100%; background: linear-gradient(90deg, var(--brand-green), var(--brand-gold)); border-radius: 8px; transition: width .6s; }
+  .funnel-row .count { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .funnel-row .conv { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .funnel-row .conv.bad { color: var(--bad); }
+  .funnel-row .conv.warn { color: var(--warn); }
+  .funnel-row .conv.ok { color: var(--ok); }
+
+  /* 이슈 카드 */
+  .issue-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 900px) { .issue-grid { grid-template-columns: 1fr; } }
+  .issue-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--bad);
+    border-radius: 12px;
+    padding: 18px;
+  }
+  .issue-card.warn { border-left-color: var(--warn); }
+  .issue-card h3 { margin: 0 0 8px; font-size: 16px; display: flex; gap: 8px; align-items: center; }
+  .issue-card h3 .tag {
+    font-size: 10.5px; padding: 3px 8px; border-radius: 10px;
+    background: var(--bad); color: white; font-weight: 700;
+  }
+  .issue-card.warn h3 .tag { background: var(--warn); }
+  .issue-card .big-num { font-size: 30px; font-weight: 800; color: var(--bad); margin: 8px 0; letter-spacing: -1px; }
+  .issue-card.warn .big-num { color: var(--warn); }
+  .issue-card .desc { font-size: 13px; color: #444; line-height: 1.6; }
+  .issue-card .causes { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); font-size: 12.5px; }
+  .issue-card .causes b { color: var(--brand-green); }
+  .issue-card ul { margin: 6px 0 0 16px; padding: 0; }
+
+  /* 테이블 */
+  .table-wrap { background: white; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  table.data {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.data thead th {
+    background: var(--brand-green); color: white;
+    padding: 10px 12px; text-align: left; font-weight: 600; font-size: 12px;
+    position: sticky; top: 0;
+  }
+  table.data tbody td {
+    padding: 9px 12px; border-bottom: 1px solid var(--border);
+  }
+  table.data tbody tr:hover { background: var(--brand-cream); }
+  table.data td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  table.data td.bad { color: var(--bad); font-weight: 700; }
+  table.data td.warn { color: var(--warn); font-weight: 600; }
+  table.data td.ok { color: var(--ok); font-weight: 600; }
+
+  /* 두 열 */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 1000px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* 액션 플랜 */
+  .action-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .action-item {
+    display: grid;
+    grid-template-columns: 60px 1fr 160px;
+    gap: 14px; padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+  .action-item:last-child { border: none; }
+  .action-item .rank {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--brand-green); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 16px;
+  }
+  .action-item.p1 .rank { background: var(--bad); }
+  .action-item.p2 .rank { background: var(--warn); }
+  .action-item.p3 .rank { background: var(--info); }
+  .action-item .title { font-weight: 700; font-size: 14.5px; margin-bottom: 4px; }
+  .action-item .why { font-size: 12.5px; color: var(--muted); }
+  .action-item .impact {
+    text-align: center; font-size: 12px; font-weight: 700;
+    padding: 8px 10px; border-radius: 8px;
+    background: var(--brand-cream); color: var(--brand-green);
+  }
+
+  /* 차트 */
+  .chart-wrap { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px; height: 340px; position: relative; }
+  .chart-wrap canvas { max-height: 300px; }
+
+  footer { text-align: center; font-size: 12px; color: var(--muted); margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>📊 윤식단 자사몰 GA4 진단 대시보드</h1>
+  <div class="sub">트래픽 · 퍼널 · 채널 · 디바이스 종합 분석</div>
+  <div class="meta">
+    <span>📅 2026-03-22 ~ 2026-04-21 (최근 30일)</span>
+    <span>🌐 yundiet.imweb.me</span>
+    <span>📡 GA4 Property 321824249</span>
+  </div>
+</header>
+
+<!-- KPI -->
+<section>
+  <h2>📌 핵심 지표 요약</h2>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="label">총 세션</div>
+      <div class="value">40,251</div>
+      <div class="sub">28,254 사용자</div>
+    </div>
+    <div class="kpi-card ok">
+      <div class="label">총 매출</div>
+      <div class="value">110.7M</div>
+      <div class="sub">purchase 이벤트 기반</div>
+    </div>
+    <div class="kpi-card alert">
+      <div class="label">전체 전환율</div>
+      <div class="value">3.9%</div>
+      <div class="sub">session → purchase</div>
+    </div>
+    <div class="kpi-card alert">
+      <div class="label">view → cart</div>
+      <div class="value">3.7%</div>
+      <div class="sub">업계 평균 7~10%</div>
+    </div>
+    <div class="kpi-card warn">
+      <div class="label">checkout → 결제</div>
+      <div class="value">50.9%</div>
+      <div class="sub">업계 70%+</div>
+    </div>
+  </div>
+</section>
+
+<!-- 퍼널 -->
+<section>
+  <h2>🎯 구매 퍼널</h2>
+  <div class="funnel-wrap">
+    <div class="funnel-row">
+      <div class="step">session_start</div>
+      <div class="bar-wrap"><div class="bar" style="width:100%"></div></div>
+      <div class="count">39,624</div>
+      <div class="conv">기준</div>
+    </div>
+    <div class="funnel-row">
+      <div class="step">view_item</div>
+      <div class="bar-wrap"><div class="bar" style="width:56.6%"></div></div>
+      <div class="count">22,441명</div>
+      <div class="conv ok">56.6%</div>
+    </div>
+    <div class="funnel-row">
+      <div class="step">add_to_cart</div>
+      <div class="bar-wrap"><div class="bar" style="width:6.5%; background: linear-gradient(90deg, #a93226, #d68910);"></div></div>
+      <div class="count">2,588명</div>
+      <div class="conv bad">3.7% ⚠️</div>
+    </div>
+    <div class="funnel-row">
+      <div class="step">begin_checkout</div>
+      <div class="bar-wrap"><div class="bar" style="width:4.7%"></div></div>
+      <div class="count">1,861명</div>
+      <div class="conv ok">71.9%</div>
+    </div>
+    <div class="funnel-row">
+      <div class="step">purchase</div>
+      <div class="bar-wrap"><div class="bar" style="width:3.6%"></div></div>
+      <div class="count">1,418명</div>
+      <div class="conv warn">76.2%</div>
+    </div>
+    <div style="margin-top:14px; padding:12px 14px; background:var(--brand-cream); border-radius:8px; font-size:13px; color:var(--brand-green);">
+      💡 <b>view_item → add_to_cart 3.7%가 가장 큰 누수.</b> 7%로 끌어올리면 이론상 매출 약 2배.
+    </div>
+  </div>
+</section>
+
+<!-- 5대 이슈 -->
+<section>
+  <h2>🚨 Critical Issues</h2>
+  <div class="issue-grid">
+    <div class="issue-card">
+      <h3><span class="tag">#1</span> 장바구니 전환율 붕괴</h3>
+      <div class="big-num">3.7%</div>
+      <div class="desc">상품 페이지 본 사용자 중 96.3%가 장바구니에 담지 않음. 업계 평균 대비 절반 이하.</div>
+      <div class="causes">
+        <b>원인 가설</b>
+        <ul>
+          <li>상세페이지 설득력 부족 (카피/이미지/후킹)</li>
+          <li>가격 저항 또는 할인 표시 약함</li>
+          <li>리뷰/신뢰 요소 부족</li>
+          <li>모바일 UX (CTA 위치, 로딩 속도)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <h3><span class="tag">#2</span> /shop_view 이탈 52%</h3>
+      <div class="big-num">20,034 PV</div>
+      <div class="desc">전체 트래픽 1위 페이지. 랜딩 세션도 1위(17,336). 광고 유입이 바로 꽂히는데 절반이 즉시 이탈.</div>
+      <div class="causes">
+        <b>체류시간</b> 113초 · <b>랜딩 이탈률</b> 51.7%<br />
+        상세페이지 첫 화면(Above the Fold) 설득력이 약함.
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <h3><span class="tag">#3</span> 메타 광고 비효율</h3>
+      <div class="big-num">1.7%</div>
+      <div class="desc">Paid Social 전환율. 세션 수는 오가닉의 2배인데 매출은 절반 수준.</div>
+      <div class="causes">
+        <b>Paid Social</b> 14,635세션 / 16.1M 매출<br />
+        <b>Organic Search</b> 6,855세션 / 32.3M 매출 ← 4배 효율<br />
+        타겟팅·크리에이티브·랜딩 중 하나 이상 문제.
+      </div>
+    </div>
+
+    <div class="issue-card warn">
+      <h3><span class="tag">#4</span> 결제 이탈 50%</h3>
+      <div class="big-num">50.9%</div>
+      <div class="desc">checkout → purchase 전환율. 결제 페이지 진입 후 절반이 이탈.</div>
+      <div class="causes">
+        <b>의심 원인</b>
+        <ul>
+          <li>배송비 공개 시점 늦음</li>
+          <li>쿠폰 자동 적용 안 됨</li>
+          <li>결제 수단 로딩/오류</li>
+          <li>회원 가입 강제 요구</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="issue-card warn">
+      <h3><span class="tag">#5</span> 모바일 UX 격차</h3>
+      <div class="big-num">+11%p</div>
+      <div class="desc">모바일 이탈률(44.9%)이 데스크톱(33.4%)보다 11%p 높음. 고객 87%가 모바일.</div>
+      <div class="causes">
+        <b>mobile</b> 34,776 / 44.9% 이탈 / 92.6M 매출<br />
+        <b>desktop</b> 4,967 / 33.4% 이탈 / 17.5M 매출
+      </div>
+    </div>
+
+    <div class="issue-card warn">
+      <h3><span class="tag">#6</span> UTM 태깅 누락</h3>
+      <div class="big-num">97.2%</div>
+      <div class="desc">(not set) 랜딩 1,023건의 이탈률. 광고 URL에 UTM 파라미터 누락으로 추적 실패.</div>
+      <div class="causes">
+        광고 채널 분석 정확도 저하. 최소한 utm_source/medium/campaign 3종 세팅 필요.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 채널 분석 -->
+<section>
+  <h2>📡 유입 채널별 효율</h2>
+  <div class="two-col">
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>채널</th><th class="num">세션</th><th class="num">이탈률</th><th class="num">전환율</th><th class="num">매출</th></tr></thead>
+        <tbody>
+          <tr><td><b>Paid Social</b></td><td class="num">14,635</td><td class="num bad">51.2%</td><td class="num bad">1.7%</td><td class="num">16.1M</td></tr>
+          <tr><td><b>Organic Search</b></td><td class="num">6,855</td><td class="num ok">22.0%</td><td class="num ok">6.5%</td><td class="num">32.3M</td></tr>
+          <tr><td>Direct</td><td class="num">4,814</td><td class="num warn">37.7%</td><td class="num ok">7.1%</td><td class="num">24.7M</td></tr>
+          <tr><td>Organic Social</td><td class="num">4,309</td><td class="num warn">41.2%</td><td class="num ok">6.6%</td><td class="num">21.3M</td></tr>
+          <tr><td>Cross-network</td><td class="num">4,241</td><td class="num warn">47.8%</td><td class="num bad">1.0%</td><td class="num">2.9M</td></tr>
+          <tr><td>Paid Other</td><td class="num">2,982</td><td class="num bad">62.0%</td><td class="num bad">0.9%</td><td class="num">1.8M</td></tr>
+          <tr><td>Referral</td><td class="num">578</td><td class="num warn">34.9%</td><td class="num">4.2%</td><td class="num">1.5M</td></tr>
+          <tr><td>Paid Search</td><td class="num">462</td><td class="num warn">40.3%</td><td class="num">1.9%</td><td class="num">0.7M</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="channelChart"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- 페이지 분석 -->
+<section>
+  <h2>📄 트래픽 상위 페이지 이탈률</h2>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>페이지 경로</th><th class="num">PV</th><th class="num">이탈률</th><th class="num">체류시간(초)</th><th>평가</th></tr></thead>
+      <tbody>
+        <tr><td><b>/shop_view</b></td><td class="num">20,034</td><td class="num bad">52.1%</td><td class="num">113.1</td><td class="bad">🔴 즉시 개선</td></tr>
+        <tr><td>/danbackbab/</td><td class="num">7,142</td><td class="num warn">45.0%</td><td class="num">84.6</td><td class="warn">🟡 개선 필요</td></tr>
+        <tr><td>/ (메인)</td><td class="num">13,964</td><td class="num ok">17.3%</td><td class="num">79.2</td><td class="ok">🟢 양호</td></tr>
+        <tr><td>/shop_view/</td><td class="num">14,392</td><td class="num ok">8.8%</td><td class="num">155.9</td><td class="ok">🟢 양호</td></tr>
+        <tr><td>/shop_cart</td><td class="num">7,258</td><td class="num ok">5.5%</td><td class="num">129.3</td><td class="ok">🟢 양호</td></tr>
+        <tr><td>/shop_mypage/</td><td class="num">4,637</td><td class="num ok">17.1%</td><td class="num">93.0</td><td class="ok">🟢 양호</td></tr>
+        <tr><td>/rice</td><td class="num">3,545</td><td class="num ok">10.8%</td><td class="num">65.2</td><td class="ok">🟢 양호</td></tr>
+        <tr><td>/shop_all/</td><td class="num">2,424</td><td class="num warn">27.2%</td><td class="num">123.2</td><td class="warn">🟡 주시</td></tr>
+        <tr><td>/Magazine/</td><td class="num">2,279</td><td class="num warn">27.3%</td><td class="num">78.5</td><td class="warn">🟡 주시</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 디바이스 -->
+<section>
+  <h2>📱 디바이스별 성과</h2>
+  <div class="two-col">
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>디바이스</th><th class="num">세션</th><th class="num">비중</th><th class="num">이탈률</th><th class="num">매출</th></tr></thead>
+        <tbody>
+          <tr><td><b>📱 Mobile</b></td><td class="num">34,776</td><td class="num"><b>87%</b></td><td class="num warn">44.9%</td><td class="num">92.6M</td></tr>
+          <tr><td>💻 Desktop</td><td class="num">4,967</td><td class="num">12%</td><td class="num ok">33.4%</td><td class="num">17.5M</td></tr>
+          <tr><td>📲 Tablet</td><td class="num">507</td><td class="num">1%</td><td class="num warn">42.4%</td><td class="num">0.6M</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="deviceChart"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- 액션 플랜 -->
+<section>
+  <h2>📋 우선순위 액션 플랜</h2>
+  <div class="action-card">
+    <div class="action-item p1">
+      <div class="rank">1</div>
+      <div>
+        <div class="title">/shop_view 모바일 상세페이지 개선</div>
+        <div class="why">view_item → add_to_cart 3.7%가 가장 큰 누수. 첫 화면 후킹·CTA 배치·리뷰 섹션 재설계 필요.</div>
+      </div>
+      <div class="impact">임팩트 최대<br />매출 최대 2배 가능</div>
+    </div>
+    <div class="action-item p2">
+      <div class="rank">2</div>
+      <div>
+        <div class="title">메타 광고 랜딩/크리에이티브 재설계</div>
+        <div class="why">세션 1위 채널인데 전환율 1.7%. 오가닉(6.5%) 대비 4배 비효율. 타겟팅·크리에이티브·랜딩 중 원인 특정 필요.</div>
+      </div>
+      <div class="impact">임팩트 큼<br />광고비 효율 회복</div>
+    </div>
+    <div class="action-item p3">
+      <div class="rank">3</div>
+      <div>
+        <div class="title">결제 페이지 이탈 원인 진단</div>
+        <div class="why">checkout → purchase 50.9%. 배송비 공개 시점, 쿠폰 적용, 결제수단 로딩, 회원가입 강제 여부 체크.</div>
+      </div>
+      <div class="impact">임팩트 중<br />매출 직결</div>
+    </div>
+    <div class="action-item">
+      <div class="rank">4</div>
+      <div>
+        <div class="title">광고 UTM 태깅 정비</div>
+        <div class="why">(not set) 랜딩 1,023건 97% 이탈. 모든 광고 URL에 utm_source/medium/campaign 필수 세팅.</div>
+      </div>
+      <div class="impact">임팩트 낮음<br />분석 정확도 ↑</div>
+    </div>
+  </div>
+</section>
+
+<!-- 추가 분석 -->
+<section>
+  <h2>🔍 다음 분석 리스트</h2>
+  <div class="issue-grid">
+    <div class="issue-card warn" style="border-left-color: var(--info);">
+      <h3>상품별 view→cart 전환율</h3>
+      <div class="desc">어떤 상품이 유독 저조한지 식별 → 해당 상세페이지 우선 개선.</div>
+    </div>
+    <div class="issue-card warn" style="border-left-color: var(--info);">
+      <h3>메타 광고 랜딩 페이지 분석</h3>
+      <div class="desc">어느 상품 페이지로 주로 꽂히는지 → 광고별 랜딩 품질 진단.</div>
+    </div>
+    <div class="issue-card warn" style="border-left-color: var(--info);">
+      <h3>begin_checkout 후 이탈 시점</h3>
+      <div class="desc">결제 플로우의 어느 단계에서 막히는지 세분화 이벤트 추가 필요.</div>
+    </div>
+    <div class="issue-card warn" style="border-left-color: var(--info);">
+      <h3>모바일 vs PC 이탈 페이지 분리</h3>
+      <div class="desc">모바일에서만 이탈 높은 페이지 식별 → 모바일 UX 집중 개선.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  © 2026 윤식단 · GA4 진단 대시보드 · 자동 생성 @ 2026-04-21<br />
+  데이터 소스: Google Analytics 4 Property 321824249 (yun-diet analysis)
+</footer>
+
+</div>
+
+<script>
+// 채널 차트
+new Chart(document.getElementById('channelChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Paid Social','Organic Search','Direct','Organic Social','Cross-net','Paid Other'],
+    datasets: [
+      { label: '세션', data: [14635,6855,4814,4309,4241,2982], backgroundColor: '#2D5016', yAxisID: 'y' },
+      { label: '매출(M)', data: [16.1,32.3,24.7,21.3,2.9,1.8], backgroundColor: '#C9A961', yAxisID: 'y1', type: 'line', borderColor:'#C9A961', borderWidth:2 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { title: { display: true, text: '채널별 세션 vs 매출', font: { size: 13, weight: '700' } } },
+    scales: {
+      y: { position:'left', beginAtZero: true, title: { display: true, text: '세션' } },
+      y1: { position:'right', beginAtZero: true, title: { display: true, text: '매출 (백만원)' }, grid: { drawOnChartArea: false } }
+    }
+  }
+});
+
+// 디바이스 차트
+new Chart(document.getElementById('deviceChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Mobile 92.6M', 'Desktop 17.5M', 'Tablet 0.6M'],
+    datasets: [{
+      data: [92.6, 17.5, 0.6],
+      backgroundColor: ['#2D5016','#C9A961','#E8DFD0'],
+      borderWidth: 2, borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { title: { display: true, text: '디바이스별 매출 비중 (백만원)', font: { size: 13, weight: '700' } }, legend: { position: 'bottom' } }
+  }
+});
+</script>
+</body>
+</html>
