@@ -264,6 +264,20 @@
   table.creatives td.num { text-align: right; font-variant-numeric: tabular-nums; }
   table.creatives td.col-action { white-space: pre-wrap; max-width: 380px; min-width: 320px; font-size: 11.5px; line-height: 1.5; }
   table.creatives td.col-reason { max-width: 220px; font-size: 11.5px; color: var(--muted); white-space: pre-wrap; }
+  table.creatives td.col-funnel { white-space: pre-wrap; max-width: 260px; min-width: 220px; font-size: 11.5px; line-height: 1.45; }
+  .funnel-chip {
+    display: inline-block;
+    margin-right: 6px;
+    margin-bottom: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--brand-cream);
+    border: 1px solid var(--brand-beige);
+    color: var(--brand-green);
+    font-size: 10.5px;
+    font-weight: 700;
+  }
+  .funnel-tag { display: block; font-weight: 600; color: #594a2b; }
 
   /* 소재명 링크 */
   table.creatives td.col-name a.ad-link {
@@ -693,15 +707,15 @@
     <div class="bridge-grid" id="bridge-grid"></div>
   </section>
 
-  <!-- ====== 섹션 2: 소재 판정 + 액션플랜 ====== -->
+  <!-- ====== 섹션 2: 소재 판정 + 액션플랜 + 퍼널진단 ====== -->
   <section>
-    <h2>🎯 소재 판정 + 액션플랜 <span class="period-badge" id="badge-creatives">-</span></h2>
-    <div class="period-caption" id="caption-creatives">이번 달(MTD) 집계 · 섹션별 하단에 합계 요약 · 판정 우선순위 정렬</div>
+    <h2>🎯 소재판정 + 액션플랜 + 퍼널진단 <span class="period-badge" id="badge-creatives">-</span></h2>
+    <div class="period-caption" id="caption-creatives">이번 달(MTD) 집계 · 각 소재에서 판정/액션/퍼널진단을 한 번에 확인 · 섹션별 하단에 합계 요약</div>
     <div id="creatives-sections"></div>
   </section>
 
-  <!-- ====== 섹션 3: 퍼널 인사이트 진단 (접힘) ====== -->
-  <section class="collapsible">
+  <!-- ====== 섹션 3: 퍼널 인사이트 진단 (숨김: 소재판정표에 통합) ====== -->
+  <section class="collapsible" id="section-funnel" hidden>
     <details>
     <summary>🔬 퍼널 인사이트 진단 <span class="period-badge" id="badge-funnel">-</span> <span class="count-badge" id="funnel-count">0건</span></summary>
     <div class="details-inner">
@@ -923,6 +937,7 @@
     { key: '__judge', label: '판정' },
     { key: '판정이유', label: '판정이유', cls: 'col-reason' },
     { key: '액션플랜', label: '액션플랜', cls: 'col-action' },
+    { key: '__funnel', label: '퍼널진단', cls: 'col-funnel' },
     { key: '일예산', label: '일예산', fmt: fmtKRW, cls: 'num' },
     { key: '누적_지출', label: '지출', fmt: fmtKRW, cls: 'num' },
     { key: '누적_ROAS', label: 'ROAS', fmt: fmtROAS, cls: 'num' },
@@ -1093,6 +1108,12 @@
           const meta = JUDGE_BADGE[key] || { cls: 'off', icon: '❔' };
           return `<td><span class="badge ${meta.cls}">${meta.icon} ${r.판정 || '-'}</span></td>`;
         }
+        if (col.key === '__funnel') {
+          const sev = r.인사이트_severity ? `<span class="funnel-chip">${r.인사이트_severity}</span>` : '';
+          const pattern = r.인사이트패턴 ? `<span class="funnel-chip">${r.인사이트패턴}</span>` : '';
+          const tag = r.인사이트태그 ? `<span class="funnel-tag">${r.인사이트태그}</span>` : '<span class="funnel-tag">진단 없음</span>';
+          return `<td class="col-funnel">${sev}${pattern}${tag}</td>`;
+        }
         const v = r[col.key];
         const cls = col.cls || '';
         const val = col.fmt ? col.fmt(v) : (v ?? '-');
@@ -1142,8 +1163,8 @@
       </div>`;
     const footTr = document.createElement('tr');
     footTr.innerHTML = COLS.map((col, i) => {
-      if (i === 0) return `<td class="label" colspan="5">합계 (${sum.광고수}개 소재)</td>`;
-      if (i > 0 && i < 5) return '';
+      if (i === 0) return `<td class="label" colspan="6">합계 (${sum.광고수}개 소재)</td>`;
+      if (i > 0 && i < 6) return '';
       switch (col.key) {
         case '일예산': return `<td class="num">${fmtKRW(sum.일예산)}</td>`;
         case '누적_지출': return `<td class="num">${fmtKRW(sum.지출)}</td>`;
