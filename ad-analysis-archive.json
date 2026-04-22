@@ -1,0 +1,105 @@
+{
+  "generated_at": "2026-04-22T13:18:06.517592+00:00",
+  "available_dates": [
+    "2026-04-22",
+    "2026-04-21"
+  ],
+  "rows": [
+    {
+      "date": "2026-04-21",
+      "total_spend": 9134178.0,
+      "total_revenue": 43539129.0,
+      "blended_roas": 476.7,
+      "daily_budget_live": 523000.0,
+      "ga4_total_profit": -251787.0,
+      "ga4_total_ad_spend": 610397.0,
+      "ga4_total_roi": -0.41249711253495674,
+      "categories": [
+        {
+          "category": "단백밥",
+          "spend": 5462582.0,
+          "revenue": 27945850.0,
+          "roas": 512.0,
+          "ad_count": 28.0,
+          "ga4_profit": -150577.0,
+          "ga4_roi": -0.4124945211483673
+        },
+        {
+          "category": "단백밥 ASC",
+          "spend": 158230.0,
+          "revenue": 470162.0,
+          "roas": 297.0,
+          "ad_count": 5.0,
+          "ga4_profit": 0.0,
+          "ga4_roi": null
+        },
+        {
+          "category": "밸런시",
+          "spend": 2433782.0,
+          "revenue": 9706808.0,
+          "roas": 399.0,
+          "ad_count": 29.0,
+          "ga4_profit": -67088.0,
+          "ga4_roi": -0.41249638770528596
+        },
+        {
+          "category": "순수단백",
+          "spend": 1079584.0,
+          "revenue": 5416309.0,
+          "roas": 502.0,
+          "ad_count": 12.0,
+          "ga4_profit": -29760.0,
+          "ga4_roi": -0.4125083166999335
+        }
+      ]
+    },
+    {
+      "date": "2026-04-22",
+      "total_spend": 9371094.0,
+      "total_revenue": 44343197.0,
+      "blended_roas": 473.2,
+      "daily_budget_live": 523000.0,
+      "ga4_total_profit": 313251.0,
+      "ga4_total_ad_spend": 796102.0,
+      "ga4_total_roi": 0.3934809861047956,
+      "categories": [
+        {
+          "category": "단백밥",
+          "spend": 5575808.0,
+          "revenue": 28554718.0,
+          "roas": 512.12,
+          "ad_count": 28.0,
+          "ga4_profit": 192629.0,
+          "ga4_roi": 0.39348176897150444
+        },
+        {
+          "category": "단백밥 ASC",
+          "spend": 186804.0,
+          "revenue": 522532.0,
+          "roas": 279.72,
+          "ad_count": 5.0,
+          "ga4_profit": 0.0,
+          "ga4_roi": null
+        },
+        {
+          "category": "밸런시",
+          "spend": 2502264.0,
+          "revenue": 9810608.0,
+          "roas": 392.07,
+          "ad_count": 29.0,
+          "ga4_profit": 83644.0,
+          "ga4_roi": 0.3934799482535576
+        },
+        {
+          "category": "순수단백",
+          "spend": 1106218.0,
+          "revenue": 5455339.0,
+          "roas": 493.15,
+          "ad_count": 12.0,
+          "ga4_profit": 36978.0,
+          "ga4_roi": 0.39347925556253127
+        }
+      ]
+    }
+  ]
+}
