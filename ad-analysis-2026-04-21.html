@@ -221,6 +221,11 @@
     background: var(--brand-green); color: white;
     font-size: 12px; padding: 2px 8px; border-radius: 10px; font-weight: 600;
   }
+  .creative-section h3 .meta-inline {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+  }
   .table-scroll {
     overflow-x: auto; border: 1px solid var(--border);
     border-radius: 10px; background: white;
@@ -1021,7 +1026,9 @@
   };
 
   const SECTION_ORDER = [
-    { key: 'winners',    title: '🏆 위너 소재 / 위너 이력 (전 상품 통합)' },
+    { key: '단백밥-위너',    title: '🏆 단백밥 — 위너 소재 / 위너 이력' },
+    { key: '순수단백-위너',  title: '🏆 순수단백 — 위너 소재 / 위너 이력' },
+    { key: '밸런시-위너',    title: '🏆 밸런시 — 위너 소재 / 위너 이력' },
     { key: '단백밥-테스트',  title: '단백밥 — 테스트캠' },
     { key: '단백밥-메인',    title: '단백밥 — 메인캠' },
     { key: '단백밥-ASC',     title: '단백밥 — ASC (Advantage+)' },
@@ -1035,7 +1042,7 @@
   ];
 
   function routeBucket(c) {
-    if (c.위너여부 || c.위너이력) return 'winners';
+    if (c.위너여부 || c.위너이력) return `${c.상품 || '기타'}-위너`;
     const prod = c.상품 || '기타';
     const type = c.캠페인유형 || '메인';
     const status = c.현재상태 || '';
@@ -1137,13 +1144,22 @@
     if (!rows.length) return;
     // 판정 우선순위 정렬 (OFF/수명종료 최상단)
     rows.sort((a, b) => judgeRank(a) - judgeRank(b));
+    const typeCounts = rows.reduce((acc, r) => {
+      const t = r.캠페인유형 || '메인';
+      acc[t] = (acc[t] || 0) + 1;
+      return acc;
+    }, {});
+    const breakdown = ['테스트', '메인', 'ASC']
+      .filter(t => typeCounts[t])
+      .map(t => `${t} ${typeCounts[t]}`)
+      .join(' · ');
 
     const sectionEl = document.createElement('div');
     sectionEl.className = 'creative-section';
     const periodLabel = DATA.meta?.period_rule === 'LAST_30D' ? '최근 30일' : '이번 달';
-    const criteriaLabel = sec.key === 'winners' ? '위너/기존 소재 기준' : '신규 소재 기준';
+    const criteriaLabel = sec.key.endsWith('-위너') ? '위너/기존 소재 기준' : '신규 소재 기준';
     sectionEl.innerHTML = `
-      <h3>${sec.title} <span class="count">${rows.length}</span></h3>
+      <h3>${sec.title}${breakdown ? ` <span class="meta-inline">${breakdown}</span>` : ''} <span class="count">${rows.length}</span></h3>
       <div class="creative-summary-grid"></div>
       <div class="table-scroll">
         <table class="creatives">
