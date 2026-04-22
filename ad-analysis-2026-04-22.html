@@ -226,6 +226,23 @@
     color: var(--muted);
     font-weight: 500;
   }
+  .category-divider {
+    margin-top: 28px;
+    padding: 12px 14px;
+    border-left: 6px solid var(--brand-green);
+    background: linear-gradient(90deg, rgba(247,241,229,0.95), rgba(255,255,255,0.92));
+    border-radius: 10px;
+  }
+  .category-divider h2 {
+    margin: 0;
+    font-size: 20px;
+    color: var(--brand-dark);
+  }
+  .category-divider .sub {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 12px;
+  }
   .table-scroll {
     overflow-x: auto; border: 1px solid var(--border);
     border-radius: 10px; background: white;
@@ -6345,15 +6362,15 @@
 
   const SECTION_ORDER = [
     { key: '단백밥-위너',    title: '🏆 단백밥 — 위너 소재 / 위너 이력' },
-    { key: '순수단백-위너',  title: '🏆 순수단백 — 위너 소재 / 위너 이력' },
-    { key: '밸런시-위너',    title: '🏆 밸런시 — 위너 소재 / 위너 이력' },
     { key: '단백밥-테스트',  title: '단백밥 — 테스트캠' },
     { key: '단백밥-메인',    title: '단백밥 — 메인캠' },
     { key: '단백밥-ASC',     title: '단백밥 — ASC (Advantage+)' },
     { key: '단백밥-OFF',     title: '단백밥 — OFF (조회기간 지출 있음)' },
+    { key: '순수단백-위너',  title: '🏆 순수단백 — 위너 소재 / 위너 이력' },
     { key: '순수단백-테스트',title: '순수단백 — 테스트캠' },
     { key: '순수단백-메인',  title: '순수단백 — 메인캠' },
     { key: '순수단백-OFF',   title: '순수단백 — OFF (조회기간 지출 있음)' },
+    { key: '밸런시-위너',    title: '🏆 밸런시 — 위너 소재 / 위너 이력' },
     { key: '밸런시-테스트',  title: '밸런시 — 테스트캠' },
     { key: '밸런시-메인',    title: '밸런시 — 메인캠' },
     { key: '밸런시-OFF',     title: '밸런시 — OFF (조회기간 지출 있음)' },
@@ -6422,41 +6439,88 @@
     const pattern = r.인사이트패턴 || '';
     const tag = r.인사이트태그 || '';
     const roasText = roas != null ? `${fmtROAS(roas)}` : 'ROAS 미집계';
+    const reportDate = DATA.meta?.date ? new Date(`${DATA.meta.date}T12:00:00+09:00`) : null;
+    const day = reportDate ? reportDate.getUTCDay() : null;
+    const isWeekendBucket = day === 5 || day === 6 || day === 0;
+    const threeDayUnder400 = Array.isArray(r.최근3일ROAS)
+      ? r.최근3일ROAS.length >= 3 && r.최근3일ROAS.slice(-3).every(v => numOrNull(v) != null && numOrNull(v) < 400)
+      : (r.최근3일연속ROAS400미만 === true);
+    const weekendGuard = isWeekendBucket && roas != null && roas >= 320 && roas < 400 && !threeDayUnder400;
+    const two = (a, b) => `1. ${a}<br>2. ${b}`;
+    if (weekendGuard) {
+      return two(
+        `금·토·일 구간 변동성을 감안하면 ${roasText} 단일 수치만으로 OFF를 확정하지 말고 월~화 회복 여부를 먼저 확인하세요.`,
+        `그 사이 상세페이지 메시지 정합성 또는 후킹 카피 1개 요소만 수정한 개선안을 재테스트해 주말 하락이 구조 문제인지 분리해서 보세요.`
+      );
+    }
     if (pattern === 'P1' || tag === '상세페이지_불일치') {
-      return `CTA/CPC 성과는 확인되지만 전환율이 약해 ${roasText} 수준입니다. 상세페이지 첫 화면 메시지, 혜택 제시, 후기/신뢰요소 정렬을 우선 개선하세요.`;
+      return two(
+        `CTA/CPC 성과는 확인되지만 전환율이 약해 ${roasText} 수준입니다. 상세페이지 첫 화면 메시지와 광고 메시지를 먼저 일치시키세요.`,
+        `혜택 요약, 후기, 신뢰요소를 첫 스크롤 안에 재배치해서 구매 전환 구간을 짧게 만드세요.`
+      );
     }
     if (pattern === 'P15' || tag === '결제_직전_이탈') {
-      return `구매 직전 이탈이 커서 ${roasText}에 머물고 있습니다. 배송비, 도착일, 구성, 환불안내를 결제 전 구간에서 더 선명하게 보여주도록 상세페이지를 수정하세요.`;
+      return two(
+        `구매 직전 이탈이 커서 ${roasText}에 머물고 있습니다. 배송비, 도착일, 구성 안내를 결제 직전 전면에 노출하세요.`,
+        `주문 망설임을 줄이도록 환불 기준·보관법·섭취법을 결제 버튼 근처에 추가하세요.`
+      );
     }
     if (pattern === 'P2' || tag === '후킹_실패') {
-      return `초반 클릭 유도가 약해 ${roasText}를 기록 중입니다. 썸네일, 첫 1~3초 후킹, 헤드카피를 다시 구성한 신규 소재 테스트가 필요합니다.`;
+      return two(
+        `초반 클릭 유도가 약해 ${roasText}를 기록 중입니다. 첫 1~3초 후킹과 썸네일 문구를 더 강한 문제 제기형으로 바꾸세요.`,
+        `같은 오퍼를 유지한 채 얼굴컷/제품컷/텍스트형 3가지 포맷으로 신규 소재를 분기 테스트하세요.`
+      );
     }
     if (pattern === 'P4' || tag === '경매_밀림') {
-      return `노출 확보가 충분하지 않아 학습이 덜 된 상태입니다. 타겟 폭, 입찰 강도, 캠페인 구조를 점검해 노출을 먼저 확보하세요.`;
+      return two(
+        `노출 확보가 충분하지 않아 학습이 덜 된 상태입니다. 타겟 폭과 입찰 강도를 조정해 먼저 표본을 확보하세요.`,
+        `소재 자체 판단은 보류하고, 동일 카피로 오디언스만 넓힌 보조 애드셋을 열어 노출 문제와 소재 문제를 분리하세요.`
+      );
     }
     if (pattern === 'P5' || tag === '소재_피로도') {
-      return `현재 성과는 유지되지만 피로도 신호가 보입니다. 위너 구조는 유지하고 후킹/구성만 바꾼 변형 소재를 2~3개 추가 준비하세요.`;
+      return two(
+        `현재 성과는 유지되지만 피로도 신호가 보입니다. 본편은 유지하고 후킹/길이/첫 문장만 바꾼 변형 2~3개를 준비하세요.`,
+        `빈도 상승 전에 댓글·후기·가격 포인트를 소재별로 분리해 방어형 크리에이티브를 선제 투입하세요.`
+      );
     }
     if (pattern === 'P7' || tag === 'CPC_과다') {
-      return `클릭 단가 부담으로 ${roasText}가 눌리고 있습니다. 후킹 문구를 더 선명하게 바꾸고, 타겟/플레이스먼트 조정으로 CPC를 낮추는 테스트가 필요합니다.`;
+      return two(
+        `클릭 단가 부담으로 ${roasText}가 눌리고 있습니다. 후킹 문구를 더 선명하게 바꿔 클릭 효율부터 끌어올리세요.`,
+        `플레이스먼트와 타겟 폭을 재조정해 CPC가 낮게 나오는 조합을 찾는 보조 테스트를 병행하세요.`
+      );
     }
     if (pattern === 'P18' || tag === '콘텐츠_성공_광고_실패') {
-      return `콘텐츠 반응 대비 클릭·전환 연결이 약합니다. 광고 안에서 CTA와 제안 문구를 더 앞단에 배치해 전환형 구조로 재편하세요.`;
+      return two(
+        `콘텐츠 반응 대비 클릭·전환 연결이 약합니다. 광고 안에서 CTA와 제안 문구를 더 앞단에 배치하세요.`,
+        `좋아요·조회 중심 구조를 줄이고 가격, 혜택, 해결 포인트가 바로 보이는 전환형 편집본으로 다시 제작하세요.`
+      );
     }
     if ((ctr != null && ctr >= 2) && (cvr != null && cvr < 3)) {
-      return `클릭 유입은 만들어지고 있지만 전환 효율이 약합니다. 상세페이지 메시지 정합성과 구매 유도 구간을 우선 개선하세요.`;
+      return two(
+        `클릭 유입은 만들어지고 있지만 전환 효율이 약합니다. 상세페이지 메시지 정합성과 첫 구매 유도 구간을 먼저 손보세요.`,
+        `장바구니 진입 이후 이탈 포인트를 찾기 위해 가격/구성/혜택 설명 순서를 바꾼 랜딩 대안을 테스트하세요.`
+      );
     }
     if ((ctr != null && ctr < 1.5)) {
-      return `초기 클릭 유도가 약합니다. 소재 후킹, 썸네일, 첫 문장 카피를 다시 설계한 신규 크리에이티브 테스트가 필요합니다.`;
+      return two(
+        `초기 클릭 유도가 약합니다. 소재 후킹, 썸네일, 첫 문장 카피를 다시 설계한 신규 크리에이티브가 필요합니다.`,
+        `동일 상품이라도 문제 제기형, 비교형, 혜택 직설형 카피를 따로 나눠 어떤 후킹이 먹히는지 확인하세요.`
+      );
     }
-    return (r.액션플랜 || '')
-      .replace(/^[^\n:]*:\s*/, '')
-      .replace(/일\s*~?₩?[\d,\.]+\s*절감\.?\s*/g, '')
-      .replace(/예산은 .*?(이관|복증에 이관)\.?\s*/g, '')
-      .trim() || '상세 데이터 재확인 후 소재/상세페이지/타겟 중 병목 구간을 특정해 직접 개선 액션으로 전환하세요.';
+    return two(
+      (r.액션플랜 || '')
+        .replace(/^[^\n:]*:\s*/, '')
+        .replace(/일\s*~?₩?[\d,\.]+\s*절감\.?\s*/g, '')
+        .replace(/예산은 .*?(이관|복증에 이관)\.?\s*/g, '')
+        .trim() || '상세 데이터 재확인 후 소재/상세페이지/타겟 중 병목 구간을 특정하세요.',
+      threeDayUnder400
+        ? '최근 3개 보고일 연속 ROAS 400% 미만이라면 OFF 또는 개선안 확정 대상으로 넘기고, 아니라면 하루 더 관찰 후 재판정하세요.'
+        : '최근 3개 보고일 연속 ROAS 400% 미만 여부를 먼저 확인한 뒤 OFF를 결정하고, 연속 조건이 아니면 개선안을 우선 제안하세요.'
+    );
   }
 
   const host = document.getElementById('creatives-sections');
+  let currentCategory = null;
   SECTION_ORDER.forEach(sec => {
     const rows = buckets[sec.key] || [];
     if (!rows.length) return;
@@ -6471,6 +6535,16 @@
       .filter(t => typeCounts[t])
       .map(t => `${t} ${typeCounts[t]}`)
       .join(' · ');
+    const category = sec.key.split('-')[0];
+    if (category !== currentCategory) {
+      currentCategory = category;
+      const divider = document.createElement('div');
+      divider.className = 'category-divider';
+      divider.innerHTML = `
+        <h2>${category}</h2>
+        <div class="sub">위너 · 테스트 · 메인 · ASC · OFF를 같은 카테고리 안에서 이어서 확인</div>`;
+      host.appendChild(divider);
+    }
 
     const sectionEl = document.createElement('div');
     sectionEl.className = 'creative-section';
