@@ -1,0 +1,2293 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>윤식단 광고 분석 대시보드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --brand-green: #2D5016;
+    --brand-cream: #F5F0E8;
+    --brand-beige: #E8DFD0;
+    --brand-gold: #C9A961;
+    --brand-dark: #1a1a1a;
+    --ok: #1e8449;
+    --warn: #d68910;
+    --bad: #a93226;
+    --info: #2874a6;
+    --muted: #6e6e6e;
+    --border: #e5e1d6;
+    --card: #ffffff;
+    --bg: #f9f6ef;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--brand-dark);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .container { max-width: 1600px; margin: 0 auto; padding: 32px 24px 80px; }
+  header {
+    background: linear-gradient(135deg, var(--brand-green) 0%, #3a6320 100%);
+    color: var(--brand-cream);
+    padding: 36px 24px;
+    border-radius: 16px;
+    margin-bottom: 28px;
+    box-shadow: 0 4px 20px rgba(45,80,22,0.15);
+  }
+  header h1 { margin: 0 0 6px; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+  header .sub { opacity: 0.85; font-size: 14px; }
+  .date-picker {
+    display: flex; gap: 8px; align-items: center;
+    margin-top: 14px; flex-wrap: wrap;
+  }
+  .date-picker label { font-size: 13px; opacity: 0.9; }
+  .date-picker select, .date-picker input[type="date"] {
+    font-family: inherit; font-size: 13px;
+    padding: 6px 10px; border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1); color: white;
+  }
+  .date-picker select option { color: var(--brand-dark); }
+  .date-picker button {
+    padding: 6px 14px; border: none; border-radius: 6px;
+    background: var(--brand-gold); color: white;
+    font-weight: 600; font-size: 13px; cursor: pointer;
+    font-family: inherit;
+  }
+  .date-picker button:hover { background: #b8984e; }
+  .range-picker {
+    display: flex; gap: 8px; align-items: center;
+    margin-top: 10px; flex-wrap: wrap;
+  }
+  .range-picker label { font-size: 13px; opacity: 0.9; }
+  .range-picker input[type="date"] {
+    font-family: inherit; font-size: 13px;
+    padding: 6px 10px; border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1); color: white;
+  }
+  .range-picker button {
+    padding: 6px 14px; border: none; border-radius: 6px;
+    background: rgba(255,255,255,0.16); color: white;
+    font-weight: 600; font-size: 13px; cursor: pointer;
+    font-family: inherit;
+  }
+  .range-picker button.primary { background: var(--brand-gold); }
+  .range-picker button:hover { background: rgba(255,255,255,0.24); }
+  .range-picker button.primary:hover { background: #b8984e; }
+
+  section { margin-bottom: 36px; }
+  section h2 {
+    font-size: 20px; font-weight: 700;
+    border-left: 4px solid var(--brand-green);
+    padding-left: 12px; margin-bottom: 8px;
+    display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  }
+  section h2 .period-badge {
+    font-size: 12px; font-weight: 500;
+    color: var(--brand-green); background: var(--brand-cream);
+    padding: 3px 10px; border-radius: 10px;
+    border: 1px solid var(--brand-beige);
+    white-space: nowrap;
+  }
+  .period-caption {
+    font-size: 12px; color: var(--muted);
+    margin-bottom: 14px; padding-left: 16px;
+    border-left: 2px solid var(--border);
+  }
+  section h3 { font-size: 15px; font-weight: 600; margin: 16px 0 8px; color: var(--brand-green); }
+
+  /* ============ MTD 카드 (섹션 0) ============ */
+  .mtd-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 1100px) { .mtd-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px)  { .mtd-grid { grid-template-columns: 1fr; } }
+  .mtd-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .mtd-card .cat {
+    font-size: 13px; font-weight: 700; color: var(--brand-green);
+    display: inline-block; padding: 3px 10px;
+    background: var(--brand-cream); border-radius: 12px; margin-bottom: 10px;
+  }
+  .mtd-card .roas { font-size: 30px; font-weight: 800; letter-spacing: -1px; margin: 6px 0 2px; }
+  .mtd-card .roas small { font-size: 13px; color: var(--muted); font-weight: 500; }
+  .mtd-card dl {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px;
+    margin: 10px 0 0; font-size: 12.5px;
+  }
+  .mtd-card dl div { display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding: 3px 0; }
+  .mtd-card dt { color: var(--muted); }
+  .mtd-card dd { margin: 0; font-weight: 600; }
+  .mtd-card .budget { font-size: 13px; color: var(--info); margin-top: 8px; font-weight: 600; }
+  .mtd-card .budget.budget-missing { color: var(--muted); font-weight: 500; }
+
+  .archive-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 1200px) { .archive-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .archive-grid { grid-template-columns: 1fr; } }
+  .archive-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .archive-card .label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .archive-card .value {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--brand-dark);
+    letter-spacing: -0.5px;
+  }
+  .archive-card .subvalue {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .archive-range-meta {
+    margin: 8px 0 14px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.75);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .archive-range-meta strong {
+    color: var(--brand-green);
+  }
+  .archive-empty {
+    padding: 18px;
+    background: white;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    color: var(--muted);
+  }
+  .archive-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    margin-top: 14px;
+  }
+  table.archive-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 980px;
+    font-size: 12.5px;
+  }
+  table.archive-table th {
+    background: var(--brand-green);
+    color: white;
+    text-align: center;
+    padding: 10px 8px;
+    font-size: 11.5px;
+  }
+  table.archive-table td {
+    border-top: 1px solid var(--border);
+    padding: 9px 8px;
+  }
+  table.archive-table tbody tr:nth-child(even) { background: #fcfbf7; }
+  table.archive-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* 섹션 0 헤더 우측 버튼 (재생성) */
+  .section-actions {
+    margin-left: auto;
+    display: flex; gap: 8px; align-items: center;
+  }
+  .btn-regen {
+    font-family: inherit; font-size: 12px; font-weight: 600;
+    padding: 5px 12px; border-radius: 6px;
+    border: 1px solid var(--brand-green); background: white;
+    color: var(--brand-green); cursor: pointer;
+  }
+  .btn-regen:hover { background: var(--brand-green); color: white; }
+  .regen-hint {
+    font-size: 11px; color: var(--muted); font-weight: 500;
+  }
+
+  /* Ex-winner 표시 (판정과 무관, 과거 위너였던 소재) */
+  .ex-winner-pill {
+    display: inline-block; margin-left: 6px;
+    font-size: 10px; font-weight: 700;
+    color: #7d6608; background: #fcf3cf;
+    border: 1px solid #d4ac0d;
+    padding: 1px 6px; border-radius: 8px;
+    vertical-align: middle;
+  }
+
+  /* 카테고리 요약 행 (tfoot) */
+  table.creatives tfoot td {
+    background: var(--brand-cream);
+    font-weight: 700; font-size: 12.5px;
+    border-top: 2px solid var(--brand-green);
+    padding: 10px 8px;
+  }
+  table.creatives tfoot td.label { text-align: left; color: var(--brand-green); }
+  .creative-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 10px 0 12px;
+  }
+  @media (max-width: 1200px) { .creative-summary-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .creative-summary-grid { grid-template-columns: 1fr; } }
+  .creative-summary-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .creative-summary-card .sum-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--brand-green);
+    margin-bottom: 8px;
+  }
+  .creative-summary-card dl {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px 10px;
+    margin: 0;
+    font-size: 12px;
+  }
+  .creative-summary-card dl div {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dashed var(--border);
+    padding: 2px 0;
+  }
+  .creative-summary-card dt { color: var(--muted); }
+  .creative-summary-card dd { margin: 0; font-weight: 600; }
+
+  /* 접이식 섹션 (퍼널/검증) */
+  section.collapsible > details { border-left: 4px solid var(--brand-green); padding-left: 12px; }
+  section.collapsible > details > summary {
+    font-size: 20px; font-weight: 700;
+    cursor: pointer; list-style: none;
+    padding: 4px 0;
+    display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  }
+  section.collapsible > details > summary::-webkit-details-marker { display: none; }
+  section.collapsible > details > summary::before {
+    content: '▶'; font-size: 11px;
+    transition: transform .15s; color: var(--brand-green);
+  }
+  section.collapsible > details[open] > summary::before { transform: rotate(90deg); }
+  section.collapsible > details > .details-inner { margin-top: 12px; }
+  section.collapsible > details > summary .count-badge {
+    font-size: 12px; font-weight: 500;
+    color: var(--brand-green); background: var(--brand-cream);
+    padding: 3px 10px; border-radius: 10px;
+    border: 1px solid var(--brand-beige);
+  }
+
+  /* ============ 소재 판정표 (섹션 1) ============ */
+  .creative-section { margin-top: 22px; }
+  .creative-section h3 {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 16px; background: var(--brand-cream);
+    padding: 10px 14px; border-radius: 8px;
+  }
+  .creative-section h3 .count {
+    background: var(--brand-green); color: white;
+    font-size: 12px; padding: 2px 8px; border-radius: 10px; font-weight: 600;
+  }
+  .creative-section h3 .meta-inline {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .category-divider {
+    margin-top: 28px;
+    padding: 12px 14px;
+    border-left: 6px solid var(--brand-green);
+    background: linear-gradient(90deg, rgba(247,241,229,0.95), rgba(255,255,255,0.92));
+    border-radius: 10px;
+  }
+  .category-divider h2 {
+    margin: 0;
+    font-size: 20px;
+    color: var(--brand-dark);
+  }
+  .category-divider .sub {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .table-scroll {
+    overflow-x: auto; border: 1px solid var(--border);
+    border-radius: 10px; background: white;
+    max-height: 72vh;
+  }
+  table.creatives {
+    border-collapse: separate; border-spacing: 0;
+    font-size: 12px; min-width: 2400px;
+    width: 100%;
+  }
+  table.creatives thead th {
+    position: sticky; top: 0; z-index: 3;
+    background: var(--brand-green); color: white;
+    padding: 10px 8px; text-align: center; white-space: nowrap;
+    font-weight: 600; font-size: 11.5px;
+  }
+  table.creatives tbody td {
+    padding: 10px 8px; border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  table.creatives tbody tr:hover { background: var(--brand-cream); }
+  /* 구분 + 썸네일 + 소재명 freeze */
+  table.creatives th.col-type, table.creatives td.col-type {
+    position: sticky; left: 0; z-index: 3;
+    background: white; width: 88px; min-width: 88px;
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+  table.creatives thead th.col-type { background: var(--brand-green); z-index: 5; }
+  table.creatives th.col-thumb, table.creatives td.col-thumb {
+    position: sticky; left: 88px; z-index: 2;
+    background: white; width: 56px; min-width: 56px;
+  }
+  table.creatives thead th.col-thumb { background: var(--brand-green); z-index: 4; }
+  table.creatives th.col-name, table.creatives td.col-name {
+    position: sticky; left: 144px; z-index: 2;
+    background: white; min-width: 260px; max-width: 260px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    border-right: 2px solid var(--border);
+  }
+  table.creatives thead th.col-name { background: var(--brand-green); z-index: 4; }
+  table.creatives td.col-name .ad-name { display: block; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+  table.creatives td.col-name .ad-meta { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+  table.creatives td.col-thumb img {
+    width: 44px; height: 44px; object-fit: cover;
+    border-radius: 6px; border: 1px solid var(--border);
+  }
+  table.creatives td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  table.creatives td.col-action { white-space: pre-wrap; max-width: 380px; min-width: 320px; font-size: 11.5px; line-height: 1.5; }
+  table.creatives td.col-reason { max-width: 220px; font-size: 11.5px; color: var(--muted); white-space: pre-wrap; }
+  table.creatives td.col-funnel { white-space: pre-wrap; max-width: 260px; min-width: 220px; font-size: 11.5px; line-height: 1.45; }
+  .funnel-chip {
+    display: inline-block;
+    margin-right: 6px;
+    margin-bottom: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--brand-cream);
+    border: 1px solid var(--brand-beige);
+    color: var(--brand-green);
+    font-size: 10.5px;
+    font-weight: 700;
+  }
+  .funnel-tag { display: block; font-weight: 600; color: #594a2b; }
+  .type-chip {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+    border: 1px solid var(--border);
+    background: #f7f4ec;
+    color: var(--brand-dark);
+  }
+  .type-chip.type-test { background: #eef6ff; color: #1f618d; border-color: #cfe3f6; }
+  .type-chip.type-main { background: #f6f1e8; color: #7d6608; border-color: #e6d8b8; }
+  .type-chip.type-asc { background: #eef9f1; color: #1e8449; border-color: #cfe8d5; }
+  .type-chip.type-winner { background: #fcf3cf; color: #7d6608; border-color: #d4ac0d; }
+
+  /* 소재명 링크 */
+  table.creatives td.col-name a.ad-link {
+    color: var(--brand-dark); text-decoration: none;
+    display: block; overflow: hidden; text-overflow: ellipsis;
+    font-weight: 600;
+  }
+  table.creatives td.col-name a.ad-link:hover {
+    color: var(--info); text-decoration: underline;
+  }
+  table.creatives td.col-name a.ad-link::after {
+    content: " ↗"; font-size: 10px; color: var(--muted);
+    opacity: 0; transition: opacity 0.15s;
+  }
+  table.creatives td.col-name a.ad-link:hover::after { opacity: 1; }
+
+  /* 패턴 코드 참조 토글 */
+  details.pattern-ref {
+    margin-bottom: 16px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0;
+  }
+  details.pattern-ref summary {
+    padding: 12px 16px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--brand-dark);
+    list-style: none;
+    user-select: none;
+  }
+  details.pattern-ref summary::-webkit-details-marker { display: none; }
+  details.pattern-ref summary::before {
+    content: '▶';
+    display: inline-block;
+    margin-right: 8px;
+    font-size: 10px;
+    transition: transform 0.15s;
+  }
+  details.pattern-ref[open] summary::before { transform: rotate(90deg); }
+  details.pattern-ref summary:hover { background: var(--brand-cream); }
+  .pattern-ref-body {
+    padding: 4px 16px 16px;
+    border-top: 1px solid var(--border);
+  }
+  .pattern-ref-note {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin: 10px 0 14px;
+    line-height: 1.8;
+  }
+  .pattern-ref-note .sev { margin-left: 6px; }
+  .sev {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+  }
+  .sev-p0 { background: #c0392b; }
+  .sev-p1 { background: #d68910; }
+  .sev-p2 { background: #7f8c8d; }
+  table.pattern-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  table.pattern-table th,
+  table.pattern-table td {
+    padding: 7px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  table.pattern-table thead th {
+    background: var(--brand-cream);
+    font-weight: 600;
+    font-size: 12px;
+  }
+  table.pattern-table tbody tr:hover { background: #fafaf6; }
+  table.pattern-table td b { color: var(--brand-dark); }
+
+  /* 검증 섹션 */
+  .validation-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 900px) { .validation-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .validation-grid { grid-template-columns: 1fr; } }
+  .val-card {
+    background: white; border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 14px;
+  }
+  .val-card .lbl { font-size: 11.5px; color: var(--muted); margin-bottom: 4px; }
+  .val-card .val { font-size: 20px; font-weight: 700; }
+  .val-card .src { font-size: 10.5px; color: var(--muted); margin-top: 4px; font-style: italic; }
+  .val-table {
+    width: 100%; border-collapse: collapse; font-size: 12.5px;
+    background: white; border-radius: 8px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .val-table th, .val-table td {
+    padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--border);
+  }
+  .val-table th:first-child, .val-table td:first-child { text-align: left; }
+  .val-table thead th { background: var(--brand-cream); font-weight: 600; }
+  .val-notes {
+    background: #fef9e7; border-left: 3px solid var(--brand-gold);
+    padding: 10px 14px; border-radius: 4px; margin-top: 12px;
+    font-size: 12.5px; color: #7d6608;
+  }
+
+  /* 판정 뱃지 */
+  .badge {
+    display: inline-block; padding: 3px 10px;
+    border-radius: 12px; font-size: 11px; font-weight: 700;
+    white-space: nowrap;
+  }
+  .badge.winner      { background: #fcf3cf; color: #7d6608; border: 1px solid #d4ac0d; }
+  .badge.winner-end  { background: #f2f3f4; color: #626567; border: 1px solid #b2babb; text-decoration: line-through; }
+  .badge.pass        { background: #d5f5e3; color: #196f3d; }
+  .badge.continue    { background: #d5f5e3; color: #196f3d; }
+  .badge.reduce      { background: #fdebd0; color: #9a6007; }
+  .badge.boost       { background: #d6eaf8; color: #1b4f72; }
+  .badge.retest      { background: #d4e6f1; color: #1a5276; }
+  .badge.reference   { background: #e8daef; color: #5b2c6f; }
+  .badge.off         { background: #eaeded; color: #616a6b; }
+  .badge.watch       { background: #f9e79f; color: #7d6608; }
+
+  /* ============ 월별 순이익 (섹션 1로 이동) ============ */
+  .profit-controls {
+    display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;
+    align-items: center;
+  }
+  .profit-controls label { font-size: 13px; color: var(--muted); }
+  .profit-controls select {
+    font-size: 13px; padding: 6px 10px;
+    border: 1px solid var(--border); border-radius: 6px;
+    background: white; font-family: inherit;
+  }
+  .profit-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  }
+  @media (max-width: 1400px) { .profit-grid { grid-template-columns: 1fr; } }
+  .profit-card {
+    background: white; border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+    box-shadow: 0 2px 8px rgba(45, 80, 22, 0.06);
+  }
+  .profit-card h4 { margin: 0 0 6px; font-size: 16px; font-weight: 700; color: var(--brand-green); }
+  .profit-headline {
+    font-size: 13px; color: var(--muted); margin-bottom: 14px;
+    display: flex; gap: 14px; flex-wrap: wrap; align-items: baseline;
+  }
+  .profit-headline .big {
+    font-size: 22px; font-weight: 800; color: var(--brand-dark);
+    letter-spacing: -0.5px;
+  }
+  .profit-headline .delta-up { color: var(--ok); font-weight: 700; }
+  .profit-headline .delta-down { color: var(--bad); font-weight: 700; }
+  .profit-card .canvas-wrap { height: 420px; position: relative; }
+  @media (max-width: 900px) { .profit-card .canvas-wrap { height: 340px; } }
+  .profit-table-wrap {
+    margin-top: 12px;
+    max-height: 240px;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .profit-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    background: white;
+  }
+  .profit-table thead th {
+    position: sticky;
+    top: 0;
+    background: var(--brand-cream);
+    color: var(--brand-dark);
+    padding: 7px 6px;
+    font-weight: 700;
+    border-bottom: 2px solid var(--brand-green);
+    text-align: left;
+    white-space: nowrap;
+  }
+  .profit-table thead th.num { text-align: right; }
+  .profit-table tbody td {
+    padding: 6px 6px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .profit-table tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .profit-table tbody tr:nth-child(even) td { background: #FAFAF7; }
+
+  /* ============ GA4 실결제 순이익 표 (섹션 1.5) ============ */
+  .ga4-profit-wrap {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+    margin-top: 8px;
+  }
+  @media (max-width: 1200px) { .ga4-profit-wrap { grid-template-columns: 1fr; } }
+  .ga4-profit-card {
+    background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 16px;
+    box-shadow: 0 2px 8px rgba(45, 80, 22, 0.06);
+  }
+  .ga4-profit-card h4 { margin: 0 0 6px; font-size: 15px; font-weight: 700; color: var(--brand-green); }
+  .ga4-profit-headline {
+    font-size: 13px; color: var(--muted); margin-bottom: 10px;
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: baseline;
+  }
+  .ga4-profit-headline .big {
+    font-size: 20px; font-weight: 800; color: var(--brand-dark);
+    letter-spacing: -0.3px;
+  }
+  .ga4-profit-headline .delta-up { color: var(--ok); font-weight: 700; }
+  .ga4-profit-headline .delta-down { color: var(--bad); font-weight: 700; }
+  .ga4-table-wrap { max-height: 480px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; }
+  .ga4-profit-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .ga4-profit-table thead th {
+    position: sticky; top: 0; background: var(--brand-cream); color: var(--brand-dark);
+    padding: 8px 6px; font-weight: 700; border-bottom: 2px solid var(--brand-green);
+    text-align: left; white-space: nowrap;
+  }
+  .ga4-profit-table thead th.num { text-align: right; }
+  .ga4-profit-table tbody td { padding: 6px 6px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .ga4-profit-table tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .ga4-profit-table tbody tr:nth-child(even) td { background: #FAFAF7; }
+  .ga4-profit-table tbody tr:hover td { background: #F4F1E6; }
+  .ga4-profit-table tbody td.profit-pos { color: var(--ok); font-weight: 700; }
+  .ga4-profit-table tbody td.profit-neg { color: var(--bad); font-weight: 700; }
+  .ga4-profit-table tfoot td {
+    background: var(--brand-cream); font-weight: 700; padding: 8px 6px;
+    border-top: 2px solid var(--brand-green);
+  }
+
+  /* ---- 카테고리별 카드 (방안 C) ---- */
+  .ga4-sub { font-size: 16px; font-weight: 700; margin: 20px 0 8px; color: var(--brand-dark); }
+  .ga4-cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 8px 0 24px; }
+  @media (max-width: 1200px) { .ga4-cat-grid { grid-template-columns: 1fr; } }
+  .ga4-cat-card {
+    background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 16px;
+    box-shadow: 0 2px 8px rgba(45,80,22,0.06);
+  }
+  .ga4-cat-card .cat-title {
+    font-size: 14px; font-weight: 800; margin: 0 0 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .ga4-cat-card .cat-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .ga4-cat-card[data-cat="단백밥"] .cat-dot { background: #6fa83a; }
+  .ga4-cat-card[data-cat="밸런시"] .cat-dot { background: #d99547; }
+  .ga4-cat-card[data-cat="순수단백"] .cat-dot { background: #5a8fb5; }
+  .ga4-cat-card[data-cat="기타"] .cat-dot { background: #999; }
+  .ga4-cat-card .mini-headline {
+    font-size: 18px; font-weight: 800; color: var(--ok);
+    margin: 4px 0 6px; font-variant-numeric: tabular-nums;
+  }
+  .ga4-cat-card .mini-headline small {
+    font-size: 12px; font-weight: 500; color: var(--muted); margin-left: 6px;
+  }
+  .ga4-cat-card .cat-sub { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .ga4-cat-card .cat-table-wrap { max-height: 360px; overflow: auto; border: 1px solid var(--border); border-radius: 6px; }
+  .ga4-cat-card .cat-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .ga4-cat-card .cat-table thead th {
+    position: sticky; top: 0; background: var(--brand-cream); color: var(--brand-dark);
+    padding: 6px 5px; font-weight: 700; border-bottom: 2px solid var(--brand-green);
+    text-align: left; font-size: 11.5px; white-space: nowrap;
+  }
+  .ga4-cat-card .cat-table thead th.num { text-align: right; }
+  .ga4-cat-card .cat-table tbody td { padding: 5px 5px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .ga4-cat-card .cat-table tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .ga4-cat-card .cat-table tbody tr:nth-child(even) td { background: #FAFAF7; }
+  .ga4-cat-card .cat-table tbody td.profit-pos { color: var(--ok); font-weight: 700; }
+  .ga4-cat-card .cat-table tbody td.profit-neg { color: var(--bad); font-weight: 700; }
+  .ga4-cat-card .cat-table tfoot td {
+    background: var(--brand-cream); font-weight: 700; padding: 6px 5px;
+    border-top: 2px solid var(--brand-green);
+  }
+  .ga4-empty {
+    grid-column: 1/-1; padding: 24px; text-align: center; color: var(--muted);
+    background: #fff; border: 1px dashed var(--border); border-radius: 10px;
+  }
+
+  .bridge-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 8px;
+  }
+  @media (max-width: 1200px) { .bridge-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .bridge-grid { grid-template-columns: 1fr; } }
+  .bridge-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 2px 8px rgba(45,80,22,0.06);
+  }
+  .bridge-card h3 {
+    margin: 0 0 10px;
+    font-size: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .bridge-chip {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--brand-green);
+    background: var(--brand-cream);
+    border: 1px solid var(--brand-beige);
+    border-radius: 999px;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+  .bridge-headline {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    margin-bottom: 4px;
+  }
+  .bridge-headline small {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .bridge-dl {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 12px;
+    margin: 12px 0 0;
+    font-size: 12.5px;
+  }
+  .bridge-dl div {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dashed var(--border);
+    padding: 3px 0;
+  }
+  .bridge-dl dt { color: var(--muted); }
+  .bridge-dl dd { margin: 0; font-weight: 600; }
+  .bridge-note {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--bg);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .bridge-note strong { color: var(--brand-green); }
+
+  .fb-links {
+    display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;
+  }
+  .fb-links a {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; background: #1877F2; color: white;
+    text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+  }
+
+  footer {
+    margin-top: 40px; padding-top: 20px;
+    border-top: 1px solid var(--border);
+    text-align: center; color: var(--muted); font-size: 12px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>📊 윤식단 광고 분석 대시보드</h1>
+    <div class="sub">
+      <span id="hdr-date">-</span>
+      <span style="opacity:0.65;margin:0 8px;">·</span>
+      <span id="hdr-generated" style="opacity:0.8;">-</span>
+    </div>
+    <div class="date-picker">
+      <label>📅 조회 날짜:</label>
+      <select id="date-select" style="display:none;"></select>
+      <input type="date" id="date-input" />
+      <button id="date-go">이동</button>
+      <span style="font-size:12px;opacity:0.75;margin-left:8px;" id="date-help"></span>
+    </div>
+    <div class="range-picker">
+      <label>📈 평균 조회:</label>
+      <input type="date" id="range-start" />
+      <span>~</span>
+      <input type="date" id="range-end" />
+      <button id="range-7">최근 7일</button>
+      <button id="range-30">최근 30일</button>
+      <button id="range-all">전체</button>
+      <button class="primary" id="range-apply">평균 보기</button>
+      <span style="font-size:12px;opacity:0.75;margin-left:8px;" id="range-help"></span>
+    </div>
+  </header>
+
+  <section>
+    <h2>🗂️ 기간 조회 & 평균</h2>
+    <div class="period-caption">저장된 일간 스냅샷 기준 평균입니다. 날짜를 선택하면 과거 리포트로 이동할 수 있고, 기간을 선택하면 선택 구간의 평균치를 바로 확인할 수 있습니다.</div>
+    <div class="archive-range-meta" id="archive-range-meta"></div>
+    <div class="archive-grid" id="archive-grid"></div>
+    <div class="archive-table-wrap">
+      <table class="archive-table">
+        <thead>
+          <tr>
+            <th>카테고리</th>
+            <th class="num">평균 Meta 지출</th>
+            <th class="num">평균 Meta 매출</th>
+            <th class="num">평균 Meta ROAS</th>
+            <th class="num">평균 광고수</th>
+            <th class="num">평균 GA4 순이익</th>
+            <th class="num">평균 GA4 실ROI</th>
+            <th class="num">포함 일수</th>
+          </tr>
+        </thead>
+        <tbody id="archive-category-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ====== 섹션 0: MTD 카테고리 요약 ====== -->
+  <section>
+    <h2>📆 월 누적 카테고리 요약 (MTD) <span class="period-badge" id="badge-mtd">-</span>
+      <span class="section-actions">
+        <span class="regen-hint" id="regen-age">-</span>
+        <button class="btn-regen" id="btn-regen" title="터미널에서 /yundiet-ad-analysis 명령으로 재생성">🔄 재생성</button>
+      </span>
+    </h2>
+    <div class="period-caption" id="caption-mtd"></div>
+    <div class="mtd-grid" id="mtd-grid"></div>
+  </section>
+
+  <!-- ====== 섹션 1: 월별 순이익 (상위 이동) ====== -->
+  <section>
+    <h2>💰 월별 순이익 <span class="period-badge" id="badge-profit">-</span></h2>
+    <div class="period-caption" id="caption-profit">원가율: 단백밥·밸런시 65% / 순수단백 77% · 순이익 = 매출 − 원가 − 광고지출</div>
+    <div class="profit-controls">
+      <label>단백밥 정렬: <select id="sort-danbaekbob" data-product="단백밥">
+        <option value="month-asc">월별 오름차순</option>
+        <option value="month-desc">월별 내림차순</option>
+        <option value="profit-desc">순이익 내림차순</option>
+      </select></label>
+      <label>밸런시 정렬: <select id="sort-balancy" data-product="밸런시">
+        <option value="month-asc">월별 오름차순</option>
+        <option value="month-desc">월별 내림차순</option>
+        <option value="profit-desc">순이익 내림차순</option>
+      </select></label>
+      <label>순수단백 정렬: <select id="sort-puresudanbak" data-product="순수단백">
+        <option value="month-asc">월별 오름차순</option>
+        <option value="month-desc">월별 내림차순</option>
+        <option value="profit-desc">순이익 내림차순</option>
+      </select></label>
+    </div>
+    <div class="profit-grid">
+      <div class="profit-card">
+        <h4>단백밥</h4>
+        <div class="profit-headline" id="headline-danbaekbob"></div>
+        <div class="canvas-wrap"><canvas id="chart-danbaekbob"></canvas></div>
+        <div class="profit-table-wrap"><table class="profit-table"><thead><tr><th>월</th><th class="num">매출</th><th class="num">광고지출</th><th class="num">순이익</th><th class="num">ROAS</th></tr></thead><tbody id="table-danbaekbob"></tbody></table></div>
+      </div>
+      <div class="profit-card">
+        <h4>밸런시</h4>
+        <div class="profit-headline" id="headline-balancy"></div>
+        <div class="canvas-wrap"><canvas id="chart-balancy"></canvas></div>
+        <div class="profit-table-wrap"><table class="profit-table"><thead><tr><th>월</th><th class="num">매출</th><th class="num">광고지출</th><th class="num">순이익</th><th class="num">ROAS</th></tr></thead><tbody id="table-balancy"></tbody></table></div>
+      </div>
+      <div class="profit-card">
+        <h4>순수단백</h4>
+        <div class="profit-headline" id="headline-puresudanbak"></div>
+        <div class="canvas-wrap"><canvas id="chart-puresudanbak"></canvas></div>
+        <div class="profit-table-wrap"><table class="profit-table"><thead><tr><th>월</th><th class="num">매출</th><th class="num">광고지출</th><th class="num">순이익</th><th class="num">ROAS</th></tr></thead><tbody id="table-puresudanbak"></tbody></table></div>
+      </div>
+    </div>
+    <div class="fb-links" id="fb-links"></div>
+  </section>
+
+  <!-- ====== 섹션 1.5: GA4 실결제 기반 순이익 (카테고리별 · 방안 C) ====== -->
+  <section>
+    <h2>🧾 GA4 실결제 기반 순이익 <span class="period-badge" id="badge-ga4-profit">-</span></h2>
+    <div class="period-caption">실결제 매출 × 매칭률 − 원가 − 배송비 − 수수료 − 광고비 = 순이익 · 카테고리별 · 매일 08:30 KST 업데이트</div>
+
+    <h3 class="ga4-sub">📘 일별 (최근 30일 · 카테고리별)</h3>
+    <div class="ga4-cat-grid" id="ga4-daily-cats"></div>
+
+    <h3 class="ga4-sub">📙 월별 (전체 · 카테고리별)</h3>
+    <div class="ga4-cat-grid" id="ga4-monthly-cats"></div>
+  </section>
+
+  <section>
+    <h2>🔗 광고 효율 vs 실결제 수익 브리지 <span class="period-badge" id="badge-bridge">-</span></h2>
+    <div class="period-caption">Meta MTD 효율과 GA4 실결제 기준 수익성을 카테고리별로 한 번에 비교</div>
+    <div class="bridge-grid" id="bridge-grid"></div>
+  </section>
+
+  <!-- ====== 섹션 2: 소재 판정 + 액션플랜 + 퍼널진단 ====== -->
+  <section>
+    <h2>🎯 소재판정 + 액션플랜 + 퍼널진단 <span class="period-badge" id="badge-creatives">-</span></h2>
+    <div class="period-caption" id="caption-creatives">이번 달(MTD) 집계 · 각 소재에서 판정/액션/퍼널진단을 한 번에 확인 · 섹션별 하단에 합계 요약</div>
+    <div id="creatives-sections"></div>
+  </section>
+
+  <!-- ====== 섹션 3: 퍼널 인사이트 진단 (숨김: 소재판정표에 통합) ====== -->
+  <section class="collapsible" id="section-funnel" hidden>
+    <details>
+    <summary>🔬 퍼널 인사이트 진단 <span class="period-badge" id="badge-funnel">-</span> <span class="count-badge" id="funnel-count">0건</span></summary>
+    <div class="details-inner">
+    <div class="period-caption" id="caption-funnel"></div>
+
+    <details class="pattern-ref">
+      <summary>📖 패턴 코드 정의 (P1~P20) · Severity 기준</summary>
+      <div class="pattern-ref-body">
+        <p class="pattern-ref-note">
+          <strong>Severity(심각도)</strong> ·
+          <span class="sev sev-p0">P0</span> 즉시 조치 (24h 내) ·
+          <span class="sev sev-p1">P1</span> 3~7일 내 조치 ·
+          <span class="sev sev-p2">P2</span> 관찰/추적
+        </p>
+        <table class="pattern-table">
+          <thead>
+            <tr><th>코드</th><th>상황</th><th>Severity</th><th>1순위 액션</th><th>트리거</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><b>P1</b></td><td>CTR↑ CVR↓</td><td><span class="sev sev-p0">P0</span></td><td>상세페이지 개선</td><td>상세페이지-오케스트레이터</td></tr>
+            <tr><td><b>P2</b></td><td>CTR↓ 빈도&lt;2</td><td><span class="sev sev-p0">P0</span></td><td>소재 교체</td><td>광고제작</td></tr>
+            <tr><td><b>P3</b></td><td>CVR↑ 객단가↓</td><td><span class="sev sev-p1">P1</span></td><td>업셀/세트 추천</td><td>상세페이지 + 프로모션-관리</td></tr>
+            <tr><td><b>P4</b></td><td>노출&lt;500</td><td><span class="sev sev-p1">P1</span></td><td>입찰/오디언스 조정</td><td>수동</td></tr>
+            <tr><td><b>P5</b></td><td>CTR↑CVR↑ 빈도≥3</td><td><span class="sev sev-p0">P0</span></td><td>변형 소재 선제 준비</td><td>광고제작 (변형)</td></tr>
+            <tr><td><b>P6</b></td><td>CTR↓CVR↓ROAS↓</td><td><span class="sev sev-p0">P0</span></td><td>OFF + 재설계</td><td>광고제작 (신규)</td></tr>
+            <tr><td><b>P7</b></td><td>CTR↑ CPA↑↑</td><td><span class="sev sev-p1">P1</span></td><td>오디언스 확장/플레이스먼트</td><td>수동</td></tr>
+            <tr><td><b>P8</b></td><td>포맷별 격차</td><td><span class="sev sev-p1">P1</span></td><td>포맷 분리 제작</td><td>광고제작</td></tr>
+            <tr><td><b>P9</b></td><td>리타겟↑ 신규↓</td><td><span class="sev sev-p1">P1</span></td><td>프로스펙팅 7:3</td><td>수동</td></tr>
+            <tr><td><b>P10</b></td><td>요일별 편차</td><td><span class="sev sev-p2">P2</span></td><td>요일별 예산 스케줄</td><td>수동</td></tr>
+            <tr><td><b>P11</b></td><td>CPM 전주 +30%</td><td><span class="sev sev-p1">P1</span></td><td>관찰 + 플레이스먼트</td><td>수동</td></tr>
+            <tr><td><b>P12</b></td><td>재구매율↓</td><td><span class="sev sev-p1">P1</span></td><td>CRM + 메시지 현실화</td><td>CRM + 리뷰분석</td></tr>
+            <tr><td><b>P13</b></td><td>위너 1개 편중</td><td><span class="sev sev-p0">P0</span></td><td>위너 변형 3~5개</td><td>광고제작 (변형 대량)</td></tr>
+            <tr><td><b>P14</b></td><td>영상조회↑ CTR↓</td><td><span class="sev sev-p0">P0</span></td><td>영상 끝 CTA 삽입</td><td>광고제작</td></tr>
+            <tr><td><b>P15</b></td><td>ATC↑ 구매↓</td><td><span class="sev sev-p1">P1</span></td><td>결제UX/배송비 고지</td><td>수동 + 상세페이지</td></tr>
+            <tr><td><b>P16</b></td><td>디바이스 편차</td><td><span class="sev sev-p1">P1</span></td><td>디바이스별 QA</td><td>상세페이지 QA</td></tr>
+            <tr><td><b>P17</b></td><td>리타겟↑↑ 프로스↓↓</td><td><span class="sev sev-p0">P0</span></td><td>프로스펙팅 신규 소재</td><td>광고제작</td></tr>
+            <tr><td><b>P18</b></td><td>인게이지↑ CTR↓</td><td><span class="sev sev-p1">P1</span></td><td>솔루션형 전환 삽입</td><td>광고제작</td></tr>
+            <tr><td><b>P19</b></td><td>테스트↑ 메인↓</td><td><span class="sev sev-p1">P1</span></td><td>3~5일 학습 대기</td><td>관찰</td></tr>
+            <tr><td><b>P20</b></td><td>특정 세그먼트만↑</td><td><span class="sev sev-p0">P0</span></td><td>핵심 세그먼트 집중</td><td>수동</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <div id="funnel-insights"></div>
+    </div>
+    </details>
+  </section>
+
+  <!-- ====== 섹션 4: 데이터 검증 (접힘) ====== -->
+  <section class="collapsible">
+    <details>
+    <summary>✅ 데이터 검증 (Meta 광고 관리자 대조용) <span class="period-badge" id="badge-val">-</span></summary>
+    <div class="details-inner">
+    <div class="period-caption" id="caption-val"></div>
+    <div class="validation-grid" id="val-kpi"></div>
+    <h3>카테고리별 합계</h3>
+    <table class="val-table" id="val-table">
+      <thead><tr><th>카테고리</th><th>지출</th><th>매출</th><th>ROAS</th><th>광고 수</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="val-notes" id="val-notes"></div>
+    </div>
+    </details>
+  </section>
+
+  <footer>
+    윤식단 광고 분석 에이전트 v6.1 · Meta Marketing API v19.0 · 자동 생성
+  </footer>
+</div>
+
+<script id="dashboard-data" type="application/json">const DATA = {"meta": {"date": "2026-04-23", "generated_at": "2026-04-23T08:05:17.941710", "available_dates": ["2026-04-23", "2026-04-22", "2026-04-21", "/Users/junho/yundiet-os/ad-analysis/2026-04-21-demo-cat.html"], "file_basename_pattern": "{date}.html", "period_rule": "MTD", "last_regen_hint": "수동 재실행: /yundiet-ad-analysis", "ad_account_id": "313374542193702", "periods": {"mtd": {"since": "2026-04-01", "until": "2026-04-23", "label": "2026-04-01~2026-04-23 (MTD · 23일차)"}, "creatives": {"since": "2026-04-01", "until": "2026-04-23", "label": "2026-04-01~2026-04-23 (이번 달 (MTD))"}, "creatives_d2": {"relative": "소재 생성일 +0d ~ +2d", "label": "D+2 시점 누적 스냅샷"}, "creatives_d4": {"relative": "소재 생성일 +0d ~ +4d", "label": "D+4 시점 누적 스냅샷"}, "monthly_profit": {"since": "2025-01-01", "until": "2026-04-23", "label": "2025-01-01~2026-04-23 (월별 집계)"}, "funnel": {"since": "2026-04-01", "until": "2026-04-23", "label": "2026-04-01~2026-04-23 (MTD)"}, "validation": {"since": "2026-04-01", "until": "2026-04-23", "label": "2026-04-01~2026-04-23 (MTD)"}, "previous_week": {"since": "2026-04-13", "until": "2026-04-16", "label": "2026-04-13~2026-04-16 (전주 비교)"}}}, "mtd_kpis": [{"카테고리": "단백밥", "title": "단백밥 · 2026-04", "월": "2026-04-01", "일예산_LIVE": 243000, "누적_지출": 5803100, "누적_매출": 30036877, "누적_ROAS": 518.0, "고유CTR": 1.0, "고유링크CVR": 7.0, "노출당LPV율": 1.0, "LPV당구매율": 7.0, "AOV": 65870, "총구매수": 456, "총노출": 537474, "총도달": 267770, "총LPV수": 6111, "활성광고수": 19, "OFF광고수": 9}, {"카테고리": "단백밥 ASC", "title": "단백밥 ASC · 2026-04", "월": "2026-04-01", "일예산_LIVE": 89000, "누적_지출": 253973, "누적_매출": 744382, "누적_ROAS": 293.0, "고유CTR": 1.0, "고유링크CVR": 5.0, "노출당LPV율": 1.0, "LPV당구매율": 5.0, "AOV": 53170, "총구매수": 14, "총노출": 24054, "총도달": 14886, "총LPV수": 257, "활성광고수": 5, "OFF광고수": 0}, {"카테고리": "밸런시", "title": "밸런시 · 2026-04", "월": "2026-04-01", "일예산_LIVE": 141000, "누적_지출": 2738086, "누적_매출": 10775683, "누적_ROAS": 394.0, "고유CTR": 1.0, "고유링크CVR": 6.0, "노출당LPV율": 1.0, "LPV당구매율": 7.0, "AOV": 67772, "총구매수": 159, "총노출": 193813, "총도달": 88322, "총LPV수": 2381, "활성광고수": 13, "OFF광고수": 18}, {"카테고리": "순수단백", "title": "순수단백 · 2026-04", "월": "2026-04-01", "일예산_LIVE": 50000, "누적_지출": 1154058, "누적_매출": 5593928, "누적_ROAS": 485.0, "고유CTR": 2.0, "고유링크CVR": 3.0, "노출당LPV율": 2.0, "LPV당구매율": 3.0, "AOV": 69061, "총구매수": 81, "총노출": 118508, "총도달": 67633, "총LPV수": 2637, "활성광고수": 6, "OFF광고수": 6}], "creatives": [{"소재명": "괴물단백질(단일)_260226(전환값)", "소재ID": "120239263750890784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "테스트", "캠페인명": "단백밥 소재 테스트_250730", "DN_일수": 56, "effective_status": "ACTIVE", "일예산": 16000, "누적_지출": 355828, "누적_매출": 1416344, "누적_ROAS": 398.0, "노출": 36997, "도달": 16623, "CTR": 1.31, "고유CTR": 2.35, "고유링크클릭수": 390, "노출당LPV율": 1.0, "LPV당구매율": 7.0, "고유링크CVR": 5.0, "CPM": 9618, "노출1천회당전환수": 0.0, "구매수": 20, "평균구매전환값": 70817, "구매전환값": 1416344, "빈도": 2.23, "CPA": 17791, "CVR": 4.0, "ATC": 43, "ATC_Rate": 9.0, "구매_Rate": 47.0, "LPView": 293, "인게이지먼트": 602, "영상조회": 145, "영상조회율": 0.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120239263750890784", "예산점유율": 4.0, "현재상태": "ACTIVE", "판정": "❌ OFF", "판정이유": "ROAS 398.0% < 400%, CTR/CVR 미달", "인사이트패턴": "P18", "인사이트태그": "콘텐츠_성공_광고_실패", "액션플랜": "❌ 즉시 OFF: ROAS 398.0%. 일 ~₩16,000 절감. 예산은 위너 소재로 이관."}, {"소재명": "오빠단톡방비밀링크4800(릴스)_260324", "소재ID": "120240613978780784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "테스트", "캠페인명": "단백밥 소재 테스트_250730", "DN_일수": 30, "effective_status": "ACTIVE", "일예산": 19000, "누적_지출": 418446, "누적_매출": 3306467, "누적_ROAS": 790.0, "노출": 33690, "도달": 15550, "CTR": 1.87, "고유CTR": 2.86, "고유링크클릭수": 445, "노출당LPV율": 1.0, "LPV당구매율": 12.0, "고유링크CVR": 11.0, "CPM": 12420, "노출1천회당전환수": 0.0, "구매수": 51, "평균구매전환값": 64833, "구매전환값": 3306467, "빈도": 2.17, "CPA": 8205, "CVR": 8.0, "ATC": 98, "ATC_Rate": 16.0, "구매_Rate": 52.0, "LPView": 417, "인게이지먼트": 4944, "영상조회": 4324, "영상조회율": 13.0, "위너여부": true, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120240613978780784", "예산점유율": 5.0, "현재상태": "ACTIVE", "판정": "🏆 위너 승격", "판정이유": "누적 구매 51건, ROAS 790.0% ≥ 400% — 메인 이관 대상", "인사이트패턴": "", "인사이트태그": "해당없음", "액션플랜": "🏆 위너 승격: 구매 51건 + ROAS 790.0%. 메인 CBO에 소재 복붙 + 일예산 ₩19,000 유지."}, {"소재명": "[프로모션]단백밥2주년생일파티_251208(슬라이드)", "소재ID": "120235619176430784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "테스트", "캠페인명": "단백밥 소재 테스트_250730", "DN_일수": 136, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 387213, "누적_매출": 2483791, "누적_ROAS": 641.0, "노출": 32442, "도달": 9546, "CTR": 1.07, "고유CTR": 2.93, "고유링크클릭수": 280, "노출당LPV율": 1.0, "LPV당구매율": 15.0, "고유링크CVR": 14.0, "CPM": 11936, "노출1천회당전환수": 0.0, "구매수": 39, "평균구매전환값": 63687, "구매전환값": 2483791, "빈도": 3.4, "CPA": 9929, "CVR": 11.0, "ATC": 79, "ATC_Rate": 23.0, "구매_Rate": 49.0, "LPView": 257, "인게이지먼트": 343, "영상조회": 0, "영상조회율": 0.0, "위너여부": true, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120235619176430784", "예산점유율": 5.0, "현재상태": "ACTIVE", "판정": "🏆 위너 승격", "판정이유": "누적 구매 39건, ROAS 641.0% ≥ 400% — 메인 이관 대상", "인사이트패턴": "P5", "인사이트태그": "소재_피로도", "액션플랜": "🏆 위너 승격: 구매 39건 + ROAS 641.0%. 메인 CBO에 소재 복붙 + 일예산 ₩20,000 유지."}, {"소재명": "이거뭐에요?(904)_릴스_260331", "소재ID": "120241050842370784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "테스트", "캠페인명": "단백밥 소재 테스트_250730", "DN_일수": 23, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 451274, "누적_매출": 2510272, "누적_ROAS": 556.0, "노출": 52029, "도달": 28164, "CTR": 1.83, "고유CTR": 2.56, "고유링크클릭수": 721, "노출당LPV율": 1.0, "LPV당구매율": 7.0, "고유링크CVR": 7.0, "CPM": 8674, "노출1천회당전환수": 0.0, "구매수": 52, "평균구매전환값": 48274, "구매전환값": 2510272, "빈도": 1.85, "CPA": 8678, "CVR": 5.0, "ATC": 130, "ATC_Rate": 14.0, "구매_Rate": 40.0, "LPView": 706, "인게이지먼트": 8807, "영상조회": 7918, "영상조회율": 15.0, "위너여부": true, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241050842370784", "예산점유율": 5.0, "현재상태": "ACTIVE", "판정": "🏆 위너 승격", "판정이유": "누적 구매 52건, ROAS 556.0% ≥ 400% — 메인 이관 대상", "인사이트패턴": "", "인사이트태그": "해당없음", "액션플랜": "🏆 위너 승격: 구매 52건 + ROAS 556.0%. 메인 CBO에 소재 복붙 + 일예산 ₩20,000 유지."}, {"소재명": "식비아끼고 7분이면 끝(영상)메인_260113", "소재ID": "120237226640930784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "테스트", "캠페인명": "단백밥 소재 테스트_250730", "DN_일수": 100, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 434501, "누적_매출": 2077407, "누적_ROAS": 478.0, "노출": 31344, "도달": 14559, "CTR": 2.32, "고유CTR": 3.33, "고유링크클릭수": 485, "노출당LPV율": 1.0, "LPV당구매율": 7.0, "고유링크CVR": 7.0, "CPM": 13862, "노출1천회당전환수": 0.0, "구매수": 32, "평균구매전환값": 64919, "구매전환값": 2077407, "빈도": 2.15, "CPA": 13578, "CVR": 4.0, "ATC": 73, "ATC_Rate": 10.0, "구매_Rate": 44.0, "LPView": 453, "인게이지먼트": 4770, "영상조회": 4066, "영상조회율": 13.0, "위너여부": true, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120237226640930784", "예산점유율": 5.0, "현재상태": "ACTIVE", "판정": "🏆 위너 승격", "판정이유": "누적 구매 32건, ROAS 478.0% ≥ 400% — 메인 이관 대상", "인사이트패턴": "", "인사이트태그": "해당없음", "액션플랜": "🏆 위너 승격: 구매 32건 + ROAS 478.0%. 메인 CBO에 소재 복붙 + 일예산 ₩20,000 유지."}, {"소재명": "자정지나면가격인상4800(단일)2_260318(전환값)", "소재ID": "120240270539120784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "테스트", "캠페인명": "단백밥 소재 테스트_250730", "DN_일수": 36, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 59162, "누적_매출": 738825, "누적_ROAS": 1249.0, "노출": 4609, "도달": 2559, "CTR": 1.71, "고유CTR": 2.15, "고유링크클릭수": 55, "노출당LPV율": 1.0, "LPV당구매율": 17.0, "고유링크CVR": 18.0, "CPM": 12836, "노출1천회당전환수": 0.0, "구매수": 10, "평균구매전환값": 73882, "구매전환값": 738825, "빈도": 1.8, "CPA": 5916, "CVR": 13.0, "ATC": 23, "ATC_Rate": 29.0, "구매_Rate": 43.0, "LPView": 58, "인게이지먼트": 123, "영상조회": 51, "영상조회율": 1.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120240270539120784", "예산점유율": 1.0, "현재상태": "ACTIVE", "판정": "🚀 메인 승격 검토", "판정이유": "ROAS 1249.0% ≥ 500%", "인사이트패턴": "", "인사이트태그": "해당없음", "액션플랜": "🚀 메인 승격 검토: ROAS 1249.0% ≥ 500%. 누적 30건 도달 대기 후 메인 이관."}, {"소재명": "자정지나면가격인상4800(단일)1_260318(전환값)", "소재ID": "120240270539130784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "테스트", "캠페인명": "단백밥 소재 테스트_250730", "DN_일수": 36, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 344302, "누적_매출": 1968255, "누적_ROAS": 572.0, "노출": 30939, "도달": 16082, "CTR": 1.63, "고유CTR": 2.64, "고유링크클릭수": 425, "노출당LPV율": 1.0, "LPV당구매율": 7.0, "고유링크CVR": 7.0, "CPM": 11128, "노출1천회당전환수": 0.0, "구매수": 29, "평균구매전환값": 67871, "구매전환값": 1968255, "빈도": 1.92, "CPA": 11872, "CVR": 6.0, "ATC": 79, "ATC_Rate": 16.0, "구매_Rate": 37.0, "LPView": 416, "인게이지먼트": 545, "영상조회": 67, "영상조회율": 0.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120240270539130784", "예산점유율": 4.0, "현재상태": "ACTIVE", "판정": "🚀 메인 승격 검토", "판정이유": "ROAS 572.0% ≥ 500%", "인사이트패턴": "", "인사이트태그": "해당없음", "액션플랜": "🚀 메인 승격 검토: ROAS 572.0% ≥ 500%. 누적 30건 도달 대기 후 메인 이관."}, {"소재명": "직장인점심한달10만원끝(영상)_260211", "소재ID": "120238400095430784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "테스트", "캠페인명": "단백밥 소재 테스트_250730", "DN_일수": 71, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 441443, "누적_매출": 2089417, "누적_ROAS": 473.0, "노출": 41380, "도달": 21098, "CTR": 1.31, "고유CTR": 2.03, "고유링크클릭수": 429, "노출당LPV율": 1.0, "LPV당구매율": 8.0, "고유링크CVR": 7.0, "CPM": 10668, "노출1천회당전환수": 0.0, "구매수": 29, "평균구매전환값": 72049, "구매전환값": 2089417, "빈도": 1.96, "CPA": 15222, "CVR": 5.0, "ATC": 67, "ATC_Rate": 12.0, "구매_Rate": 43.0, "LPView": 379, "인게이지먼트": 8696, "영상조회": 8156, "영상조회율": 20.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120238400095430784", "예산점유율": 5.0, "현재상태": "ACTIVE", "판정": "✅ 1차 통과", "판정이유": "ROAS 473.0% ≥ 400%, 누적 구매 29건 (30건 미달 → 위너 대기)", "인사이트패턴": "P2", "인사이트태그": "후킹_실패", "액션플랜": "✅ 메인캠 승격 검토: ROAS 473.0% 유지 확인 중. 누적 30건 도달 시 위너 승격. 일예산 ₩20,000 유지. + 광고제작(신규) 트리거: 시작 3초 재기획."}, {"소재명": "직장인점심한달10만원끝(영상)_260406 - 용량변경", "소재ID": "120241471968850784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "테스트", "캠페인명": "단백밥 소재 테스트_250730", "DN_일수": 17, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 337909, "누적_매출": 1356883, "누적_ROAS": 402.0, "노출": 27684, "도달": 11156, "CTR": 1.15, "고유CTR": 2.24, "고유링크클릭수": 250, "노출당LPV율": 1.0, "LPV당구매율": 11.0, "고유링크CVR": 9.0, "CPM": 12206, "노출1천회당전환수": 0.0, "구매수": 22, "평균구매전환값": 61676, "구매전환값": 1356883, "빈도": 2.48, "CPA": 15360, "CVR": 7.0, "ATC": 55, "ATC_Rate": 17.0, "구매_Rate": 40.0, "LPView": 198, "인게이지먼트": 4861, "영상조회": 4543, "영상조회율": 16.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241471968850784", "예산점유율": 4.0, "현재상태": "ACTIVE", "판정": "✅ 1차 통과", "판정이유": "ROAS 402.0% ≥ 400%, 누적 구매 22건 (30건 미달 → 위너 대기)", "인사이트패턴": "P18", "인사이트태그": "콘텐츠_성공_광고_실패", "액션플랜": "✅ 메인캠 승격 검토: ROAS 402.0% 유지 확인 중. 누적 30건 도달 시 위너 승격. 일예산 ₩20,000 유지."}, {"소재명": "괴물단백질(단일)_260406(전환값) - 용량변경", "소재ID": "120241471151000784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "테스트", "캠페인명": "단백밥 소재 테스트_250730", "DN_일수": 17, "effective_status": "ACTIVE", "일예산": 16000, "누적_지출": 273106, "누적_매출": 1082877, "누적_ROAS": 397.0, "노출": 23637, "도달": 7917, "CTR": 1.02, "고유CTR": 2.59, "고유링크클릭수": 205, "노출당LPV율": 1.0, "LPV당구매율": 12.0, "고유링크CVR": 8.0, "CPM": 11554, "노출1천회당전환수": 0.0, "구매수": 17, "평균구매전환값": 63699, "구매전환값": 1082877, "빈도": 2.99, "CPA": 16065, "CVR": 7.0, "ATC": 27, "ATC_Rate": 11.0, "구매_Rate": 63.0, "LPView": 136, "인게이지먼트": 386, "영상조회": 153, "영상조회율": 1.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241471151000784", "예산점유율": 3.0, "현재상태": "ACTIVE", "판정": "📌 참고 소재", "판정이유": "CTR 1.02%/CVR 7.0% 양호, ROAS 397.0% 미달", "인사이트패턴": "P18", "인사이트태그": "콘텐츠_성공_광고_실패", "액션플랜": "📌 레퍼런스 보관: 후킹 성공(CTR 1.02%) but ROAS 397.0% 미달. 신규 제작 시 시작 3초 복제 활용."}, {"소재명": "[프로모션]단백밥2주년생일파티_251208(영상)", "소재ID": "120235616758030784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "테스트", "캠페인명": "단백밥 소재 테스트_250730", "DN_일수": 136, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 50467, "누적_매출": 543420, "누적_ROAS": 1077.0, "노출": 5326, "도달": 1434, "CTR": 0.34, "고유CTR": 0.49, "고유링크클릭수": 7, "노출당LPV율": 0.0, "LPV당구매율": 157.0, "고유링크CVR": 157.0, "CPM": 9476, "노출1천회당전환수": 0.0, "구매수": 11, "평균구매전환값": 49402, "구매전환값": 543420, "빈도": 3.71, "CPA": 4588, "CVR": 61.0, "ATC": 16, "ATC_Rate": 89.0, "구매_Rate": 69.0, "LPView": 7, "인게이지먼트": 507, "영상조회": 489, "영상조회율": 9.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120235616758030784", "예산점유율": 1.0, "현재상태": "ACTIVE", "판정": "⏳ 관찰", "판정이유": "노출 5326/클릭 7 — 데이터 불충분", "인사이트패턴": "P5", "인사이트태그": "소재_피로도", "액션플랜": "⏳ 관찰: D+136. 일예산 ₩20,000 유지. 24~48h 후 재판정."}, {"소재명": "자정지나면가격인상4800(슬라이드)2_260318(전환값)", "소재ID": "120240270539110784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "테스트", "캠페인명": "단백밥 소재 테스트_250730", "DN_일수": 36, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 33100, "누적_매출": 219494, "누적_ROAS": 663.0, "노출": 2759, "도달": 1384, "CTR": 1.23, "고유CTR": 1.81, "고유링크클릭수": 25, "노출당LPV율": 1.0, "LPV당구매율": 8.0, "고유링크CVR": 8.0, "CPM": 11997, "노출1천회당전환수": 0.0, "구매수": 2, "평균구매전환값": 109747, "구매전환값": 219494, "빈도": 1.99, "CPA": 16550, "CVR": 6.0, "ATC": 2, "ATC_Rate": 6.0, "구매_Rate": 100.0, "LPView": 25, "인게이지먼트": 203, "영상조회": 172, "영상조회율": 6.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120240270539110784", "예산점유율": 0.0, "현재상태": "ACTIVE", "판정": "⏳ 관찰", "판정이유": "노출 2759/클릭 25 — 데이터 불충분", "인사이트패턴": "P2", "인사이트태그": "후킹_실패", "액션플랜": "⏳ 관찰: D+36. 일예산 ₩20,000 유지. 24~48h 후 재판정. + 광고제작(신규) 트리거: 시작 3초 재기획."}, {"소재명": "자정지나면가격인상4800(슬라이드)1_260318(전환값)", "소재ID": "120240270539100784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "테스트", "캠페인명": "단백밥 소재 테스트_250730", "DN_일수": 36, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 6016, "누적_매출": 10900, "누적_ROAS": 181.0, "노출": 484, "도달": 355, "CTR": 1.03, "고유CTR": 1.13, "고유링크클릭수": 4, "노출당LPV율": 0.0, "LPV당구매율": 50.0, "고유링크CVR": 25.0, "CPM": 12430, "노출1천회당전환수": 0.0, "구매수": 1, "평균구매전환값": 10900, "구매전환값": 10900, "빈도": 1.36, "CPA": 6016, "CVR": 20.0, "ATC": 3, "ATC_Rate": 60.0, "구매_Rate": 33.0, "LPView": 2, "인게이지먼트": 5, "영상조회": 1, "영상조회율": 0.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120240270539100784", "예산점유율": 0.0, "현재상태": "ACTIVE", "판정": "⏳ 관찰", "판정이유": "노출 484/클릭 4 — 데이터 불충분", "인사이트패턴": "P4", "인사이트태그": "경매_밀림", "액션플랜": "⏳ 관찰: D+36. 일예산 ₩20,000 유지. 24~48h 후 재판정."}, {"소재명": "[프로모션]단백밥2주년생일파티_251208(단일)", "소재ID": "120235617006730784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "테스트", "캠페인명": "단백밥 소재 테스트_250730", "DN_일수": 136, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 5800, "누적_매출": 0, "누적_ROAS": 0.0, "노출": 478, "도달": 387, "CTR": 1.05, "고유CTR": 1.03, "고유링크클릭수": 4, "노출당LPV율": 1.0, "LPV당구매율": 0.0, "고유링크CVR": 0.0, "CPM": 12134, "노출1천회당전환수": 0.0, "구매수": 0, "평균구매전환값": 0, "구매전환값": 0, "빈도": 1.24, "CPA": 0, "CVR": 0.0, "ATC": 0, "ATC_Rate": 0.0, "구매_Rate": 0, "LPView": 3, "인게이지먼트": 4, "영상조회": 0, "영상조회율": 0.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120235617006730784", "예산점유율": 0.0, "현재상태": "ACTIVE", "판정": "⏳ 관찰", "판정이유": "노출 478/클릭 4 — 데이터 불충분", "인사이트패턴": "P4", "인사이트태그": "경매_밀림", "액션플랜": "⏳ 관찰: D+136. 일예산 ₩20,000 유지. 24~48h 후 재판정."}, {"소재명": "(복증)식비아끼고 7분이면 끝(영상)메인_260309", "소재ID": "120239817231840784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "메인", "캠페인명": "전환광고 (수동셋팅)_단백밥", "DN_일수": 45, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 433146, "누적_매출": 2795508, "누적_ROAS": 645.0, "노출": 24148, "도달": 13323, "CTR": 2.85, "고유CTR": 3.85, "고유링크클릭수": 513, "노출당LPV율": 2.0, "LPV당구매율": 7.0, "고유링크CVR": 7.0, "CPM": 17937, "노출1천회당전환수": 0.0, "구매수": 36, "평균구매전환값": 77653, "구매전환값": 2795508, "빈도": 1.81, "CPA": 12032, "CVR": 5.0, "ATC": 89, "ATC_Rate": 13.0, "구매_Rate": 40.0, "LPView": 494, "인게이지먼트": 4041, "영상조회": 3374, "영상조회율": 14.0, "위너여부": true, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120239817231840784", "예산점유율": 5.0, "현재상태": "ACTIVE", "판정": "🏆 위너 + 🚀 복증", "판정이유": "ROAS 645.0% ≥ 500%, 누적 구매 36건", "인사이트패턴": "", "인사이트태그": "해당없음", "액션플랜": "🚀 복증: ROAS 645.0% + 36건. 일예산 ₩20,000 → ₩30,000 (+50%)."}, {"소재명": "(복증)괴물단백질(단일)_260312(전환값)", "소재ID": "120239977172690784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "메인", "캠페인명": "전환광고 (수동셋팅)_단백밥", "DN_일수": 42, "effective_status": "ACTIVE", "일예산": 16000, "누적_지출": 355885, "누적_매출": 2058208, "누적_ROAS": 578.0, "노출": 34340, "도달": 13635, "CTR": 1.53, "고유CTR": 3.03, "고유링크클릭수": 413, "노출당LPV율": 1.0, "LPV당구매율": 8.0, "고유링크CVR": 6.0, "CPM": 10364, "노출1천회당전환수": 0.0, "구매수": 25, "평균구매전환값": 82328, "구매전환값": 2058208, "빈도": 2.52, "CPA": 14235, "CVR": 5.0, "ATC": 50, "ATC_Rate": 10.0, "구매_Rate": 50.0, "LPView": 313, "인게이지먼트": 782, "영상조회": 283, "영상조회율": 1.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120239977172690784", "예산점유율": 4.0, "현재상태": "ACTIVE", "판정": "🚀 복증 검토", "판정이유": "ROAS 578.0% ≥ 500%", "인사이트패턴": "", "인사이트태그": "해당없음", "액션플랜": "🚀 복증: ROAS 578.0%. 일예산 ₩16,000 → ₩20,800 (+30%). 빈도 3.0 시 변형 제작."}, {"소재명": "(복증)오빠단톡방비밀링크4800(릴스)_260413", "소재ID": "120241833721350784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "메인", "캠페인명": "전환광고 (수동셋팅)_단백밥", "DN_일수": 10, "effective_status": "ACTIVE", "일예산": 12000, "누적_지출": 164038, "누적_매출": 911177, "누적_ROAS": 555.0, "노출": 13251, "도달": 8261, "CTR": 2.35, "고유CTR": 2.18, "고유링크클릭수": 180, "노출당LPV율": 2.0, "LPV당구매율": 6.0, "고유링크CVR": 7.0, "CPM": 12379, "노출1천회당전환수": 0.0, "구매수": 12, "평균구매전환값": 75931, "구매전환값": 911177, "빈도": 1.6, "CPA": 13670, "CVR": 4.0, "ATC": 29, "ATC_Rate": 9.0, "구매_Rate": 41.0, "LPView": 201, "인게이지먼트": 2305, "영상조회": 2005, "영상조회율": 15.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241833721350784", "예산점유율": 2.0, "현재상태": "ACTIVE", "판정": "🚀 복증 검토", "판정이유": "ROAS 555.0% ≥ 500%", "인사이트패턴": "", "인사이트태그": "해당없음", "액션플랜": "🚀 복증: ROAS 555.0%. 일예산 ₩12,000 → ₩15,600 (+30%). 빈도 3.0 시 변형 제작."}, {"소재명": "직장인식비10만원실화(영상)_260406- 용량변경", "소재ID": "120241471552860784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "메인", "캠페인명": "전환광고 (수동셋팅)_단백밥", "DN_일수": 17, "effective_status": "ACTIVE", "일예산": 10000, "누적_지출": 221899, "누적_매출": 1070372, "누적_ROAS": 482.0, "노출": 25539, "도달": 16962, "CTR": 2.09, "고유CTR": 2.51, "고유링크클릭수": 425, "노출당LPV율": 2.0, "LPV당구매율": 4.0, "고유링크CVR": 4.0, "CPM": 8689, "노출1천회당전환수": 0.0, "구매수": 15, "평균구매전환값": 71358, "구매전환값": 1070372, "빈도": 1.51, "CPA": 14793, "CVR": 3.0, "ATC": 56, "ATC_Rate": 10.0, "구매_Rate": 27.0, "LPView": 409, "인게이지먼트": 3338, "영상조회": 2813, "영상조회율": 11.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241471552860784", "예산점유율": 3.0, "현재상태": "ACTIVE", "판정": "✅ 계속 운영", "판정이유": "ROAS 482.0% ≥ 400%", "인사이트패턴": "P15", "인사이트태그": "결제_직전_이탈", "액션플랜": "✅ 유지: ROAS 482.0%. 일예산 ₩10,000 유지. 누적 30건 도달 시 위너 승격. + 상세페이지: 배송비/소요시간 사전 고지 추가."}, {"소재명": "직장인식비10만원실화(영상)_250811", "소재ID": "120228620423900784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "메인", "캠페인명": "전환광고 (수동셋팅)_단백밥", "DN_일수": 255, "effective_status": "ACTIVE", "일예산": 14000, "누적_지출": 308135, "누적_매출": 1318360, "누적_ROAS": 428.0, "노출": 47159, "도달": 28573, "CTR": 1.63, "고유CTR": 2.06, "고유링크클릭수": 589, "노출당LPV율": 1.0, "LPV당구매율": 4.0, "고유링크CVR": 3.0, "CPM": 6534, "노출1천회당전환수": 0.0, "구매수": 20, "평균구매전환값": 65918, "구매전환값": 1318360, "빈도": 1.65, "CPA": 15407, "CVR": 3.0, "ATC": 53, "ATC_Rate": 7.0, "구매_Rate": 38.0, "LPView": 560, "인게이지먼트": 5618, "영상조회": 4903, "영상조회율": 10.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120228620423900784", "예산점유율": 4.0, "현재상태": "ACTIVE", "판정": "✅ 계속 운영", "판정이유": "ROAS 428.0% ≥ 400%", "인사이트패턴": "", "인사이트태그": "해당없음", "액션플랜": "✅ 유지: ROAS 428.0%. 일예산 ₩14,000 유지. 누적 30건 도달 시 위너 승격."}, {"소재명": "(ASC)자정지나면가격인상4800(단일1)88_260420", "소재ID": "120242235819930784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "ASC", "캠페인명": "윤식단 ASC_260420", "DN_일수": 3, "effective_status": "ACTIVE", "일예산": 89000, "누적_지출": 109119, "누적_매출": 189360, "누적_ROAS": 174.0, "노출": 9794, "도달": 6151, "CTR": 1.53, "고유CTR": 1.98, "고유링크클릭수": 122, "노출당LPV율": 1.0, "LPV당구매율": 5.0, "고유링크CVR": 4.0, "CPM": 11141, "노출1천회당전환수": 0.0, "구매수": 5, "평균구매전환값": 37872, "구매전환값": 189360, "빈도": 1.59, "CPA": 21824, "CVR": 3.0, "ATC": 17, "ATC_Rate": 11.0, "구매_Rate": 29.0, "LPView": 102, "인게이지먼트": 141, "영상조회": 7, "영상조회율": 0.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120242235819930784", "예산점유율": 1.0, "현재상태": "ACTIVE", "판정": "❌ OFF", "판정이유": "ROAS 174.0% < 350%", "인사이트패턴": "P15", "인사이트태그": "결제_직전_이탈", "액션플랜": "❌ 즉시 OFF: ROAS 174.0%. 일 ~₩89,000 절감. 예산은 위너 소재로 이관. + 상세페이지: 배송비/소요시간 사전 고지 추가."}, {"소재명": "(ASC)괴물단백질(단일)88_260420", "소재ID": "120242235791820784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "ASC", "캠페인명": "윤식단 ASC_260420", "DN_일수": 3, "effective_status": "ACTIVE", "일예산": 89000, "누적_지출": 125761, "누적_매출": 555022, "누적_ROAS": 441.0, "노출": 12811, "도달": 7493, "CTR": 1.55, "고유CTR": 2.11, "고유링크클릭수": 158, "노출당LPV율": 1.0, "LPV당구매율": 7.0, "고유링크CVR": 6.0, "CPM": 9817, "노출1천회당전환수": 0.0, "구매수": 9, "평균구매전환값": 61669, "구매전환값": 555022, "빈도": 1.71, "CPA": 13973, "CVR": 5.0, "ATC": 26, "ATC_Rate": 13.0, "구매_Rate": 35.0, "LPView": 137, "인게이지먼트": 206, "영상조회": 22, "영상조회율": 0.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120242235791820784", "예산점유율": 2.0, "현재상태": "ACTIVE", "판정": "✅ 계속 운영", "판정이유": "ROAS 441.0% ≥ 400%", "인사이트패턴": "", "인사이트태그": "해당없음", "액션플랜": "✅ 유지: ROAS 441.0%. 일예산 ₩89,000 유지. 누적 30건 도달 시 위너 승격."}, {"소재명": "(ASC)식비아끼고 7분이면 끝(영상)88_260420", "소재ID": "120242235835360784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "ASC", "캠페인명": "윤식단 ASC_260420", "DN_일수": 3, "effective_status": "ACTIVE", "일예산": 89000, "누적_지출": 12700, "누적_매출": 0, "누적_ROAS": 0.0, "노출": 946, "도달": 792, "CTR": 2.11, "고유CTR": 2.4, "고유링크클릭수": 19, "노출당LPV율": 2.0, "LPV당구매율": 0.0, "고유링크CVR": 0.0, "CPM": 13425, "노출1천회당전환수": 0.0, "구매수": 0, "평균구매전환값": 0, "구매전환값": 0, "빈도": 1.19, "CPA": 0, "CVR": 0.0, "ATC": 1, "ATC_Rate": 5.0, "구매_Rate": 0.0, "LPView": 15, "인게이지먼트": 25, "영상조회": 6, "영상조회율": 1.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120242235835360784", "예산점유율": 0.0, "현재상태": "ACTIVE", "판정": "⏳ 관찰", "판정이유": "노출 946/클릭 19 — 데이터 불충분", "인사이트패턴": "P1", "인사이트태그": "상세페이지_불일치", "액션플랜": "⏳ 관찰: D+3. 일예산 ₩89,000 유지. 24~48h 후 재판정. + 상세페이지 개선 트리거."}, {"소재명": "(ASC)괴물단백질(단일)672_260420", "소재ID": "120242235845390784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "ASC", "캠페인명": "윤식단 ASC_260420", "DN_일수": 3, "effective_status": "ACTIVE", "일예산": 89000, "누적_지출": 4938, "누적_매출": 0, "누적_ROAS": 0.0, "노출": 383, "도달": 346, "CTR": 1.57, "고유CTR": 1.16, "고유링크클릭수": 4, "노출당LPV율": 1.0, "LPV당구매율": 0.0, "고유링크CVR": 0.0, "CPM": 12893, "노출1천회당전환수": 0.0, "구매수": 0, "평균구매전환값": 0, "구매전환값": 0, "빈도": 1.11, "CPA": 0, "CVR": 0.0, "ATC": 0, "ATC_Rate": 0.0, "구매_Rate": 0, "LPView": 3, "인게이지먼트": 7, "영상조회": 3, "영상조회율": 1.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120242235845390784", "예산점유율": 0.0, "현재상태": "ACTIVE", "판정": "⏳ 관찰", "판정이유": "노출 383/클릭 4 — 데이터 불충분", "인사이트패턴": "P4", "인사이트태그": "경매_밀림", "액션플랜": "⏳ 관찰: D+3. 일예산 ₩89,000 유지. 24~48h 후 재판정."}, {"소재명": "(ASC)이가격처음일걸(단일)_260420", "소재ID": "120242236004240784", "소재이미지URL": "", "상품": "단백밥", "캠페인유형": "ASC", "캠페인명": "윤식단 ASC_260420", "DN_일수": 3, "effective_status": "ACTIVE", "일예산": 89000, "누적_지출": 1455, "누적_매출": 0, "누적_ROAS": 0.0, "노출": 120, "도달": 104, "CTR": 0.0, "고유CTR": 0, "고유링크클릭수": 0, "노출당LPV율": 0.0, "LPV당구매율": 0, "고유링크CVR": 0, "CPM": 12125, "노출1천회당전환수": 0.0, "구매수": 0, "평균구매전환값": 0, "구매전환값": 0, "빈도": 1.15, "CPA": 0, "CVR": 0, "ATC": 0, "ATC_Rate": 0, "구매_Rate": 0, "LPView": 0, "인게이지먼트": 0, "영상조회": 0, "영상조회율": 0.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120242236004240784", "예산점유율": 0.0, "현재상태": "ACTIVE", "판정": "⏳ 관찰", "판정이유": "노출 120/클릭 0 — 데이터 불충분", "인사이트패턴": "P4", "인사이트태그": "경매_밀림", "액션플랜": "⏳ 관찰: D+3. 일예산 ₩89,000 유지. 24~48h 후 재판정."}, {"소재명": "[제육]진짜남자의소울푸드(단일)_260406", "소재ID": "120241292647250784", "소재이미지URL": "", "상품": "순수단백", "캠페인유형": "테스트", "캠페인명": "순수단백 소재 테스트_260105", "DN_일수": 20, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 344146, "누적_매출": 1250536, "누적_ROAS": 363.0, "노출": 29027, "도달": 12848, "CTR": 1.99, "고유CTR": 3.49, "고유링크클릭수": 448, "노출당LPV율": 2.0, "LPV당구매율": 4.0, "고유링크CVR": 4.0, "CPM": 11856, "노출1천회당전환수": 0.0, "구매수": 20, "평균구매전환값": 62527, "구매전환값": 1250536, "빈도": 2.26, "CPA": 17207, "CVR": 3.0, "ATC": 40, "ATC_Rate": 7.0, "구매_Rate": 50.0, "LPView": 461, "인게이지먼트": 652, "영상조회": 72, "영상조회율": 0.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241292647250784", "예산점유율": 4.0, "현재상태": "ACTIVE", "판정": "❌ OFF", "판정이유": "ROAS 363.0% < 400%, CTR/CVR 미달", "인사이트패턴": "", "인사이트태그": "해당없음", "액션플랜": "❌ 즉시 OFF: ROAS 363.0%. 일 ~₩20,000 절감. 예산은 위너 소재로 이관."}, {"소재명": "요즘헬창은이거먹는다(단일3)_260105", "소재ID": "120236722432410784", "소재이미지URL": "", "상품": "순수단백", "캠페인유형": "테스트", "캠페인명": "순수단백 소재 테스트_260105", "DN_일수": 113, "effective_status": "WITH_ISSUES", "일예산": 10000, "누적_지출": 52650, "누적_매출": 27700, "누적_ROAS": 53.0, "노출": 7897, "도달": 7058, "CTR": 2.09, "고유CTR": 2.1, "고유링크클릭수": 148, "노출당LPV율": 2.0, "LPV당구매율": 1.0, "고유링크CVR": 1.0, "CPM": 6667, "노출1천회당전환수": 0.0, "구매수": 1, "평균구매전환값": 27700, "구매전환값": 27700, "빈도": 1.12, "CPA": 52650, "CVR": 1.0, "ATC": 9, "ATC_Rate": 5.0, "구매_Rate": 11.0, "LPView": 127, "인게이지먼트": 162, "영상조회": 0, "영상조회율": 0.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120236722432410784", "예산점유율": 0, "현재상태": "ACTIVE", "판정": "❌ OFF", "판정이유": "ROAS 53.0% < 400%, CTR/CVR 미달", "인사이트패턴": "P1", "인사이트태그": "상세페이지_불일치", "액션플랜": "❌ 즉시 OFF: ROAS 53.0%. 일 ~₩10,000 절감. 예산은 위너 소재로 이관. + 상세페이지 개선 트리거."}, {"소재명": "[함박]식후나른함육즙파티_260310", "소재ID": "120239871696990784", "소재이미지URL": "", "상품": "순수단백", "캠페인유형": "테스트", "캠페인명": "순수단백 소재 테스트_260105", "DN_일수": 44, "effective_status": "ACTIVE", "일예산": 15000, "누적_지출": 332239, "누적_매출": 1587047, "누적_ROAS": 478.0, "노출": 28169, "도달": 14858, "CTR": 3.44, "고유CTR": 5.31, "고유링크클릭수": 789, "노출당LPV율": 3.0, "LPV당구매율": 3.0, "고유링크CVR": 3.0, "CPM": 11794, "노출1천회당전환수": 0.0, "구매수": 21, "평균구매전환값": 75574, "구매전환값": 1587047, "빈도": 1.9, "CPA": 15821, "CVR": 2.0, "ATC": 58, "ATC_Rate": 6.0, "구매_Rate": 36.0, "LPView": 808, "인게이지먼트": 1153, "영상조회": 225, "영상조회율": 1.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120239871696990784", "예산점유율": 4.0, "현재상태": "ACTIVE", "판정": "✅ 1차 통과", "판정이유": "ROAS 478.0% ≥ 400%, 누적 구매 21건 (30건 미달 → 위너 대기)", "인사이트패턴": "", "인사이트태그": "해당없음", "액션플랜": "✅ 메인캠 승격 검토: ROAS 478.0% 유지 확인 중. 누적 30건 도달 시 위너 승격. 일예산 ₩15,000 유지."}, {"소재명": "[제육]진짜남자의소울푸드(슬라이드)_260406", "소재ID": "120241284828840784", "소재이미지URL": "", "상품": "순수단백", "캠페인유형": "테스트", "캠페인명": "순수단백 소재 테스트_260105", "DN_일수": 20, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 5944, "누적_매출": 141532, "누적_ROAS": 2381.0, "노출": 453, "도달": 363, "CTR": 1.32, "고유CTR": 1.38, "고유링크클릭수": 5, "노출당LPV율": 1.0, "LPV당구매율": 50.0, "고유링크CVR": 40.0, "CPM": 13121, "노출1천회당전환수": 0.0, "구매수": 2, "평균구매전환값": 70766, "구매전환값": 141532, "빈도": 1.25, "CPA": 2972, "CVR": 33.0, "ATC": 4, "ATC_Rate": 67.0, "구매_Rate": 50.0, "LPView": 4, "인게이지먼트": 27, "영상조회": 20, "영상조회율": 4.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241284828840784", "예산점유율": 0.0, "현재상태": "ACTIVE", "판정": "⏳ 관찰", "판정이유": "노출 453/클릭 5 — 데이터 불충분", "인사이트패턴": "P4", "인사이트태그": "경매_밀림", "액션플랜": "⏳ 관찰: D+20. 일예산 ₩20,000 유지. 24~48h 후 재판정."}, {"소재명": "요즘헬창은이거먹는다(단일2)_260105", "소재ID": "120236722888390784", "소재이미지URL": "", "상품": "순수단백", "캠페인유형": "테스트", "캠페인명": "순수단백 소재 테스트_260105", "DN_일수": 113, "effective_status": "WITH_ISSUES", "일예산": 10000, "누적_지출": 704, "누적_매출": 0, "누적_ROAS": 0.0, "노출": 74, "도달": 72, "CTR": 4.05, "고유CTR": 2.78, "고유링크클릭수": 2, "노출당LPV율": 3.0, "LPV당구매율": 0.0, "고유링크CVR": 0.0, "CPM": 9514, "노출1천회당전환수": 0.0, "구매수": 0, "평균구매전환값": 0, "구매전환값": 0, "빈도": 1.03, "CPA": 0, "CVR": 0.0, "ATC": 0, "ATC_Rate": 0.0, "구매_Rate": 0, "LPView": 2, "인게이지먼트": 2, "영상조회": 0, "영상조회율": 0.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120236722888390784", "예산점유율": 0, "현재상태": "ACTIVE", "판정": "⏳ 관찰", "판정이유": "노출 74/클릭 2 — 데이터 불충분", "인사이트패턴": "P4", "인사이트태그": "경매_밀림", "액션플랜": "⏳ 관찰: D+113. 일예산 ₩10,000 유지. 24~48h 후 재판정."}, {"소재명": "닭을이겼습니다(슬라이드)_260108(복증)", "소재ID": "120236980814170784", "소재이미지URL": "", "상품": "순수단백", "캠페인유형": "메인", "캠페인명": "순수단백 메인 캠페인_260108 (전환수동)", "DN_일수": 105, "effective_status": "ACTIVE", "일예산": 15000, "누적_지출": 337175, "누적_매출": 2484453, "누적_ROAS": 737.0, "노출": 46116, "도달": 26818, "CTR": 2.81, "고유CTR": 3.93, "고유링크클릭수": 1053, "노출당LPV율": 2.0, "LPV당구매율": 3.0, "고유링크CVR": 3.0, "CPM": 7311, "노출1천회당전환수": 0.0, "구매수": 34, "평균구매전환값": 73072, "구매전환값": 2484453, "빈도": 1.72, "CPA": 9917, "CVR": 3.0, "ATC": 84, "ATC_Rate": 6.0, "구매_Rate": 40.0, "LPView": 1105, "인게이지먼트": 1224, "영상조회": 0, "영상조회율": 0.0, "위너여부": true, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120236980814170784", "예산점유율": 4.0, "현재상태": "ACTIVE", "판정": "🏆 위너 + 🚀 복증", "판정이유": "ROAS 737.0% ≥ 500%, 누적 구매 34건", "인사이트패턴": "", "인사이트태그": "해당없음", "액션플랜": "🚀 복증: ROAS 737.0% + 34건. 일예산 ₩15,000 → ₩22,500 (+50%)."}, {"소재명": "마라탕생각에무너졌나요(슬라이드)_260316", "소재ID": "120240036050780784", "소재이미지URL": "", "상품": "밸런시", "캠페인유형": "테스트", "캠페인명": "밸런시 테스트 캠페인_260316", "DN_일수": 41, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 239968, "누적_매출": 797303, "누적_ROAS": 332.0, "노출": 17143, "도달": 7549, "CTR": 2.08, "고유CTR": 3.05, "고유링크클릭수": 230, "노출당LPV율": 1.0, "LPV당구매율": 5.0, "고유링크CVR": 5.0, "CPM": 13998, "노출1천회당전환수": 0.0, "구매수": 12, "평균구매전환값": 66442, "구매전환값": 797303, "빈도": 2.27, "CPA": 19997, "CVR": 3.0, "ATC": 19, "ATC_Rate": 5.0, "구매_Rate": 63.0, "LPView": 240, "인게이지먼트": 1064, "영상조회": 723, "영상조회율": 4.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120240036050780784", "예산점유율": 3.0, "현재상태": "ACTIVE", "판정": "❌ OFF", "판정이유": "ROAS 332.0% < 400%, CTR/CVR 미달", "인사이트패턴": "", "인사이트태그": "해당없음", "액션플랜": "❌ 즉시 OFF: ROAS 332.0%. 일 ~₩20,000 절감. 예산은 위너 소재로 이관."}, {"소재명": "편의점도시락맛은있는데1186(슬라이드)_260413", "소재ID": "120241829297100784", "소재이미지URL": "", "상품": "밸런시", "캠페인유형": "테스트", "캠페인명": "밸런시 테스트 캠페인_260316", "DN_일수": 10, "effective_status": "ACTIVE", "일예산": 13000, "누적_지출": 141513, "누적_매출": 1083561, "누적_ROAS": 766.0, "노출": 12537, "도달": 3524, "CTR": 3.16, "고유CTR": 5.79, "고유링크클릭수": 204, "노출당LPV율": 2.0, "LPV당구매율": 5.0, "고유링크CVR": 7.0, "CPM": 11288, "노출1천회당전환수": 0.0, "구매수": 15, "평균구매전환값": 72237, "구매전환값": 1083561, "빈도": 3.56, "CPA": 9434, "CVR": 4.0, "ATC": 19, "ATC_Rate": 5.0, "구매_Rate": 79.0, "LPView": 294, "인게이지먼트": 2937, "영상조회": 2472, "영상조회율": 20.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241829297100784", "예산점유율": 2.0, "현재상태": "ACTIVE", "판정": "🚀 메인 승격 검토", "판정이유": "ROAS 766.0% ≥ 500%", "인사이트패턴": "", "인사이트태그": "해당없음", "액션플랜": "🚀 메인 승격 검토: ROAS 766.0% ≥ 500%. 누적 30건 도달 대기 후 메인 이관."}, {"소재명": "마라탕생각에무너졌나요(단일)_260316", "소재ID": "120240035785120784", "소재이미지URL": "", "상품": "밸런시", "캠페인유형": "테스트", "캠페인명": "밸런시 테스트 캠페인_260316", "DN_일수": 41, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 126169, "누적_매출": 666148, "누적_ROAS": 528.0, "노출": 9870, "도달": 3980, "CTR": 1.13, "고유CTR": 2.29, "고유링크클릭수": 91, "노출당LPV율": 1.0, "LPV당구매율": 13.0, "고유링크CVR": 10.0, "CPM": 12783, "노출1천회당전환수": 0.0, "구매수": 9, "평균구매전환값": 74016, "구매전환값": 666148, "빈도": 2.48, "CPA": 14019, "CVR": 8.0, "ATC": 23, "ATC_Rate": 21.0, "구매_Rate": 39.0, "LPView": 67, "인게이지먼트": 246, "영상조회": 133, "영상조회율": 1.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120240035785120784", "예산점유율": 2.0, "현재상태": "ACTIVE", "판정": "🚀 메인 승격 검토", "판정이유": "ROAS 528.0% ≥ 500%", "인사이트패턴": "P18", "인사이트태그": "콘텐츠_성공_광고_실패", "액션플랜": "🚀 메인 승격 검토: ROAS 528.0% ≥ 500%. 누적 30건 도달 대기 후 메인 이관."}, {"소재명": "이렇게맛있어도되나ad_260316", "소재ID": "120240036421830784", "소재이미지URL": "", "상품": "밸런시", "캠페인유형": "테스트", "캠페인명": "밸런시 테스트 캠페인_260316", "DN_일수": 41, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 370155, "누적_매출": 1869158, "누적_ROAS": 505.0, "노출": 27279, "도달": 6538, "CTR": 1.35, "고유CTR": 3.49, "고유링크클릭수": 228, "노출당LPV율": 1.0, "LPV당구매율": 15.0, "고유링크CVR": 12.0, "CPM": 13569, "노출1천회당전환수": 0.0, "구매수": 28, "평균구매전환값": 66756, "구매전환값": 1869158, "빈도": 4.17, "CPA": 13220, "CVR": 8.0, "ATC": 61, "ATC_Rate": 17.0, "구매_Rate": 46.0, "LPView": 193, "인게이지먼트": 512, "영상조회": 155, "영상조회율": 1.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120240036421830784", "예산점유율": 4.0, "현재상태": "ACTIVE", "판정": "🚀 메인 승격 검토", "판정이유": "ROAS 505.0% ≥ 500%", "인사이트패턴": "P5", "인사이트태그": "소재_피로도", "액션플랜": "🚀 메인 승격 검토: ROAS 505.0% ≥ 500%. 누적 30건 도달 대기 후 메인 이관."}, {"소재명": "가격이게되네main_promotion(슬라이드)_260409(전환값)", "소재ID": "120241634578910784", "소재이미지URL": "", "상품": "밸런시", "캠페인유형": "테스트", "캠페인명": "밸런시 테스트 캠페인_260316", "DN_일수": 14, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 164489, "누적_매출": 815483, "누적_ROAS": 496.0, "노출": 11484, "도달": 4753, "CTR": 1.37, "고유CTR": 2.74, "고유링크클릭수": 130, "노출당LPV율": 1.0, "LPV당구매율": 11.0, "고유링크CVR": 8.0, "CPM": 14323, "노출1천회당전환수": 0.0, "구매수": 11, "평균구매전환값": 74135, "구매전환값": 815483, "빈도": 2.42, "CPA": 14954, "CVR": 7.0, "ATC": 28, "ATC_Rate": 18.0, "구매_Rate": 39.0, "LPView": 99, "인게이지먼트": 341, "영상조회": 190, "영상조회율": 2.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241634578910784", "예산점유율": 2.0, "현재상태": "ACTIVE", "판정": "✅ 1차 통과", "판정이유": "ROAS 496.0% ≥ 400%, 누적 구매 11건 (30건 미달 → 위너 대기)", "인사이트패턴": "P18", "인사이트태그": "콘텐츠_성공_광고_실패", "액션플랜": "✅ 메인캠 승격 검토: ROAS 496.0% 유지 확인 중. 누적 30건 도달 시 위너 승격. 일예산 ₩20,000 유지."}, {"소재명": "가격이게되네main_promotion(단일)_260409(전환값)", "소재ID": "120241634578920784", "소재이미지URL": "", "상품": "밸런시", "캠페인유형": "테스트", "캠페인명": "밸런시 테스트 캠페인_260316", "DN_일수": 14, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 111055, "누적_매출": 506014, "누적_ROAS": 456.0, "노출": 7342, "도달": 3767, "CTR": 1.84, "고유CTR": 3.0, "고유링크클릭수": 113, "노출당LPV율": 1.0, "LPV당구매율": 5.0, "고유링크CVR": 4.0, "CPM": 15126, "노출1천회당전환수": 0.0, "구매수": 5, "평균구매전환값": 101203, "구매전환값": 506014, "빈도": 1.95, "CPA": 22211, "CVR": 4.0, "ATC": 16, "ATC_Rate": 12.0, "구매_Rate": 31.0, "LPView": 106, "인게이지먼트": 159, "영상조회": 21, "영상조회율": 0.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241634578920784", "예산점유율": 1.0, "현재상태": "ACTIVE", "판정": "✅ 1차 통과", "판정이유": "ROAS 456.0% ≥ 400%, 누적 구매 5건 (30건 미달 → 위너 대기)", "인사이트패턴": "", "인사이트태그": "해당없음", "액션플랜": "✅ 메인캠 승격 검토: ROAS 456.0% 유지 확인 중. 누적 30건 도달 시 위너 승격. 일예산 ₩20,000 유지."}, {"소재명": "2995원일때쟁여두세요main_promotion_260316", "소재ID": "120240036552760784", "소재이미지URL": "", "상품": "밸런시", "캠페인유형": "테스트", "캠페인명": "밸런시 테스트 캠페인_260316", "DN_일수": 41, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 272225, "누적_매출": 1151416, "누적_ROAS": 423.0, "노출": 17085, "도달": 8694, "CTR": 2.19, "고유CTR": 3.54, "고유링크클릭수": 308, "노출당LPV율": 2.0, "LPV당구매율": 6.0, "고유링크CVR": 6.0, "CPM": 15934, "노출1천회당전환수": 0.0, "구매수": 19, "평균구매전환값": 60601, "구매전환값": 1151416, "빈도": 1.97, "CPA": 14328, "CVR": 5.0, "ATC": 54, "ATC_Rate": 14.0, "구매_Rate": 35.0, "LPView": 315, "인게이지먼트": 414, "영상조회": 38, "영상조회율": 0.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120240036552760784", "예산점유율": 3.0, "현재상태": "ACTIVE", "판정": "✅ 1차 통과", "판정이유": "ROAS 423.0% ≥ 400%, 누적 구매 19건 (30건 미달 → 위너 대기)", "인사이트패턴": "", "인사이트태그": "해당없음", "액션플랜": "✅ 메인캠 승격 검토: ROAS 423.0% 유지 확인 중. 누적 30건 도달 시 위너 승격. 일예산 ₩20,000 유지."}, {"소재명": "편의점도시락맛은있는데1186(단일)_260413", "소재ID": "120241829236010784", "소재이미지URL": "", "상품": "밸런시", "캠페인유형": "테스트", "캠페인명": "밸런시 테스트 캠페인_260316", "DN_일수": 10, "effective_status": "ACTIVE", "일예산": 13000, "누적_지출": 5886, "누적_매출": 0, "누적_ROAS": 0.0, "노출": 369, "도달": 279, "CTR": 1.08, "고유CTR": 1.43, "고유링크클릭수": 4, "노출당LPV율": 0.0, "LPV당구매율": 0.0, "고유링크CVR": 0.0, "CPM": 15951, "노출1천회당전환수": 0.0, "구매수": 0, "평균구매전환값": 0, "구매전환값": 0, "빈도": 1.32, "CPA": 0, "CVR": 0.0, "ATC": 0, "ATC_Rate": 0.0, "구매_Rate": 0, "LPView": 1, "인게이지먼트": 4, "영상조회": 0, "영상조회율": 0.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241829236010784", "예산점유율": 0.0, "현재상태": "ACTIVE", "판정": "⏳ 관찰", "판정이유": "노출 369/클릭 4 — 데이터 불충분", "인사이트패턴": "P4", "인사이트태그": "경매_밀림", "액션플랜": "⏳ 관찰: D+10. 일예산 ₩13,000 유지. 24~48h 후 재판정."}, {"소재명": "(복증)편의점도시락맛은있는데1186(슬라이드)_260420", "소재ID": "120242235299100784", "소재이미지URL": "", "상품": "밸런시", "캠페인유형": "메인", "캠페인명": "밸런시 메인 캠페인_260316", "DN_일수": 3, "effective_status": "ACTIVE", "일예산": 13000, "누적_지출": 38341, "누적_매출": 111366, "누적_ROAS": 290.0, "노출": 2695, "도달": 1145, "CTR": 4.38, "고유CTR": 6.38, "고유링크클릭수": 73, "노출당LPV율": 3.0, "LPV당구매율": 5.0, "고유링크CVR": 5.0, "CPM": 14227, "노출1천회당전환수": 0.0, "구매수": 4, "평균구매전환값": 27842, "구매전환값": 111366, "빈도": 2.35, "CPA": 9585, "CVR": 3.0, "ATC": 4, "ATC_Rate": 3.0, "구매_Rate": 100.0, "LPView": 86, "인게이지먼트": 818, "영상조회": 690, "영상조회율": 26.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120242235299100784", "예산점유율": 0.0, "현재상태": "ACTIVE", "판정": "❌ OFF", "판정이유": "ROAS 290.0% < 350%", "인사이트패턴": "", "인사이트태그": "해당없음", "액션플랜": "❌ 즉시 OFF: ROAS 290.0%. 일 ~₩13,000 절감. 예산은 위너 소재로 이관."}, {"소재명": "(복증)풀만뜯다폭식차라리밥(단일)_260408", "소재ID": "120241576486890784", "소재이미지URL": "", "상품": "밸런시", "캠페인유형": "메인", "캠페인명": "밸런시 메인 캠페인_260316", "DN_일수": 15, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 214212, "누적_매출": 412252, "누적_ROAS": 192.0, "노출": 15381, "도달": 5972, "CTR": 1.42, "고유CTR": 2.68, "고유링크클릭수": 160, "노출당LPV율": 1.0, "LPV당구매율": 6.0, "고유링크CVR": 5.0, "CPM": 13927, "노출1천회당전환수": 0.0, "구매수": 8, "평균구매전환값": 51532, "구매전환값": 412252, "빈도": 2.58, "CPA": 26776, "CVR": 4.0, "ATC": 11, "ATC_Rate": 5.0, "구매_Rate": 73.0, "LPView": 131, "인게이지먼트": 284, "영상조회": 75, "영상조회율": 0.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241576486890784", "예산점유율": 3.0, "현재상태": "ACTIVE", "판정": "❌ OFF", "판정이유": "ROAS 192.0% < 350%", "인사이트패턴": "P18", "인사이트태그": "콘텐츠_성공_광고_실패", "액션플랜": "❌ 즉시 OFF: ROAS 192.0%. 일 ~₩20,000 절감. 예산은 위너 소재로 이관."}, {"소재명": "가격이게되네main_promotion(단일)_260416(전환값)", "소재ID": "120242009148620784", "소재이미지URL": "", "상품": "밸런시", "캠페인유형": "메인", "캠페인명": "밸런시 메인 캠페인_260316", "DN_일수": 7, "effective_status": "ACTIVE", "일예산": 15000, "누적_지출": 76252, "누적_매출": 110542, "누적_ROAS": 145.0, "노출": 4496, "도달": 2506, "CTR": 1.47, "고유CTR": 2.31, "고유링크클릭수": 58, "노출당LPV율": 1.0, "LPV당구매율": 2.0, "고유링크CVR": 2.0, "CPM": 16960, "노출1천회당전환수": 0.0, "구매수": 1, "평균구매전환값": 110542, "구매전환값": 110542, "빈도": 1.79, "CPA": 76252, "CVR": 2.0, "ATC": 6, "ATC_Rate": 9.0, "구매_Rate": 17.0, "LPView": 41, "인게이지먼트": 77, "영상조회": 12, "영상조회율": 0.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120242009148620784", "예산점유율": 1.0, "현재상태": "ACTIVE", "판정": "❌ OFF", "판정이유": "ROAS 145.0% < 350%", "인사이트패턴": "P2", "인사이트태그": "후킹_실패", "액션플랜": "❌ 즉시 OFF: ROAS 145.0%. 일 ~₩15,000 절감. 예산은 위너 소재로 이관. + 광고제작(신규) 트리거: 시작 3초 재기획."}, {"소재명": "(복증)풀만뜯다폭식차라리밥(슬라이드)_260408", "소재ID": "120241576486870784", "소재이미지URL": "", "상품": "밸런시", "캠페인유형": "메인", "캠페인명": "밸런시 메인 캠페인_260316", "DN_일수": 15, "effective_status": "ACTIVE", "일예산": 20000, "누적_지출": 83635, "누적_매출": 724159, "누적_ROAS": 866.0, "노출": 6737, "도달": 2404, "CTR": 2.37, "고유CTR": 3.95, "고유링크클릭수": 95, "노출당LPV율": 2.0, "LPV당구매율": 7.0, "고유링크CVR": 9.0, "CPM": 12414, "노출1천회당전환수": 0.0, "구매수": 9, "평균구매전환값": 80462, "구매전환값": 724159, "빈도": 2.8, "CPA": 9293, "CVR": 6.0, "ATC": 16, "ATC_Rate": 10.0, "구매_Rate": 56.0, "LPView": 125, "인게이지먼트": 953, "영상조회": 781, "영상조회율": 12.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241576486870784", "예산점유율": 1.0, "현재상태": "ACTIVE", "판정": "🚀 복증 검토", "판정이유": "ROAS 866.0% ≥ 500%", "인사이트패턴": "", "인사이트태그": "해당없음", "액션플랜": "🚀 복증: ROAS 866.0%. 일예산 ₩20,000 → ₩26,000 (+30%). 빈도 3.0 시 변형 제작."}, {"소재명": "가격이게되네main_promotion(슬라이드)_260416(전환값)", "소재ID": "120242009148600784", "소재이미지URL": "", "상품": "밸런시", "캠페인유형": "메인", "캠페인명": "밸런시 메인 캠페인_260316", "DN_일수": 7, "effective_status": "ACTIVE", "일예산": 15000, "누적_지출": 48155, "누적_매출": 115780, "누적_ROAS": 240.0, "노출": 3115, "도달": 1742, "CTR": 1.22, "고유CTR": 1.66, "고유링크클릭수": 29, "노출당LPV율": 1.0, "LPV당구매율": 9.0, "고유링크CVR": 7.0, "CPM": 15459, "노출1천회당전환수": 0.0, "구매수": 2, "평균구매전환값": 57890, "구매전환값": 115780, "빈도": 1.79, "CPA": 24078, "CVR": 5.0, "ATC": 9, "ATC_Rate": 24.0, "구매_Rate": 22.0, "LPView": 23, "인게이지먼트": 101, "영상조회": 61, "영상조회율": 2.0, "위너여부": false, "위너이력": false, "소재_라이프사이클": "신규", "개선시도_횟수": 0, "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120242009148600784", "예산점유율": 1.0, "현재상태": "ACTIVE", "판정": "⏳ 관찰", "판정이유": "노출 3115/클릭 29 — 데이터 불충분", "인사이트패턴": "P2", "인사이트태그": "후킹_실패", "액션플랜": "⏳ 관찰: D+7. 일예산 ₩15,000 유지. 24~48h 후 재판정. + 광고제작(신규) 트리거: 시작 3초 재기획."}], "monthly_profit": {"단백밥": [{"월": "2026-04", "구매전환값": 30781259, "원가율": 0.65, "원가액": 20007818, "매출총이익": 10773441, "광고지출": 6057073, "순이익": 4716368, "순이익률": 15.0, "ROAS": 508.0}], "밸런시": [{"월": "2026-04", "구매전환값": 10775683, "원가율": 0.65, "원가액": 7004194, "매출총이익": 3771489, "광고지출": 2738086, "순이익": 1033403, "순이익률": 10.0, "ROAS": 394.0}], "순수단백": [{"월": "2026-04", "구매전환값": 5593928, "원가율": 0.77, "원가액": 4307325, "매출총이익": 1286603, "광고지출": 1154058, "순이익": 132545, "순이익률": 2.0, "ROAS": 485.0}]}, "funnel_insights": [{"severity": "P0", "pattern": "P5", "tag": "소재_피로도", "target": "[프로모션]단백밥2주년생일파티_251208(영상)", "ad_id": "120235616758030784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120235616758030784", "action": "변형 소재 선제 준비 — 빈도 3.71"}, {"severity": "P0", "pattern": "P5", "tag": "소재_피로도", "target": "[프로모션]단백밥2주년생일파티_251208(슬라이드)", "ad_id": "120235619176430784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120235619176430784", "action": "변형 소재 선제 준비 — 빈도 3.4"}, {"severity": "P0", "pattern": "P1", "tag": "상세페이지_불일치", "target": "요즘헬창은이거먹는다(단일3)_260105", "ad_id": "120236722432410784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120236722432410784", "action": "상세페이지 개선 — 광고 메시지와 랜딩 일치 점검"}, {"severity": "P0", "pattern": "P2", "tag": "후킹_실패", "target": "직장인점심한달10만원끝(영상)_260211", "ad_id": "120238400095430784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120238400095430784", "action": "후킹 강화 — 시작 3초 재기획"}, {"severity": "P0", "pattern": "P5", "tag": "소재_피로도", "target": "이렇게맛있어도되나ad_260316", "ad_id": "120240036421830784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120240036421830784", "action": "변형 소재 선제 준비 — 빈도 4.17"}, {"severity": "P0", "pattern": "P2", "tag": "후킹_실패", "target": "자정지나면가격인상4800(슬라이드)2_260318(전환값)", "ad_id": "120240270539110784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120240270539110784", "action": "후킹 강화 — 시작 3초 재기획"}, {"severity": "P0", "pattern": "P2", "tag": "후킹_실패", "target": "가격이게되네main_promotion(슬라이드)_260416(전환값)", "ad_id": "120242009148600784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120242009148600784", "action": "후킹 강화 — 시작 3초 재기획"}, {"severity": "P0", "pattern": "P2", "tag": "후킹_실패", "target": "가격이게되네main_promotion(단일)_260416(전환값)", "ad_id": "120242009148620784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120242009148620784", "action": "후킹 강화 — 시작 3초 재기획"}, {"severity": "P0", "pattern": "P1", "tag": "상세페이지_불일치", "target": "(ASC)식비아끼고 7분이면 끝(영상)88_260420", "ad_id": "120242235835360784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120242235835360784", "action": "상세페이지 개선 — 광고 메시지와 랜딩 일치 점검"}, {"severity": "P1", "pattern": "P4", "tag": "경매_밀림", "target": "[프로모션]단백밥2주년생일파티_251208(단일)", "ad_id": "120235617006730784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120235617006730784", "action": "예산/입찰 조정 + 오디언스 확장"}, {"severity": "P1", "pattern": "P4", "tag": "경매_밀림", "target": "요즘헬창은이거먹는다(단일2)_260105", "ad_id": "120236722888390784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120236722888390784", "action": "예산/입찰 조정 + 오디언스 확장"}, {"severity": "P1", "pattern": "P18", "tag": "콘텐츠_성공_광고_실패", "target": "괴물단백질(단일)_260226(전환값)", "ad_id": "120239263750890784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120239263750890784", "action": "전환형 CTA 삽입"}, {"severity": "P1", "pattern": "P18", "tag": "콘텐츠_성공_광고_실패", "target": "마라탕생각에무너졌나요(단일)_260316", "ad_id": "120240035785120784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120240035785120784", "action": "전환형 CTA 삽입"}, {"severity": "P1", "pattern": "P4", "tag": "경매_밀림", "target": "자정지나면가격인상4800(슬라이드)1_260318(전환값)", "ad_id": "120240270539100784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120240270539100784", "action": "예산/입찰 조정 + 오디언스 확장"}, {"severity": "P1", "pattern": "P4", "tag": "경매_밀림", "target": "[제육]진짜남자의소울푸드(슬라이드)_260406", "ad_id": "120241284828840784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241284828840784", "action": "예산/입찰 조정 + 오디언스 확장"}, {"severity": "P1", "pattern": "P18", "tag": "콘텐츠_성공_광고_실패", "target": "괴물단백질(단일)_260406(전환값) - 용량변경", "ad_id": "120241471151000784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241471151000784", "action": "전환형 CTA 삽입"}, {"severity": "P1", "pattern": "P15", "tag": "결제_직전_이탈", "target": "직장인식비10만원실화(영상)_260406- 용량변경", "ad_id": "120241471552860784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241471552860784", "action": "배송비 사전 고지 + 결제 페이지 간소화"}, {"severity": "P1", "pattern": "P18", "tag": "콘텐츠_성공_광고_실패", "target": "직장인점심한달10만원끝(영상)_260406 - 용량변경", "ad_id": "120241471968850784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241471968850784", "action": "전환형 CTA 삽입"}, {"severity": "P1", "pattern": "P18", "tag": "콘텐츠_성공_광고_실패", "target": "(복증)풀만뜯다폭식차라리밥(단일)_260408", "ad_id": "120241576486890784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241576486890784", "action": "전환형 CTA 삽입"}, {"severity": "P1", "pattern": "P18", "tag": "콘텐츠_성공_광고_실패", "target": "가격이게되네main_promotion(슬라이드)_260409(전환값)", "ad_id": "120241634578910784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241634578910784", "action": "전환형 CTA 삽입"}, {"severity": "P1", "pattern": "P4", "tag": "경매_밀림", "target": "편의점도시락맛은있는데1186(단일)_260413", "ad_id": "120241829236010784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120241829236010784", "action": "예산/입찰 조정 + 오디언스 확장"}, {"severity": "P1", "pattern": "P15", "tag": "결제_직전_이탈", "target": "(ASC)자정지나면가격인상4800(단일1)88_260420", "ad_id": "120242235819930784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120242235819930784", "action": "배송비 사전 고지 + 결제 페이지 간소화"}, {"severity": "P1", "pattern": "P4", "tag": "경매_밀림", "target": "(ASC)괴물단백질(단일)672_260420", "ad_id": "120242235845390784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120242235845390784", "action": "예산/입찰 조정 + 오디언스 확장"}, {"severity": "P1", "pattern": "P4", "tag": "경매_밀림", "target": "(ASC)이가격처음일걸(단일)_260420", "ad_id": "120242236004240784", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120242236004240784", "action": "예산/입찰 조정 + 오디언스 확장"}], "ga4_profit_daily": [], "ga4_profit_monthly": [], "facebook_pages": {"단백밥": "https://www.facebook.com/yundiet.official", "순수단백": "https://www.facebook.com/yundiet.pure", "밸런시": "https://www.facebook.com/yundiet.balancy"}, "validation": {"total_spend": {"value": 9949217, "source": "Meta API (ad level sum, MTD)"}, "total_revenue": {"value": 47150870, "source": "Meta API (ad level sum, MTD)"}, "blended_roas": {"value": 474.0, "source": "total_revenue / total_spend × 100"}, "active_ads": {"value": 41, "source": "ads effective_status=ACTIVE"}, "off_ads": {"value": 33, "source": "ads effective_status in [PAUSED,ARCHIVED,...]"}, "daily_budget_live": {"value": 523000, "source": "Step 1.5 ACTIVE adsets sum"}, "by_category": [{"카테고리": "단백밥", "지출": 5803100, "매출": 30036877, "ROAS": 518.0, "광고수": 28}, {"카테고리": "단백밥 ASC", "지출": 253973, "매출": 744382, "ROAS": 293.0, "광고수": 5}, {"카테고리": "밸런시", "지출": 2738086, "매출": 10775683, "ROAS": 394.0, "광고수": 31}, {"카테고리": "순수단백", "지출": 1154058, "매출": 5593928, "ROAS": 485.0, "광고수": 12}], "notes": "Meta 광고 관리자 ▶ '보고서' ▶ 기간 '이번 달' 리포트와 대조하여 ±1% 범위 내 확인"}};</script>
+<script>
+(function () {
+  const dataEl = document.getElementById('dashboard-data');
+  const raw = dataEl.textContent.trim();
+  const DATA = raw && !raw.startsWith('/*') ? JSON.parse(raw) : {
+    meta: { date: '-', generated_at: '-' },
+    mtd_kpis: [], creatives: [], monthly_profit: {},
+    facebook_pages: {}
+  };
+
+  /* ---------- Formatters ---------- */
+  const fmtKRW = (v) => v == null ? '-' : '₩' + Math.round(v).toLocaleString('ko-KR');
+  const fmtNum = (v, d = 0) => v == null ? '-' : Number(v).toLocaleString('ko-KR', { maximumFractionDigits: d });
+  const fmtInt = (v) => v == null ? '-' : Math.round(Number(v)).toLocaleString('ko-KR');
+  const fmtPct = (v, d = 2) => v == null ? '-' : (Number(v).toFixed(d) + '%');
+  const fmtPctSigned = (v, d = 1) => {
+    if (v == null || !isFinite(v)) return '-';
+    const pct = Number(v) * 100;
+    const sign = pct >= 0 ? '+' : '';
+    return `${sign}${pct.toFixed(d)}%`;
+  };
+  const fmtROAS = (v) => v == null ? '-' : Math.round(v).toLocaleString('ko-KR') + '%';
+  const numOrNull = (v) => (v == null || v === '' || Number.isNaN(Number(v))) ? null : Number(v);
+
+  /* ---------- Header ---------- */
+  document.getElementById('hdr-date').textContent = `📅 ${DATA.meta.date || '-'}`;
+  document.getElementById('hdr-generated').textContent = `생성: ${DATA.meta.generated_at || '-'}`;
+
+  /* ---------- 재생성 버튼 & 생성 후 경과 시간 ---------- */
+  const regenBtn = document.getElementById('btn-regen');
+  const regenAge = document.getElementById('regen-age');
+  function computeAge(generatedAt) {
+    if (!generatedAt) return '';
+    const m = generatedAt.match(/(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+    if (!m) return '';
+    const gen = new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5]);
+    const diffMin = Math.max(0, Math.round((Date.now() - gen.getTime()) / 60000));
+    if (diffMin < 60) return `${diffMin}분 전`;
+    if (diffMin < 60*24) return `${Math.round(diffMin/60)}시간 전`;
+    return `${Math.round(diffMin/(60*24))}일 전`;
+  }
+  regenAge.textContent = computeAge(DATA.meta.generated_at);
+  regenBtn.addEventListener('click', () => {
+    alert('터미널에서 다음 명령을 실행하세요:\n\n/yundiet-ad-analysis\n\n생성 완료 후 페이지를 새로고침하면 최신 데이터가 반영됩니다.');
+  });
+
+  /* ---------- 섹션별 조회 기간 배지 ---------- */
+  const P = (DATA.meta && DATA.meta.periods) || {};
+  const fmtPeriod = (p, fallback) => {
+    if (!p) return fallback || '';
+    if (p.label) return p.label;
+    if (p.since && p.until) return `${p.since.replaceAll('-','.')}~${p.until.replaceAll('-','.')}`;
+    if (p.relative) return p.relative;
+    return fallback || '';
+  };
+  const setBadge = (id, period, capId, capFallback) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = `📅 ${fmtPeriod(period, '-')}`;
+    if (capId) {
+      const cap = document.getElementById(capId);
+      if (cap && !cap.textContent.trim() && period && period.label) cap.textContent = period.label;
+    }
+  };
+  setBadge('badge-mtd', P.mtd);
+  setBadge('badge-creatives', P.creatives);
+  setBadge('badge-funnel', P.funnel || P.creatives);
+  setBadge('badge-val', P.validation || P.mtd);
+  setBadge('badge-profit', P.monthly_profit);
+  setBadge('badge-bridge', P.ga4_profit || P.monthly_profit || P.mtd);
+
+  /* ---------- 날짜 선택기 ---------- */
+  const dateSelect = document.getElementById('date-select');
+  const dateInput = document.getElementById('date-input');
+  const dateGo = document.getElementById('date-go');
+  const dateHelp = document.getElementById('date-help');
+  const rangeStart = document.getElementById('range-start');
+  const rangeEnd = document.getElementById('range-end');
+  const rangeHelp = document.getElementById('range-help');
+  const archiveGrid = document.getElementById('archive-grid');
+  const archiveCategoryBody = document.getElementById('archive-category-body');
+  const archiveRangeMeta = document.getElementById('archive-range-meta');
+
+  const availableDates = (DATA.meta.available_dates && DATA.meta.available_dates.length)
+    ? [...new Set(DATA.meta.available_dates)].sort().reverse()
+    : [DATA.meta.date];
+  const filePattern = DATA.meta.file_basename_pattern || '{date}.html';
+  const archiveSummary = DATA.meta.archive_summary || null;
+  const archiveRows = (archiveSummary && Array.isArray(archiveSummary.rows)) ? archiveSummary.rows.slice() : [];
+  const ga4EventRows = (archiveSummary && Array.isArray(archiveSummary.ga4_event_rows)) ? archiveSummary.ga4_event_rows.slice() : [];
+  const defaultMonthStart = `${String(DATA.meta.date || '').slice(0, 7)}-01`;
+
+  // 드롭다운은 2일치 이상일 때만 표시
+  if (availableDates.length > 1) {
+    dateSelect.style.display = '';
+    availableDates.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d; opt.textContent = d;
+      if (d === DATA.meta.date) opt.selected = true;
+      dateSelect.appendChild(opt);
+    });
+    dateHelp.textContent = `· ${availableDates.length}일치 리포트 보관`;
+  } else {
+    dateSelect.style.display = 'none';
+    dateHelp.textContent = `· 오늘 1일치만 보관`;
+  }
+  dateInput.value = DATA.meta.date;
+  dateInput.max = DATA.meta.date;
+  dateInput.min = availableDates[availableDates.length - 1] || DATA.meta.date;
+
+  function navigateToDate(d) {
+    if (!d) return;
+    // 존재 확인
+    if (availableDates.length && !availableDates.includes(d)) {
+      // 가장 가까운 과거 날짜 찾기
+      const past = availableDates.filter(x => x <= d).sort().reverse();
+      if (past.length) {
+        alert(`⚠️ ${d} 리포트가 없습니다.\n가장 가까운 날짜(${past[0]})로 이동합니다.`);
+        d = past[0];
+      } else {
+        alert(`⚠️ ${d} 리포트가 없습니다. 터미널에서 /yundiet-ad-analysis 실행 후 다시 시도하세요.`);
+        return;
+      }
+    }
+    const current = location.pathname.replace(/[^/]+$/, '');
+    const target = filePattern.replace('{date}', d);
+    location.href = current + target;
+  }
+  dateSelect.addEventListener('change', (e) => navigateToDate(e.target.value));
+  dateGo.addEventListener('click', () => navigateToDate(dateInput.value));
+  dateInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') navigateToDate(dateInput.value); });
+
+  function renderArchiveRange(start, end) {
+    if (!archiveRows.length) {
+      archiveRangeMeta.innerHTML = `<strong>데이터 조회기간:</strong> ${fmtPeriod(P.mtd || P.ga4_profit || P.monthly_profit, '-')}`;
+      archiveGrid.innerHTML = `<div class="archive-empty">과거 일간 스냅샷이 아직 쌓이지 않았습니다. 일별 HTML 저장이 누적되면 이 영역에서 평균치를 볼 수 있습니다.</div>`;
+      archiveCategoryBody.innerHTML = `<tr><td colspan="8">데이터 없음</td></tr>`;
+      rangeHelp.textContent = '· 아카이브 대기 중';
+      return;
+    }
+    const rows = archiveRows
+      .filter(r => (!start || r.date >= start) && (!end || r.date <= end))
+      .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    const ga4Rows = ga4EventRows
+      .filter(r => (!start || r.date >= start) && (!end || r.date <= end))
+      .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    if (!rows.length) {
+      archiveRangeMeta.innerHTML = `<strong>데이터 조회기간:</strong> ${fmtPeriod(P.mtd || P.ga4_profit || P.monthly_profit, '-')}`;
+      archiveGrid.innerHTML = `<div class="archive-empty">선택한 기간에 저장된 리포트가 없습니다.</div>`;
+      archiveCategoryBody.innerHTML = `<tr><td colspan="8">데이터 없음</td></tr>`;
+      rangeHelp.textContent = '· 선택 기간 데이터 없음';
+      return;
+    }
+    const avg = (key) => rows.reduce((s, r) => s + (numOrNull(r[key]) ?? 0), 0) / rows.length;
+    const latest = rows[rows.length - 1];
+    const avgGa4 = (key) => ga4Rows.length ? ga4Rows.reduce((s, r) => s + (numOrNull(r[key]) ?? 0), 0) / ga4Rows.length : null;
+    const latestGa4 = ga4Rows.length ? ga4Rows[ga4Rows.length - 1] : null;
+    archiveRangeMeta.innerHTML = `
+      <strong>데이터 조회기간:</strong> ${fmtPeriod(P.mtd || P.ga4_profit || P.monthly_profit, '-')}
+      <span style="opacity:.55;margin:0 8px;">·</span>
+      <strong>포함 일수:</strong> Meta ${rows.length}일 / GA4 ${ga4Rows.length}일
+    `;
+    const cards = [
+      { label: '선택 일수', value: `${rows.length}일`, sub: `${rows[0].date} ~ ${latest.date}` },
+      { label: '평균 Meta 지출', value: fmtKRW(avg('total_spend')), sub: `최신 ${fmtKRW(latest.total_spend)}` },
+      { label: '평균 Meta 매출', value: fmtKRW(avg('total_revenue')), sub: `최신 ${fmtKRW(latest.total_revenue)}` },
+      { label: '평균 blended ROAS', value: fmtROAS(avg('blended_roas')), sub: `최신 ${fmtROAS(latest.blended_roas)}` },
+      {
+        label: '평균 GA4 순이익',
+        value: fmtKRW(avgGa4('total_profit')),
+        sub: latestGa4
+          ? `기준일 최신 재산출 · ${latestGa4.date} ${fmtKRW(latestGa4.total_profit)} / 평균 실ROI ${fmtPctSigned(avgGa4('total_roi'))}`
+          : 'GA4 기준일 데이터 없음',
+      },
+    ];
+    archiveGrid.innerHTML = cards.map(card => `
+      <div class="archive-card">
+        <div class="label">${card.label}</div>
+        <div class="value">${card.value}</div>
+        <div class="subvalue">${card.sub}</div>
+      </div>
+    `).join('');
+
+    const metaCatMap = new Map();
+    rows.forEach(row => {
+      (row.categories || []).forEach(cat => {
+        const key = cat.category || '기타';
+        if (!metaCatMap.has(key)) metaCatMap.set(key, []);
+        metaCatMap.get(key).push(cat);
+      });
+    });
+    const ga4CatMap = new Map();
+    ga4Rows.forEach(row => {
+      (row.categories || []).forEach(cat => {
+        const key = cat.category || '기타';
+        if (!ga4CatMap.has(key)) ga4CatMap.set(key, []);
+        ga4CatMap.get(key).push(cat);
+      });
+    });
+    const CAT_RANGE_ORDER = ['단백밥', '단백밥 ASC', '밸런시', '순수단백', '기타'];
+    const orderedCats = [...new Set([
+      ...CAT_RANGE_ORDER,
+      ...[...metaCatMap.keys()],
+      ...[...ga4CatMap.keys()],
+    ])].filter(cat => metaCatMap.has(cat) || ga4CatMap.has(cat));
+    archiveCategoryBody.innerHTML = orderedCats.map(cat => {
+      const metaItems = metaCatMap.get(cat) || [];
+      const ga4Items = ga4CatMap.get(cat) || [];
+      const avgMeta = (key) => metaItems.reduce((s, r) => s + (numOrNull(r[key]) ?? 0), 0) / (metaItems.length || 1);
+      const avgGa4Cat = (key) => ga4Items.reduce((s, r) => s + (numOrNull(r[key]) ?? 0), 0) / (ga4Items.length || 1);
+      const avgGa4Roi = ga4Items.length
+        ? ga4Items.reduce((s, r) => s + (numOrNull(r.roi) ?? 0), 0) / ga4Items.length
+        : null;
+      return `<tr>
+        <td>${cat}</td>
+        <td class="num">${metaItems.length ? fmtKRW(avgMeta('spend')) : '-'}</td>
+        <td class="num">${metaItems.length ? fmtKRW(avgMeta('revenue')) : '-'}</td>
+        <td class="num">${metaItems.length ? fmtROAS(avgMeta('roas')) : '-'}</td>
+        <td class="num">${metaItems.length ? fmtInt(avgMeta('ad_count')) : '-'}</td>
+        <td class="num ${(avgGa4Cat('profit') ?? 0) >= 0 ? 'profit-pos' : 'profit-neg'}">${ga4Items.length ? fmtKRW(avgGa4Cat('profit')) : '-'}</td>
+        <td class="num ${(avgGa4Roi ?? 0) >= 0 ? 'profit-pos' : 'profit-neg'}">${ga4Items.length ? fmtPctSigned(avgGa4Roi) : '-'}</td>
+        <td class="num">${Math.max(metaItems.length, ga4Items.length)}일</td>
+      </tr>`;
+    }).join('');
+    rangeHelp.textContent = `· Meta ${rows.length}일 스냅샷 평균 / GA4 ${ga4Rows.length}일 기준일 최신 재산출`;
+  }
+
+  function setRangePreset(days) {
+    if (!availableDates.length) return;
+    const end = availableDates[0];
+    const start = availableDates[Math.min(days - 1, availableDates.length - 1)];
+    rangeStart.value = start;
+    rangeEnd.value = end;
+    renderArchiveRange(start, end);
+  }
+
+  rangeStart.min = availableDates[availableDates.length - 1] || DATA.meta.date;
+  rangeStart.max = availableDates[0] || DATA.meta.date;
+  rangeEnd.min = availableDates[availableDates.length - 1] || DATA.meta.date;
+  rangeEnd.max = availableDates[0] || DATA.meta.date;
+  const monthWindowDates = availableDates
+    .filter(d => d >= defaultMonthStart && d <= (DATA.meta.date || d))
+    .sort();
+  rangeStart.value = monthWindowDates[0] || availableDates[Math.min(6, availableDates.length - 1)] || DATA.meta.date;
+  rangeEnd.value = DATA.meta.date;
+  document.getElementById('range-7').addEventListener('click', () => setRangePreset(7));
+  document.getElementById('range-30').addEventListener('click', () => setRangePreset(30));
+  document.getElementById('range-all').addEventListener('click', () => {
+    rangeStart.value = availableDates[availableDates.length - 1] || DATA.meta.date;
+    rangeEnd.value = availableDates[0] || DATA.meta.date;
+    renderArchiveRange(rangeStart.value, rangeEnd.value);
+  });
+  document.getElementById('range-apply').addEventListener('click', () => {
+    const start = rangeStart.value;
+    const end = rangeEnd.value;
+    if (start && end && start > end) {
+      alert('시작 날짜가 종료 날짜보다 늦습니다.');
+      return;
+    }
+    renderArchiveRange(start, end);
+  });
+  renderArchiveRange(rangeStart.value, rangeEnd.value);
+
+  /* ---------- 섹션 0: MTD 카드 ---------- */
+  const mtdGrid = document.getElementById('mtd-grid');
+  const CAT_ORDER = ['단백밥', '단백밥 ASC', '밸런시', '순수단백'];
+  CAT_ORDER.forEach(cat => {
+    const row = (DATA.mtd_kpis || []).find(r => r.카테고리 === cat) || {};
+    const budgetLive = row.일예산_LIVE;
+    const budgetClass = (budgetLive == null || budgetLive === 0) ? 'budget budget-missing' : 'budget';
+    const budgetText = (budgetLive == null)
+      ? '일예산 LIVE: 미집계'
+      : `일예산 LIVE: ${fmtKRW(budgetLive)}`;
+    const card = document.createElement('div');
+    card.className = 'mtd-card';
+    card.innerHTML = `
+      <div class="cat">${cat}</div>
+      <div class="roas">${fmtROAS(row.누적_ROAS)} <small>누적 ROAS</small></div>
+      <div class="${budgetClass}" title="ACTIVE 애드셋 일예산 합계 · CBO는 애드셋 수로 균등 배분">${budgetText}</div>
+      <dl>
+        <div><dt>고유CTR</dt><dd>${fmtPct(row.고유CTR)}</dd></div>
+        <div><dt>고유링크CVR</dt><dd>${fmtPct(row.고유링크CVR)}</dd></div>
+        <div><dt>노출당LPV</dt><dd>${fmtPct(row.노출당LPV율)}</dd></div>
+        <div><dt>LPV당구매</dt><dd>${fmtPct(row.LPV당구매율)}</dd></div>
+        <div><dt>AOV</dt><dd>${fmtKRW(row.AOV)}</dd></div>
+        <div><dt>누적지출</dt><dd>${fmtKRW(row.누적_지출)}</dd></div>
+        <div><dt>누적매출</dt><dd>${fmtKRW(row.누적_매출)}</dd></div>
+        <div title="MTD 내 effective_status=ACTIVE 광고 수"><dt>진행 중 광고</dt><dd>${fmtNum(row.활성광고수)}개</dd></div>
+        <div title="MTD 내 PAUSED 또는 ARCHIVED 광고 수"><dt>중단된 광고</dt><dd>${fmtNum(row.OFF광고수)}개</dd></div>
+      </dl>`;
+    mtdGrid.appendChild(card);
+  });
+
+  /* ---------- 섹션 1: 소재 판정표 ---------- */
+  const COLS = [
+    { key: '__type', label: '구분', cls: 'col-type' },
+    { key: '__thumb', label: '썸네일', cls: 'col-thumb' },
+    { key: '__name', label: '소재명', cls: 'col-name' },
+    { key: '__judge', label: '판정' },
+    { key: '판정이유', label: '판정이유', cls: 'col-reason' },
+    { key: '액션플랜', label: '액션플랜', cls: 'col-action' },
+    { key: '__funnel', label: '퍼널진단', cls: 'col-funnel' },
+    { key: '일예산', label: '일예산', fmt: fmtKRW, cls: 'num' },
+    { key: '누적_지출', label: '지출', fmt: fmtKRW, cls: 'num' },
+    { key: '누적_ROAS', label: 'ROAS', fmt: fmtROAS, cls: 'num' },
+    { key: '노출', label: '노출', fmt: fmtNum, cls: 'num' },
+    { key: '도달', label: '도달', fmt: fmtNum, cls: 'num' },
+    { key: 'CTR', label: 'CTR', fmt: (v) => fmtPct(v,2), cls: 'num' },
+    { key: '고유CTR', label: '고유CTR', fmt: (v) => fmtPct(v,2), cls: 'num' },
+    { key: '고유링크클릭수', label: '고유링크클릭', fmt: fmtNum, cls: 'num' },
+    { key: '노출당LPV율', label: '노출당LPV', fmt: (v) => fmtPct(v,2), cls: 'num' },
+    { key: 'LPV당구매율', label: 'LPV당구매', fmt: (v) => fmtPct(v,2), cls: 'num' },
+    { key: '고유링크CVR', label: '고유링크CVR', fmt: (v) => fmtPct(v,2), cls: 'num' },
+    { key: 'CPM', label: 'CPM', fmt: fmtKRW, cls: 'num' },
+    { key: '노출1천회당전환수', label: '1K노출당전환', fmt: (v) => fmtNum(v,2), cls: 'num' },
+    { key: '구매수', label: '구매수', fmt: fmtNum, cls: 'num' },
+    { key: '평균구매전환값', label: '평균구매값', fmt: fmtKRW, cls: 'num' },
+    { key: '구매전환값', label: '구매전환값', fmt: fmtKRW, cls: 'num' },
+    { key: '빈도', label: '빈도', fmt: (v) => fmtNum(v,2), cls: 'num' },
+  ];
+
+  const JUDGE_BADGE = {
+    '위너': { cls: 'winner', icon: '🏆' },
+    '위너승격': { cls: 'winner', icon: '🏆' },
+    '위너종료': { cls: 'winner-end', icon: '🏆→❌' },
+    '수명종료': { cls: 'winner-end', icon: '🏆→❌' },
+    '계속운영': { cls: 'continue', icon: '✅' },
+    '1차통과': { cls: 'pass', icon: '✅' },
+    '복증': { cls: 'boost', icon: '🚀' },
+    '복증검토': { cls: 'boost', icon: '🚀' },
+    '메인승격검토': { cls: 'boost', icon: '🚀' },
+    '감액유지': { cls: 'reduce', icon: '📉' },
+    '재집행검토': { cls: 'retest', icon: '🔄' },
+    '참고소재': { cls: 'reference', icon: '📌' },
+    '개선시도': { cls: 'retest', icon: '🛠️' },
+    'OFF': { cls: 'off', icon: '❌' },
+    '관찰': { cls: 'watch', icon: '⏳' },
+  };
+
+  // 정렬 우선순위 — 작을수록 위. OFF·수명종료 최상단, 위너/관찰 하단
+  const JUDGE_RANK = {
+    '수명종료': 0, '위너종료': 0,
+    'OFF': 1,
+    '개선시도': 2,
+    '감액유지': 3,
+    '재집행검토': 4, '참고소재': 5,
+    '1차통과': 6, '계속운영': 6,
+    '복증': 7, '복증검토': 7, '메인승격검토': 7,
+    '위너': 8, '위너승격': 8,
+    '관찰': 9,
+  };
+  const judgeKey = (r) => (r.판정 || '').replace(/\s/g, '');
+  const judgeRank = (r) => {
+    const k = judgeKey(r);
+    return (JUDGE_RANK[k] ?? 99);
+  };
+  const normalizeCreative = (c) => {
+    const impressions = numOrNull(c.노출);
+    const purchases = numOrNull(c.구매수);
+    const revenue = numOrNull(c.구매전환값) ?? numOrNull(c.매출) ?? numOrNull(c.누적_매출);
+    const lpv = numOrNull(c.LPV) ?? numOrNull(c.LPView);
+    return {
+      ...c,
+      고유CTR: numOrNull(c.고유CTR) ?? numOrNull(c.CTR),
+      고유링크클릭수: numOrNull(c.고유링크클릭수),
+      노출당LPV율: numOrNull(c.노출당LPV율) ?? ((lpv != null && impressions) ? (lpv / impressions * 100) : null),
+      LPV당구매율: numOrNull(c.LPV당구매율) ?? ((lpv != null && purchases != null && lpv > 0) ? (purchases / lpv * 100) : null),
+      고유링크CVR: numOrNull(c.고유링크CVR) ?? numOrNull(c.CVR),
+      노출1천회당전환수: numOrNull(c.노출1천회당전환수) ?? ((impressions && purchases != null) ? (purchases / impressions * 1000) : null),
+      평균구매전환값: numOrNull(c.평균구매전환값) ?? ((revenue != null && purchases) ? (revenue / purchases) : null),
+      구매전환값: revenue,
+      LPV: lpv,
+    };
+  };
+  const RUNNING_STATUSES = new Set(['ACTIVE', 'WITH_ISSUES']);
+  const shouldDisplayCreative = (c) => {
+    const status = c.현재상태 || '';
+    if (RUNNING_STATUSES.has(status)) return true;
+    if (c.위너이력 || c.위너여부) return true;
+    if (!RUNNING_STATUSES.has(status) && (numOrNull(c.누적_지출) ?? 0) > 0) return true;
+    return false;
+  };
+
+  const SECTION_ORDER = [
+    { key: '단백밥-위너',    title: '🏆 단백밥 — 위너 소재 / 위너 이력' },
+    { key: '단백밥-테스트',  title: '단백밥 — 테스트캠' },
+    { key: '단백밥-메인',    title: '단백밥 — 메인캠' },
+    { key: '단백밥-ASC',     title: '단백밥 — ASC (Advantage+)' },
+    { key: '단백밥-OFF',     title: '단백밥 — OFF (조회기간 지출 있음)' },
+    { key: '순수단백-위너',  title: '🏆 순수단백 — 위너 소재 / 위너 이력' },
+    { key: '순수단백-테스트',title: '순수단백 — 테스트캠' },
+    { key: '순수단백-메인',  title: '순수단백 — 메인캠' },
+    { key: '순수단백-OFF',   title: '순수단백 — OFF (조회기간 지출 있음)' },
+    { key: '밸런시-위너',    title: '🏆 밸런시 — 위너 소재 / 위너 이력' },
+    { key: '밸런시-테스트',  title: '밸런시 — 테스트캠' },
+    { key: '밸런시-메인',    title: '밸런시 — 메인캠' },
+    { key: '밸런시-OFF',     title: '밸런시 — OFF (조회기간 지출 있음)' },
+  ];
+
+  function routeBucket(c) {
+    if (c.위너여부 || c.위너이력) return `${c.상품 || '기타'}-위너`;
+    const prod = c.상품 || '기타';
+    const type = c.캠페인유형 || '메인';
+    const status = c.현재상태 || '';
+    if (!RUNNING_STATUSES.has(status) && (numOrNull(c.누적_지출) ?? 0) > 0) return `${prod}-OFF`;
+    return `${prod}-${type}`;
+  }
+
+  const buckets = {};
+  SECTION_ORDER.forEach(s => buckets[s.key] = []);
+  (DATA.creatives || []).forEach(c => {
+    const row = normalizeCreative(c);
+    if (!shouldDisplayCreative(row)) return;
+    const b = routeBucket(row);
+    if (buckets[b]) buckets[b].push(row);
+    else (buckets[`${row.상품}-메인`] || buckets['단백밥-메인']).push(row);
+  });
+
+  // 섹션별 합계 계산 (가중평균 포함)
+  function computeSummary(rows) {
+    const sumSpend = rows.reduce((s, r) => s + (r.누적_지출 || 0), 0);
+    const sumRev = rows.reduce((s, r) => s + (r.구매전환값 || 0), 0);
+    const sumImpr = rows.reduce((s, r) => s + (r.노출 || 0), 0);
+    const sumClicks = rows.reduce((s, r) => s + ((r.노출 || 0) * (r.CTR || 0) / 100), 0);
+    const sumUniqueClicks = rows.reduce((s, r) => s + (r.고유링크클릭수 || 0), 0);
+    const sumUniqClicks = rows.reduce((s, r) => s + (r.고유링크클릭수 || 0), 0);
+    const sumPurchase = rows.reduce((s, r) => s + (r.구매수 || 0), 0);
+    const sumBudget = rows.reduce((s, r) => s + (r.일예산 || 0), 0);
+    const sumLpv = rows.reduce((s, r) => s + (r.LPV || 0), 0);
+    const sumReach = rows.reduce((s, r) => s + (r.도달 || 0), 0);
+    const running = rows.filter(r => RUNNING_STATUSES.has(r.현재상태 || '')).length;
+    const off = rows.filter(r => !RUNNING_STATUSES.has(r.현재상태 || '')).length;
+    return {
+      광고수: rows.length,
+      지출: sumSpend,
+      매출: sumRev,
+      ROAS: sumSpend > 0 ? (sumRev / sumSpend * 100) : null,
+      CTR: sumImpr > 0 ? (sumClicks / sumImpr * 100) : null,
+      고유CTR: sumReach > 0 ? (sumUniqueClicks / sumReach * 100) : null,
+      고유링크클릭수: sumUniqueClicks,
+      CVR: sumUniqClicks > 0 ? (sumPurchase / sumUniqClicks * 100) : null,
+      구매수: sumPurchase,
+      일예산: sumBudget,
+      노출: sumImpr,
+      도달: sumReach,
+      LPV: sumLpv,
+      노출당LPV율: sumImpr > 0 && sumLpv > 0 ? (sumLpv / sumImpr * 100) : null,
+      LPV당구매: sumLpv > 0 ? (sumPurchase / sumLpv * 100) : null,
+      노출1천회당전환수: sumImpr > 0 ? (sumPurchase / sumImpr * 1000) : null,
+      AOV: sumPurchase > 0 ? (sumRev / sumPurchase) : null,
+      구매전환값: sumRev,
+      진행중광고수: running,
+      중단광고수: off,
+    };
+  }
+  function directActionPlan(r) {
+    const roas = numOrNull(r.누적_ROAS) ?? numOrNull(r.ROAS);
+    const ctr = numOrNull(r.CTR);
+    const cvr = numOrNull(r.고유링크CVR) ?? numOrNull(r.CVR);
+    const pattern = r.인사이트패턴 || '';
+    const tag = r.인사이트태그 || '';
+    const roasText = roas != null ? `${fmtROAS(roas)}` : 'ROAS 미집계';
+    const reportDate = DATA.meta?.date ? new Date(`${DATA.meta.date}T12:00:00+09:00`) : null;
+    const day = reportDate ? reportDate.getUTCDay() : null;
+    const isWeekendBucket = day === 5 || day === 6 || day === 0;
+    const threeDayUnder400 = Array.isArray(r.최근3일ROAS)
+      ? r.최근3일ROAS.length >= 3 && r.최근3일ROAS.slice(-3).every(v => numOrNull(v) != null && numOrNull(v) < 400)
+      : (r.최근3일연속ROAS400미만 === true);
+    const weekendGuard = isWeekendBucket && roas != null && roas >= 320 && roas < 400 && !threeDayUnder400;
+    const two = (a, b) => `1. ${a}<br>2. ${b}`;
+    if (weekendGuard) {
+      return two(
+        `금·토·일 구간 변동성을 감안하면 ${roasText} 단일 수치만으로 OFF를 확정하지 말고 월~화 회복 여부를 먼저 확인하세요.`,
+        `그 사이 상세페이지 메시지 정합성 또는 후킹 카피 1개 요소만 수정한 개선안을 재테스트해 주말 하락이 구조 문제인지 분리해서 보세요.`
+      );
+    }
+    if (pattern === 'P1' || tag === '상세페이지_불일치') {
+      return two(
+        `CTA/CPC 성과는 확인되지만 전환율이 약해 ${roasText} 수준입니다. 상세페이지 첫 화면 메시지와 광고 메시지를 먼저 일치시키세요.`,
+        `혜택 요약, 후기, 신뢰요소를 첫 스크롤 안에 재배치해서 구매 전환 구간을 짧게 만드세요.`
+      );
+    }
+    if (pattern === 'P15' || tag === '결제_직전_이탈') {
+      return two(
+        `구매 직전 이탈이 커서 ${roasText}에 머물고 있습니다. 배송비, 도착일, 구성 안내를 결제 직전 전면에 노출하세요.`,
+        `주문 망설임을 줄이도록 환불 기준·보관법·섭취법을 결제 버튼 근처에 추가하세요.`
+      );
+    }
+    if (pattern === 'P2' || tag === '후킹_실패') {
+      return two(
+        `초반 클릭 유도가 약해 ${roasText}를 기록 중입니다. 첫 1~3초 후킹과 썸네일 문구를 더 강한 문제 제기형으로 바꾸세요.`,
+        `같은 오퍼를 유지한 채 얼굴컷/제품컷/텍스트형 3가지 포맷으로 신규 소재를 분기 테스트하세요.`
+      );
+    }
+    if (pattern === 'P4' || tag === '경매_밀림') {
+      return two(
+        `노출 확보가 충분하지 않아 학습이 덜 된 상태입니다. 타겟 폭과 입찰 강도를 조정해 먼저 표본을 확보하세요.`,
+        `소재 자체 판단은 보류하고, 동일 카피로 오디언스만 넓힌 보조 애드셋을 열어 노출 문제와 소재 문제를 분리하세요.`
+      );
+    }
+    if (pattern === 'P5' || tag === '소재_피로도') {
+      return two(
+        `현재 성과는 유지되지만 피로도 신호가 보입니다. 본편은 유지하고 후킹/길이/첫 문장만 바꾼 변형 2~3개를 준비하세요.`,
+        `빈도 상승 전에 댓글·후기·가격 포인트를 소재별로 분리해 방어형 크리에이티브를 선제 투입하세요.`
+      );
+    }
+    if (pattern === 'P7' || tag === 'CPC_과다') {
+      return two(
+        `클릭 단가 부담으로 ${roasText}가 눌리고 있습니다. 후킹 문구를 더 선명하게 바꿔 클릭 효율부터 끌어올리세요.`,
+        `플레이스먼트와 타겟 폭을 재조정해 CPC가 낮게 나오는 조합을 찾는 보조 테스트를 병행하세요.`
+      );
+    }
+    if (pattern === 'P18' || tag === '콘텐츠_성공_광고_실패') {
+      return two(
+        `콘텐츠 반응 대비 클릭·전환 연결이 약합니다. 광고 안에서 CTA와 제안 문구를 더 앞단에 배치하세요.`,
+        `좋아요·조회 중심 구조를 줄이고 가격, 혜택, 해결 포인트가 바로 보이는 전환형 편집본으로 다시 제작하세요.`
+      );
+    }
+    if ((ctr != null && ctr >= 2) && (cvr != null && cvr < 3)) {
+      return two(
+        `클릭 유입은 만들어지고 있지만 전환 효율이 약합니다. 상세페이지 메시지 정합성과 첫 구매 유도 구간을 먼저 손보세요.`,
+        `장바구니 진입 이후 이탈 포인트를 찾기 위해 가격/구성/혜택 설명 순서를 바꾼 랜딩 대안을 테스트하세요.`
+      );
+    }
+    if ((ctr != null && ctr < 1.5)) {
+      return two(
+        `초기 클릭 유도가 약합니다. 소재 후킹, 썸네일, 첫 문장 카피를 다시 설계한 신규 크리에이티브가 필요합니다.`,
+        `동일 상품이라도 문제 제기형, 비교형, 혜택 직설형 카피를 따로 나눠 어떤 후킹이 먹히는지 확인하세요.`
+      );
+    }
+    return two(
+      (r.액션플랜 || '')
+        .replace(/^[^\n:]*:\s*/, '')
+        .replace(/일\s*~?₩?[\d,\.]+\s*절감\.?\s*/g, '')
+        .replace(/예산은 .*?(이관|복증에 이관)\.?\s*/g, '')
+        .trim() || '상세 데이터 재확인 후 소재/상세페이지/타겟 중 병목 구간을 특정하세요.',
+      threeDayUnder400
+        ? '최근 3개 보고일 연속 ROAS 400% 미만이라면 OFF 또는 개선안 확정 대상으로 넘기고, 아니라면 하루 더 관찰 후 재판정하세요.'
+        : '최근 3개 보고일 연속 ROAS 400% 미만 여부를 먼저 확인한 뒤 OFF를 결정하고, 연속 조건이 아니면 개선안을 우선 제안하세요.'
+    );
+  }
+
+  const host = document.getElementById('creatives-sections');
+  const creativeTypeLabel = (r) => {
+    if (r.위너여부) return { text: '위너', cls: 'type-winner' };
+    if (r.위너이력) return { text: '위너이력', cls: 'type-winner' };
+    const type = r.캠페인유형 || '메인';
+    if (type === '테스트') return { text: '테스트', cls: 'type-test' };
+    if (type === 'ASC') return { text: 'ASC', cls: 'type-asc' };
+    return { text: '메인', cls: 'type-main' };
+  };
+  let currentCategory = null;
+  SECTION_ORDER.forEach(sec => {
+    const rows = buckets[sec.key] || [];
+    if (!rows.length) return;
+    // 판정 우선순위 정렬 (OFF/수명종료 최상단)
+    rows.sort((a, b) => judgeRank(a) - judgeRank(b));
+    const typeCounts = rows.reduce((acc, r) => {
+      const t = r.캠페인유형 || '메인';
+      acc[t] = (acc[t] || 0) + 1;
+      return acc;
+    }, {});
+    const breakdown = ['테스트', '메인', 'ASC']
+      .filter(t => typeCounts[t])
+      .map(t => `${t} ${typeCounts[t]}`)
+      .join(' · ');
+    const category = sec.key.split('-')[0];
+    if (category !== currentCategory) {
+      currentCategory = category;
+      const divider = document.createElement('div');
+      divider.className = 'category-divider';
+      divider.innerHTML = `
+        <h2>${category}</h2>
+        <div class="sub">위너 · 테스트 · 메인 · ASC · OFF를 같은 카테고리 안에서 이어서 확인</div>`;
+      host.appendChild(divider);
+    }
+
+    const sectionEl = document.createElement('div');
+    sectionEl.className = 'creative-section';
+    const periodLabel = DATA.meta?.period_rule === 'LAST_30D' ? '최근 30일' : '이번 달';
+    const criteriaLabel = sec.key.endsWith('-위너') ? '위너/기존 소재 기준' : '신규 소재 기준';
+    sectionEl.innerHTML = `
+      <h3>${sec.title}${breakdown ? ` <span class="meta-inline">${breakdown}</span>` : ''} <span class="count">${rows.length}</span></h3>
+      <div class="creative-summary-grid"></div>
+      <div class="table-scroll">
+        <table class="creatives">
+          <thead><tr>${COLS.map(c => `<th class="${c.cls || ''}">${c.label}</th>`).join('')}</tr></thead>
+          <tbody></tbody>
+          <tfoot></tfoot>
+        </table>
+      </div>`;
+    const summaryGrid = sectionEl.querySelector('.creative-summary-grid');
+    const tbody = sectionEl.querySelector('tbody');
+    const tfoot = sectionEl.querySelector('tfoot');
+    rows.forEach(r => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = COLS.map(col => {
+        if (col.key === '__type') {
+          const typeMeta = creativeTypeLabel(r);
+          return `<td class="col-type"><span class="type-chip ${typeMeta.cls}">${typeMeta.text}</span></td>`;
+        }
+        if (col.key === '__thumb') {
+          const img = r.소재이미지URL ? `<img src="${r.소재이미지URL}" alt="" loading="lazy" />` : '—';
+          return `<td class="col-thumb">${img}</td>`;
+        }
+        if (col.key === '__name') {
+          const title = (r.소재명 || '').replace(/"/g, '&quot;');
+          const name = r.소재명 || '-';
+          const url = r.ad_manager_url;
+          const nameEl = url
+            ? `<a class="ad-link" href="${url}" target="_blank" rel="noopener" title="Meta 광고 관리자에서 열기: ${title}">${name}</a>`
+            : `<span class="ad-name" title="${title}">${name}</span>`;
+          const exWinner = r.위너이력 && !r.위너여부
+            ? '<span class="ex-winner-pill" title="과거 위너 이력이 있는 소재">🏆 위너이력</span>'
+            : '';
+          return `<td class="col-name">
+            ${nameEl}${exWinner}
+            <span class="ad-meta">D+${r.DN_일수 ?? '-'} · ${r.캠페인명 || ''}</span>
+          </td>`;
+        }
+        if (col.key === '__judge') {
+          const key = (r.판정 || '').replace(/\s/g, '');
+          const meta = JUDGE_BADGE[key] || { cls: 'off', icon: '❔' };
+          return `<td><span class="badge ${meta.cls}">${meta.icon} ${r.판정 || '-'}</span></td>`;
+        }
+        if (col.key === '__funnel') {
+          const sev = r.인사이트_severity ? `<span class="funnel-chip">${r.인사이트_severity}</span>` : '';
+          const pattern = r.인사이트패턴 ? `<span class="funnel-chip">${r.인사이트패턴}</span>` : '';
+          const tag = r.인사이트태그 ? `<span class="funnel-tag">${r.인사이트태그}</span>` : '<span class="funnel-tag">진단 없음</span>';
+          return `<td class="col-funnel">${sev}${pattern}${tag}</td>`;
+        }
+        if (col.key === '액션플랜') {
+          return `<td class="${col.cls || ''}">${directActionPlan(r)}</td>`;
+        }
+        const v = r[col.key];
+        const cls = col.cls || '';
+        const val = col.fmt ? col.fmt(v) : (v ?? '-');
+        return `<td class="${cls}">${val}</td>`;
+      }).join('');
+      tbody.appendChild(tr);
+    });
+
+    // tfoot 합계 행 렌더링
+    const sum = computeSummary(rows);
+    summaryGrid.innerHTML = `
+      <div class="creative-summary-card">
+        <div class="sum-title">집행 / 상태</div>
+        <dl>
+          <div><dt>일예산</dt><dd>${fmtKRW(sum.일예산)}</dd></div>
+          <div><dt>소재수</dt><dd>${fmtNum(sum.광고수)}</dd></div>
+          <div><dt>진행 중</dt><dd>${fmtNum(sum.진행중광고수)}</dd></div>
+          <div><dt>중단</dt><dd>${fmtNum(sum.중단광고수)}</dd></div>
+        </dl>
+      </div>
+      <div class="creative-summary-card">
+        <div class="sum-title">성과 합계</div>
+        <dl>
+          <div><dt>지출</dt><dd>${fmtKRW(sum.지출)}</dd></div>
+          <div><dt>매출</dt><dd>${fmtKRW(sum.매출)}</dd></div>
+          <div><dt>ROAS</dt><dd>${fmtROAS(sum.ROAS)}</dd></div>
+          <div><dt>구매수</dt><dd>${fmtNum(sum.구매수)}</dd></div>
+          <div><dt>구매전환값</dt><dd>${fmtKRW(sum.구매전환값)}</dd></div>
+          <div><dt>평균구매값</dt><dd>${fmtKRW(sum.AOV)}</dd></div>
+        </dl>
+      </div>
+      <div class="creative-summary-card">
+        <div class="sum-title">퍼널 요약</div>
+        <dl>
+          <div><dt>노출</dt><dd>${fmtNum(sum.노출)}</dd></div>
+          <div><dt>CTR</dt><dd>${fmtPct(sum.CTR, 2)}</dd></div>
+          <div><dt>고유CTR</dt><dd>${fmtPct(sum.고유CTR, 2)}</dd></div>
+          <div><dt>고유링크클릭</dt><dd>${fmtNum(sum.고유링크클릭수)}</dd></div>
+          <div><dt>LPV</dt><dd>${fmtNum(sum.LPV)}</dd></div>
+          <div><dt>노출당LPV</dt><dd>${fmtPct(sum.노출당LPV율, 2)}</dd></div>
+          <div><dt>LPV당구매</dt><dd>${fmtPct(sum.LPV당구매, 2)}</dd></div>
+          <div><dt>1K노출당전환</dt><dd>${fmtNum(sum.노출1천회당전환수, 2)}</dd></div>
+        </dl>
+      </div>
+      <div class="creative-summary-card">
+        <div class="sum-title">판정 참고</div>
+        <dl>
+          <div><dt>AOV</dt><dd>${fmtKRW(sum.AOV)}</dd></div>
+          <div><dt>고유링크CVR</dt><dd>${fmtPct(sum.CVR, 2)}</dd></div>
+          <div><dt>도달</dt><dd>${fmtNum(sum.도달)}</dd></div>
+          <div><dt>상태별 OFF</dt><dd>${fmtNum(sum.중단광고수)}</dd></div>
+          <div><dt>기준 기간</dt><dd>${periodLabel}</dd></div>
+          <div><dt>판정 기준</dt><dd>${criteriaLabel}</dd></div>
+        </dl>
+      </div>`;
+    const footTr = document.createElement('tr');
+    footTr.innerHTML = COLS.map((col, i) => {
+      if (i === 0) return `<td class="label" colspan="6">합계 (${sum.광고수}개 소재)</td>`;
+      if (i > 0 && i < 6) return '';
+      switch (col.key) {
+        case '일예산': return `<td class="num">${fmtKRW(sum.일예산)}</td>`;
+        case '누적_지출': return `<td class="num">${fmtKRW(sum.지출)}</td>`;
+        case '누적_ROAS': return `<td class="num">${fmtROAS(sum.ROAS)}</td>`;
+        case '노출': return `<td class="num">${fmtNum(sum.노출)}</td>`;
+        case 'CTR': return `<td class="num">${fmtPct(sum.CTR, 2)}</td>`;
+        case '고유링크CVR': return `<td class="num">${fmtPct(sum.CVR, 2)}</td>`;
+        case '구매수': return `<td class="num">${fmtNum(sum.구매수)}</td>`;
+        case '구매전환값': return `<td class="num">${fmtKRW(sum.매출)}</td>`;
+        default: return '<td></td>';
+      }
+    }).join('');
+    tfoot.appendChild(footTr);
+
+    host.appendChild(sectionEl);
+  });
+
+  /* ---------- 섹션 2.5: 데이터 검증 ---------- */
+  const val = DATA.validation || {};
+  const valKpi = document.getElementById('val-kpi');
+  const KPI_ORDER = [
+    { k: 'total_spend', lbl: '총 지출 (MTD)', fmt: fmtKRW },
+    { k: 'total_revenue', lbl: '총 매출 (MTD)', fmt: fmtKRW },
+    { k: 'blended_roas', lbl: 'Blended ROAS', fmt: fmtROAS },
+    { k: 'daily_budget_live', lbl: '일예산 LIVE (ACTIVE 합)', fmt: fmtKRW },
+    { k: 'active_ads', lbl: 'ACTIVE 광고 수', fmt: fmtNum },
+    { k: 'off_ads', lbl: 'OFF 광고 수', fmt: fmtNum },
+  ];
+  valKpi.innerHTML = KPI_ORDER.map(({k, lbl, fmt}) => {
+    const item = val[k] || {};
+    return `<div class="val-card">
+      <div class="lbl">${lbl}</div>
+      <div class="val">${item.value != null ? fmt(item.value) : '-'}</div>
+      <div class="src">${item.source || ''}</div>
+    </div>`;
+  }).join('');
+
+  const valTbody = document.querySelector('#val-table tbody');
+  (val.by_category || []).forEach(c => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${c.카테고리 || '-'}</td>
+      <td>${fmtKRW(c.지출)}</td>
+      <td>${fmtKRW(c.매출)}</td>
+      <td>${fmtROAS(c.ROAS)}</td>
+      <td>${fmtNum(c.광고수)}</td>`;
+    valTbody.appendChild(tr);
+  });
+  if (val.notes) document.getElementById('val-notes').textContent = '💡 ' + val.notes;
+
+  /* ---------- 섹션 3: 퍼널 인사이트 진단 ---------- */
+  const fi = document.getElementById('funnel-insights');
+  const insights = DATA.funnel_insights || [];
+  const funnelCountBadge = document.getElementById('funnel-count');
+  if (funnelCountBadge) {
+    const p0 = insights.filter(i => (i.severity || '').toUpperCase().includes('P0')).length;
+    const p1 = insights.filter(i => (i.severity || '').toUpperCase().includes('P1')).length;
+    funnelCountBadge.textContent = insights.length === 0
+      ? '0건'
+      : `P0 ${p0} · P1 ${p1} · 전체 ${insights.length}건`;
+  }
+  if (!insights.length) {
+    fi.innerHTML = '<p style="color:var(--muted)">오늘 기준 P0/P1 중요 인사이트 없음.</p>';
+  } else {
+    fi.innerHTML = insights.map(i => {
+      const targetHtml = i.ad_manager_url
+        ? `<a class="ad-link" href="${i.ad_manager_url}" target="_blank" rel="noopener">${i.target || '-'}</a>`
+        : (i.target || '-');
+      return `
+      <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;">
+        <strong>${i.severity || '-'} · ${i.pattern || '-'}</strong> — ${i.tag || ''}<br>
+        <small style="color:var(--muted)">대상: ${targetHtml}</small>
+        <div style="margin-top:6px;">${i.action || ''}</div>
+      </div>`;
+    }).join('');
+  }
+
+  /* ---------- 섹션 1: 월별 순이익 차트 ---------- */
+  const CHART_MAP = {
+    '단백밥':    { canvas: 'chart-danbaekbob',   select: 'sort-danbaekbob',   headline: 'headline-danbaekbob', table: 'table-danbaekbob' },
+    '밸런시':    { canvas: 'chart-balancy',      select: 'sort-balancy',      headline: 'headline-balancy', table: 'table-balancy' },
+    '순수단백':  { canvas: 'chart-puresudanbak', select: 'sort-puresudanbak', headline: 'headline-puresudanbak', table: 'table-puresudanbak' },
+  };
+  const charts = {};
+
+  function normalizeMonthlyProfitRows(product) {
+    const rows = (DATA.monthly_profit?.[product] || []).map(r => ({ ...r }));
+    const currentMonth = String(DATA.meta?.date || '').slice(0, 7);
+    if (!currentMonth) return rows;
+
+    const mtd = (DATA.mtd_kpis || []).find(r => (r.카테고리 || r.category) === product);
+    if (!mtd) return rows;
+
+    return rows.map(row => {
+      const rowMonth = String(row.월 || row.month || '').slice(0, 7);
+      if (rowMonth !== currentMonth) return row;
+
+      const monthlyRevenue = numOrNull(row.매출) ?? numOrNull(row.구매전환값) ?? numOrNull(row.revenue);
+      const mtdRevenue = numOrNull(mtd.누적_매출) ?? numOrNull(mtd.revenue);
+      const mtdSpend = numOrNull(mtd.누적_지출) ?? numOrNull(mtd.spend);
+      const cogsRate = numOrNull(row.원가율) ?? numOrNull(row.cogs_rate) ?? (product === '순수단백' ? 0.77 : 0.65);
+      if (monthlyRevenue == null || mtdRevenue == null || mtdSpend == null || monthlyRevenue <= 0) return row;
+
+      const gapRatio = Math.abs(monthlyRevenue - mtdRevenue) / monthlyRevenue;
+      if (gapRatio < 0.25) return row;
+
+      const revenue = mtdRevenue;
+      const cogsAmount = Math.round(revenue * cogsRate);
+      const grossProfit = revenue - cogsAmount;
+      const netProfit = grossProfit - mtdSpend;
+      const netMargin = revenue ? (netProfit / revenue) * 100 : null;
+      const roas = mtd.누적_ROAS ?? mtd.roas ?? (mtdSpend ? (revenue / mtdSpend) * 100 : null);
+
+      return {
+        ...row,
+        title: `${product} · ${currentMonth}`,
+        product,
+        month: `${currentMonth}-01`,
+        월: currentMonth,
+        revenue,
+        매출: revenue,
+        구매전환값: revenue,
+        cogs_rate: cogsRate,
+        원가율: cogsRate,
+        cogs_amount: cogsAmount,
+        원가액: cogsAmount,
+        gross_profit: grossProfit,
+        매출총이익: grossProfit,
+        ad_spend: mtdSpend,
+        광고지출: mtdSpend,
+        net_profit: netProfit,
+        순이익: netProfit,
+        net_margin: netMargin,
+        순이익률: netMargin,
+        roas,
+        ROAS: roas,
+        _normalized_from_mtd: true,
+      };
+    });
+  }
+
+  function sortRows(rows, mode) {
+    const cp = [...rows];
+    if (mode === 'profit-desc') cp.sort((a,b) => (b.순이익||0) - (a.순이익||0));
+    else if (mode === 'month-desc') cp.sort((a,b) => (b.월||'').localeCompare(a.월||''));
+    else if (mode === 'month-asc') cp.sort((a,b) => (a.월||'').localeCompare(b.월||''));
+    return cp;
+  }
+
+  function renderHeadline(product, sorted) {
+    const cfg = CHART_MAP[product];
+    const host = document.getElementById(cfg.headline);
+    if (!host) return;
+    // 시간순 배열로 변환 (현재/전월 비교)
+    const byMonth = [...sorted].sort((a, b) => (a.월 || '').localeCompare(b.월 || ''));
+    const cur = byMonth[byMonth.length - 1];
+    const prev = byMonth[byMonth.length - 2];
+    if (!cur) { host.textContent = ''; return; }
+    const curProfit = cur.순이익 || 0;
+    const prevProfit = prev?.순이익 || 0;
+    const curRevenue = cur.매출 || cur.구매전환값 || 0;
+    const prevRevenue = prev?.매출 || prev?.구매전환값 || 0;
+    const deltaPct = prevProfit !== 0 ? ((curProfit - prevProfit) / Math.abs(prevProfit)) * 100 : null;
+    const deltaEl = deltaPct == null
+      ? ''
+      : (deltaPct >= 0
+         ? `<span class="delta-up">▲ ${deltaPct.toFixed(1)}%</span>`
+         : `<span class="delta-down">▼ ${Math.abs(deltaPct).toFixed(1)}%</span>`);
+    host.innerHTML = `
+      <div><span class="big">${fmtKRW(curProfit)}</span> <small>(${cur.월} 순이익)</small></div>
+      <div>당월 매출 ${fmtKRW(curRevenue)}${prev ? ` · 전월 ${fmtKRW(prevRevenue)}` : ''}</div>
+      ${prev ? `<div>전월 대비 ${deltaEl} · 전월 ${fmtKRW(prevProfit)}</div>` : ''}`;
+  }
+
+  function renderProfitTable(product, sorted) {
+    const cfg = CHART_MAP[product];
+    const body = document.getElementById(cfg.table);
+    if (!body) return;
+    body.innerHTML = sorted.map(r => `
+      <tr>
+        <td>${r.월 || '-'}</td>
+        <td class="num">${fmtKRW(r.매출 || r.구매전환값)}</td>
+        <td class="num">${fmtKRW(r.광고지출)}</td>
+        <td class="num">${fmtKRW(r.순이익)}</td>
+        <td class="num">${fmtROAS(r.ROAS)}</td>
+      </tr>
+    `).join('');
+  }
+
+  function renderChart(product) {
+    const cfg = CHART_MAP[product];
+    const sel = document.getElementById(cfg.select);
+    const rows = normalizeMonthlyProfitRows(product);
+    const sorted = sortRows(rows, sel.value);
+    const labels = sorted.map(r => r.월);
+    const cogs = sorted.map(r => r.원가액 || 0);
+    const adspend = sorted.map(r => r.광고지출 || 0);
+    const profit = sorted.map(r => r.순이익 || 0);
+
+    renderHeadline(product, sorted);
+    renderProfitTable(product, sorted);
+
+    if (charts[product]) charts[product].destroy();
+    const ctx = document.getElementById(cfg.canvas).getContext('2d');
+    charts[product] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          // 순이익 라인 (보조축 y1) — 굵고 선명하게, 포인트 라벨
+          {
+            type: 'line',
+            label: '순이익',
+            data: profit,
+            yAxisID: 'y1',
+            borderColor: '#2D5016',
+            backgroundColor: 'rgba(45, 80, 22, 0.08)',
+            borderWidth: 4,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            pointBackgroundColor: '#2D5016',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            tension: 0.25,
+            fill: true,
+            order: 0,
+          },
+          // 원가 막대 (배경화)
+          {
+            label: '원가',
+            data: cogs,
+            backgroundColor: 'rgba(178, 186, 187, 0.4)',
+            borderRadius: 4,
+            order: 3,
+            yAxisID: 'y',
+          },
+          // 광고지출 막대
+          {
+            label: '광고지출',
+            data: adspend,
+            backgroundColor: 'rgba(214, 137, 16, 0.7)',
+            borderRadius: 4,
+            order: 2,
+            yAxisID: 'y',
+          },
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 14, font: { size: 12 }, padding: 14 } },
+          tooltip: {
+            callbacks: {
+              label: (c) => `${c.dataset.label}: ${fmtKRW(c.parsed.y)}`,
+              afterBody: (items) => {
+                const row = sorted[items[0].dataIndex];
+                return [`매출: ${fmtKRW(row.매출 || row.구매전환값)}`, `ROAS: ${fmtROAS(row.ROAS)}`, `순이익률: ${fmtPct(row.순이익률,1)}`];
+              }
+            }
+          }
+        },
+        scales: {
+          x: { stacked: false, ticks: { font: { size: 11 } } },
+          y: {
+            beginAtZero: true,
+            position: 'left',
+            title: { display: true, text: '원가/광고지출', font: { size: 11 }, color: '#6e6e6e' },
+            ticks: { callback: (v) => fmtKRW(v), font: { size: 10 } },
+            grid: { color: 'rgba(0,0,0,0.04)' },
+          },
+          y1: {
+            beginAtZero: false,
+            position: 'right',
+            title: { display: true, text: '순이익', font: { size: 12, weight: 'bold' }, color: '#2D5016' },
+            ticks: { callback: (v) => fmtKRW(v), font: { size: 11, weight: 'bold' }, color: '#2D5016' },
+            grid: { drawOnChartArea: false },
+          }
+        }
+      }
+    });
+  }
+
+  Object.keys(CHART_MAP).forEach(p => {
+    const sel = document.getElementById(CHART_MAP[p].select);
+    sel.addEventListener('change', () => renderChart(p));
+    renderChart(p);
+  });
+
+  /* ---------- 섹션 1.5: GA4 실결제 순이익 (카테고리별 · 방안 C) ---------- */
+  (function renderGA4Profit() {
+    const fmtPctSigned = (v) => {
+      if (v == null || !isFinite(v)) return '-';
+      const pct = v * 100;
+      const sign = pct >= 0 ? '+' : '';
+      return `${sign}${pct.toFixed(1)}%`;
+    };
+    const profitClass = (v) => v == null ? '' : (v >= 0 ? 'profit-pos' : 'profit-neg');
+    const pctCell = (v) => {
+      if (v == null || !isFinite(v)) return '<td class="num">-</td>';
+      const cls = v >= 0 ? 'profit-pos' : 'profit-neg';
+      return `<td class="num ${cls}">${fmtPctSigned(v)}</td>`;
+    };
+    const periods = DATA.meta?.periods || {};
+    const ga4Range = periods.ga4_profit?.label || '';
+    document.getElementById('badge-ga4-profit').textContent = ga4Range || '-';
+
+    const CAT_ORDER = ['단백밥', '밸런시', '순수단백', '기타'];
+    const buildGa4SplitShares = () => {
+      const explicit = DATA.meta?.ga4_category_split?.shares;
+      if (explicit && Object.keys(explicit).length) return explicit;
+      const spend = { '단백밥': 0, '밸런시': 0, '순수단백': 0, '기타': 0 };
+      (DATA.mtd_kpis || []).forEach(r => {
+        const cat = r.카테고리 || r.category;
+        const s = numOrNull(r.누적_지출) ?? numOrNull(r.spend) ?? 0;
+        if (cat === '단백밥' || cat === '단백밥 ASC') spend['단백밥'] += s;
+        else if (cat === '밸런시') spend['밸런시'] += s;
+        else if (cat === '순수단백') spend['순수단백'] += s;
+        else spend['기타'] += s;
+      });
+      const total = Object.values(spend).reduce((a, b) => a + b, 0);
+      if (!total) return null;
+      return Object.fromEntries(Object.entries(spend).map(([k, v]) => [k, v / total]));
+    };
+    const splitGa4RowsIfNeeded = (arr, kind) => {
+      const rows = (arr || []).slice();
+      if (!rows.length) return rows;
+      const cats = new Set(rows.map(r => r.카테고리 || '기타'));
+      if (!(cats.size === 1 && cats.has('기타'))) return rows;
+      const shares = buildGa4SplitShares();
+      if (!shares) return rows;
+      const targetCats = ['단백밥', '밸런시', '순수단백'];
+      const numericKeys = kind === 'daily'
+        ? ['매출', '주문수', '원가', '배송비', '수수료', '광고비', '소재수', '순이익']
+        : ['매출', '주문수', '원가', '배송비', '수수료', '광고비', '일수', '순이익'];
+      const splitRows = [];
+      for (const row of rows) {
+        for (const cat of targetCats) {
+          const share = shares[cat] ?? 0;
+          const next = { ...row, 카테고리: cat };
+          numericKeys.forEach(k => {
+            const v = numOrNull(row[k]);
+            next[k] = v == null ? row[k] : Math.round(v * share);
+          });
+          const adCost = numOrNull(next.광고비);
+          const profit = numOrNull(next.순이익);
+          next.실ROI = adCost ? profit / adCost : null;
+          splitRows.push(next);
+        }
+      }
+      return splitRows;
+    };
+    const groupByCategory = (arr) => {
+      const map = new Map();
+      for (const r of (arr || [])) {
+        const cat = r.카테고리 || '기타';
+        if (!map.has(cat)) map.set(cat, []);
+        map.get(cat).push(r);
+      }
+      return map;
+    };
+    const orderedCats = (byCat) => {
+      const present = CAT_ORDER.filter(c => byCat.has(c));
+      const extras = [...byCat.keys()].filter(c => !CAT_ORDER.includes(c));
+      return [...present, ...extras];
+    };
+
+    // ---- 일별 카테고리 카드 ----
+    (function renderDailyCats() {
+      const host = document.getElementById('ga4-daily-cats');
+      const byCat = groupByCategory(splitGa4RowsIfNeeded(DATA.ga4_profit_daily, 'daily'));
+      const cats = orderedCats(byCat);
+      if (cats.length === 0) {
+        host.innerHTML = `<div class="ga4-empty">데이터 없음 — 노션 DB 동기화 대기 중</div>`;
+        return;
+      }
+      host.innerHTML = cats.map(cat => {
+        const catRows = byCat.get(cat).slice()
+          .sort((a, b) => (b.날짜 || '').localeCompare(a.날짜 || ''))
+          .slice(0, 30);
+        const latest = catRows[0];
+        const sum = catRows.reduce((s, r) => ({
+          매출: s.매출 + (r.매출 || 0),
+          원가: s.원가 + (r.원가 || 0),
+          배송비: s.배송비 + (r.배송비 || 0),
+          수수료: s.수수료 + (r.수수료 || 0),
+          광고비: s.광고비 + (r.광고비 || 0),
+          순이익: s.순이익 + (r.순이익 || 0),
+        }), { 매출:0, 원가:0, 배송비:0, 수수료:0, 광고비:0, 순이익:0 });
+        const roiAvg = sum.광고비 ? sum.순이익 / sum.광고비 : null;
+        const latestROI = latest.실ROI != null ? latest.실ROI
+                        : (latest.광고비 ? latest.순이익 / latest.광고비 : null);
+
+        return `<div class="ga4-cat-card" data-cat="${cat}">
+          <div class="cat-title"><span class="cat-dot"></span>${cat}</div>
+          <div class="mini-headline">${fmtKRW(latest.순이익)}
+            <small>(${latest.날짜} · 실ROI ${fmtPctSigned(latestROI)})</small>
+          </div>
+          <div class="cat-sub">${catRows.length}일 합계 ${fmtKRW(sum.순이익)} · 평균 실ROI ${fmtPctSigned(roiAvg)}</div>
+          <div class="cat-table-wrap">
+            <table class="cat-table">
+              <thead><tr>
+                <th>날짜</th><th class="num">매출</th><th class="num">광고비</th>
+                <th class="num">순이익</th><th class="num">실ROI</th>
+              </tr></thead>
+              <tbody>
+                ${catRows.map(r => {
+                  const roi = r.실ROI != null ? r.실ROI
+                            : (r.광고비 ? r.순이익 / r.광고비 : null);
+                  return `<tr>
+                    <td>${r.날짜 || '-'}</td>
+                    <td class="num">${fmtKRW(r.매출)}</td>
+                    <td class="num">${fmtKRW(r.광고비)}</td>
+                    <td class="num ${profitClass(r.순이익)}">${fmtKRW(r.순이익)}</td>
+                    ${pctCell(roi)}
+                  </tr>`;
+                }).join('')}
+              </tbody>
+              <tfoot><tr>
+                <td>합계</td>
+                <td class="num">${fmtKRW(sum.매출)}</td>
+                <td class="num">${fmtKRW(sum.광고비)}</td>
+                <td class="num ${profitClass(sum.순이익)}">${fmtKRW(sum.순이익)}</td>
+                ${pctCell(roiAvg)}
+              </tr></tfoot>
+            </table>
+          </div>
+        </div>`;
+      }).join('');
+    })();
+
+    // ---- 월별 카테고리 카드 ----
+    (function renderMonthlyCats() {
+      const host = document.getElementById('ga4-monthly-cats');
+      const byCat = groupByCategory(splitGa4RowsIfNeeded(DATA.ga4_profit_monthly, 'monthly'));
+      const cats = orderedCats(byCat);
+      if (cats.length === 0) {
+        host.innerHTML = `<div class="ga4-empty">데이터 없음 — 노션 DB 동기화 대기 중</div>`;
+        return;
+      }
+      host.innerHTML = cats.map(cat => {
+        const catRows = byCat.get(cat).slice()
+          .sort((a, b) => (b.월 || '').localeCompare(a.월 || ''));
+        const cur = catRows[0], prev = catRows[1];
+        const curROI = cur.실ROI != null ? cur.실ROI
+                     : (cur.광고비 ? cur.순이익 / cur.광고비 : null);
+        const deltaPct = (prev && prev.순이익 && prev.순이익 !== 0)
+          ? ((cur.순이익 - prev.순이익) / Math.abs(prev.순이익)) * 100 : null;
+        const deltaEl = deltaPct == null ? ''
+          : (deltaPct >= 0
+              ? `<span style="color:var(--ok);font-weight:700;">▲ ${deltaPct.toFixed(1)}%</span>`
+              : `<span style="color:var(--bad);font-weight:700;">▼ ${Math.abs(deltaPct).toFixed(1)}%</span>`);
+
+        return `<div class="ga4-cat-card" data-cat="${cat}">
+          <div class="cat-title"><span class="cat-dot"></span>${cat}</div>
+          <div class="mini-headline">${fmtKRW(cur.순이익)}
+            <small>(${cur.월} · 실ROI ${fmtPctSigned(curROI)})</small>
+          </div>
+          <div class="cat-sub">${prev ? `전월 대비 ${deltaEl} · 전월 ${fmtKRW(prev.순이익)}` : '이전 월 데이터 없음'}</div>
+          <div class="cat-table-wrap">
+            <table class="cat-table">
+              <thead><tr>
+                <th>월</th><th class="num">매출</th><th class="num">광고비</th>
+                <th class="num">순이익</th><th class="num">실ROI</th>
+              </tr></thead>
+              <tbody>
+                ${catRows.map(r => {
+                  const roi = r.실ROI != null ? r.실ROI
+                            : (r.광고비 ? r.순이익 / r.광고비 : null);
+                  return `<tr>
+                    <td>${r.월 || '-'}</td>
+                    <td class="num">${fmtKRW(r.매출)}</td>
+                    <td class="num">${fmtKRW(r.광고비)}</td>
+                    <td class="num ${profitClass(r.순이익)}">${fmtKRW(r.순이익)}</td>
+                    ${pctCell(roi)}
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+      }).join('');
+    })();
+  })();
+
+  /* ---------- 섹션 1.7: 광고 효율 vs 실결제 수익 브리지 ---------- */
+  (function renderBridge() {
+    const host = document.getElementById('bridge-grid');
+    const CAT_ORDER = ['단백밥', '단백밥 ASC', '밸런시', '순수단백', '기타'];
+    const mtdMap = new Map((DATA.mtd_kpis || []).map(r => [r.카테고리 || r.category, r]));
+    const buildGa4SplitShares = () => {
+      const explicit = DATA.meta?.ga4_category_split?.shares;
+      if (explicit && Object.keys(explicit).length) return explicit;
+      const spend = { '단백밥': 0, '밸런시': 0, '순수단백': 0, '기타': 0 };
+      (DATA.mtd_kpis || []).forEach(r => {
+        const cat = r.카테고리 || r.category;
+        const s = numOrNull(r.누적_지출) ?? numOrNull(r.spend) ?? 0;
+        if (cat === '단백밥' || cat === '단백밥 ASC') spend['단백밥'] += s;
+        else if (cat === '밸런시') spend['밸런시'] += s;
+        else if (cat === '순수단백') spend['순수단백'] += s;
+        else spend['기타'] += s;
+      });
+      const total = Object.values(spend).reduce((a, b) => a + b, 0);
+      if (!total) return null;
+      return Object.fromEntries(Object.entries(spend).map(([k, v]) => [k, v / total]));
+    };
+    const splitGa4RowsIfNeeded = (arr, kind) => {
+      const rows = (arr || []).slice();
+      if (!rows.length) return rows;
+      const cats = new Set(rows.map(r => r.카테고리 || '기타'));
+      if (!(cats.size === 1 && cats.has('기타'))) return rows;
+      const shares = buildGa4SplitShares();
+      if (!shares) return rows;
+      const targetCats = ['단백밥', '밸런시', '순수단백'];
+      const numericKeys = kind === 'daily'
+        ? ['매출', '주문수', '원가', '배송비', '수수료', '광고비', '소재수', '순이익']
+        : ['매출', '주문수', '원가', '배송비', '수수료', '광고비', '일수', '순이익'];
+      const splitRows = [];
+      for (const row of rows) {
+        for (const cat of targetCats) {
+          const share = shares[cat] ?? 0;
+          const next = { ...row, 카테고리: cat };
+          numericKeys.forEach(k => {
+            const v = numOrNull(row[k]);
+            next[k] = v == null ? row[k] : Math.round(v * share);
+          });
+          const adCost = numOrNull(next.광고비);
+          const profit = numOrNull(next.순이익);
+          next.실ROI = adCost ? profit / adCost : null;
+          splitRows.push(next);
+        }
+      }
+      return splitRows;
+    };
+    const ga4MonthlyRows = splitGa4RowsIfNeeded(DATA.ga4_profit_monthly, 'monthly');
+    const ga4DailyRows = splitGa4RowsIfNeeded(DATA.ga4_profit_daily, 'daily');
+    const monthByCat = new Map();
+    ga4MonthlyRows.forEach(r => {
+      const cat = r.카테고리 || '기타';
+      const prev = monthByCat.get(cat);
+      if (!prev || String(r.월 || '') > String(prev.월 || '')) monthByCat.set(cat, r);
+    });
+    const dayByCat = new Map();
+    ga4DailyRows.forEach(r => {
+      const cat = r.카테고리 || '기타';
+      const prev = dayByCat.get(cat);
+      if (!prev || String(r.날짜 || '') > String(prev.날짜 || '')) dayByCat.set(cat, r);
+    });
+    const cats = [...new Set([
+      ...CAT_ORDER,
+      ...[...mtdMap.keys()],
+      ...[...monthByCat.keys()],
+      ...[...dayByCat.keys()],
+    ])].filter(Boolean);
+
+    const noteFor = (mtd, ga4m) => {
+      const roas = mtd?.누적_ROAS;
+      const roi = ga4m?.실ROI;
+      if (roas == null && roi == null) return '비교 데이터가 아직 없습니다.';
+      if (roas >= 400 && roi != null && roi < 0) return '광고 관리자 효율은 좋아 보여도 실결제 기준으로는 적자입니다.';
+      if (roas < 350 && roi != null && roi >= 0) return '광고 효율은 약하지만 실결제 기준으로는 아직 버티는 구간입니다.';
+      if (roas >= 400 && roi != null && roi >= 0) return '광고 효율과 실결제 수익성이 함께 받쳐주는 카테고리입니다.';
+      return '효율과 수익성의 방향이 완전히 일치하는지 추가 관찰이 필요합니다.';
+    };
+
+    host.innerHTML = cats.map(cat => {
+      const mtd = mtdMap.get(cat);
+      const ga4m = monthByCat.get(cat);
+      const ga4d = dayByCat.get(cat);
+      const roi = ga4m?.실ROI != null ? ga4m.실ROI : (ga4m?.광고비 ? ga4m.순이익 / ga4m.광고비 : null);
+      const roiText = roi == null ? '-' : `${roi >= 0 ? '+' : ''}${(roi * 100).toFixed(1)}%`;
+      const matchRate = ga4d?.매칭률;
+      return `<div class="bridge-card">
+        <h3>${cat}<span class="bridge-chip">통합 보기</span></h3>
+        <div class="bridge-headline">${roiText}<small>최신 실결제 기준 실ROI${ga4m?.월 ? ` · ${ga4m.월}` : ''}</small></div>
+        <dl class="bridge-dl">
+          <div><dt>Meta MTD ROAS</dt><dd>${mtd ? fmtROAS(mtd.누적_ROAS) : '-'}</dd></div>
+          <div><dt>Meta MTD 지출</dt><dd>${mtd ? fmtKRW(mtd.누적_지출) : '-'}</dd></div>
+          <div><dt>Meta MTD 매출</dt><dd>${mtd ? fmtKRW(mtd.누적_매출) : '-'}</dd></div>
+          <div><dt>GA4 월 순이익</dt><dd class="${ga4m?.순이익 >= 0 ? 'profit-pos' : 'profit-neg'}">${ga4m ? fmtKRW(ga4m.순이익) : '-'}</dd></div>
+          <div><dt>GA4 월 광고비</dt><dd>${ga4m ? fmtKRW(ga4m.광고비) : '-'}</dd></div>
+          <div><dt>최근 매칭률</dt><dd>${matchRate == null ? '-' : fmtPct(matchRate * 100, 1)}</dd></div>
+        </dl>
+        <div class="bridge-note"><strong>해석:</strong> ${noteFor(mtd, ga4m)}</div>
+      </div>`;
+    }).join('');
+  })();
+
+  /* ---------- 페이스북 페이지 링크 ---------- */
+  const fbHost = document.getElementById('fb-links');
+  Object.entries(DATA.facebook_pages || {}).forEach(([name, url]) => {
+    const a = document.createElement('a');
+    a.href = url; a.target = '_blank'; a.rel = 'noopener';
+    a.innerHTML = `📘 ${name} 페이지`;
+    fbHost.appendChild(a);
+  });
+})();
+</script>
+</body>
+</html>
