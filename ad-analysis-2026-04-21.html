@@ -151,6 +151,42 @@
     padding: 10px 8px;
   }
   table.creatives tfoot td.label { text-align: left; color: var(--brand-green); }
+  .creative-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 10px 0 12px;
+  }
+  @media (max-width: 1200px) { .creative-summary-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .creative-summary-grid { grid-template-columns: 1fr; } }
+  .creative-summary-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .creative-summary-card .sum-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--brand-green);
+    margin-bottom: 8px;
+  }
+  .creative-summary-card dl {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px 10px;
+    margin: 0;
+    font-size: 12px;
+  }
+  .creative-summary-card dl div {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dashed var(--border);
+    padding: 2px 0;
+  }
+  .creative-summary-card dt { color: var(--muted); }
+  .creative-summary-card dd { margin: 0; font-weight: 600; }
 
   /* 접이식 섹션 (퍼널/검증) */
   section.collapsible > details { border-left: 4px solid var(--brand-green); padding-left: 12px; }
@@ -941,9 +977,16 @@
     const k = judgeKey(r);
     return (JUDGE_RANK[k] ?? 99);
   };
+  const RUNNING_STATUSES = new Set(['ACTIVE', 'WITH_ISSUES']);
+  const shouldDisplayCreative = (c) => {
+    const status = c.현재상태 || '';
+    if (RUNNING_STATUSES.has(status)) return true;
+    if (c.위너이력 || c.위너여부) return true;
+    return false;
+  };
 
   const SECTION_ORDER = [
-    { key: 'winners',    title: '🏆 위너 소재 (전 상품 통합)' },
+    { key: 'winners',    title: '🏆 위너 소재 / 위너 이력 (전 상품 통합)' },
     { key: '단백밥-테스트',  title: '단백밥 — 테스트캠' },
     { key: '단백밥-메인',    title: '단백밥 — 메인캠' },
     { key: '단백밥-ASC',     title: '단백밥 — ASC (Advantage+)' },
@@ -954,7 +997,7 @@
   ];
 
   function routeBucket(c) {
-    if (c.위너여부) return 'winners';
+    if (c.위너여부 || c.위너이력) return 'winners';
     const prod = c.상품 || '기타';
     const type = c.캠페인유형 || '메인';
     return `${prod}-${type}`;
@@ -963,6 +1006,7 @@
   const buckets = {};
   SECTION_ORDER.forEach(s => buckets[s.key] = []);
   (DATA.creatives || []).forEach(c => {
+    if (!shouldDisplayCreative(c)) return;
     const b = routeBucket(c);
     if (buckets[b]) buckets[b].push(c);
     else (buckets[`${c.상품}-메인`] || buckets['단백밥-메인']).push(c);
@@ -977,6 +1021,9 @@
     const sumUniqClicks = rows.reduce((s, r) => s + (r.고유링크클릭수 || 0), 0);
     const sumPurchase = rows.reduce((s, r) => s + (r.구매수 || 0), 0);
     const sumBudget = rows.reduce((s, r) => s + (r.일예산 || 0), 0);
+    const sumLpv = rows.reduce((s, r) => s + (r.LPV || 0), 0);
+    const running = rows.filter(r => RUNNING_STATUSES.has(r.현재상태 || '')).length;
+    const off = rows.filter(r => !RUNNING_STATUSES.has(r.현재상태 || '')).length;
     return {
       광고수: rows.length,
       지출: sumSpend,
@@ -987,6 +1034,11 @@
       구매수: sumPurchase,
       일예산: sumBudget,
       노출: sumImpr,
+      LPV: sumLpv,
+      LPV당구매: sumLpv > 0 ? (sumPurchase / sumLpv * 100) : null,
+      AOV: sumPurchase > 0 ? (sumRev / sumPurchase) : null,
+      진행중광고수: running,
+      중단광고수: off,
     };
   }
 
@@ -999,8 +1051,11 @@
 
     const sectionEl = document.createElement('div');
     sectionEl.className = 'creative-section';
+    const periodLabel = DATA.meta?.period_rule === 'LAST_30D' ? '최근 30일' : '이번 달';
+    const criteriaLabel = sec.key === 'winners' ? '위너/기존 소재 기준' : '신규 소재 기준';
     sectionEl.innerHTML = `
       <h3>${sec.title} <span class="count">${rows.length}</span></h3>
+      <div class="creative-summary-grid"></div>
       <div class="table-scroll">
         <table class="creatives">
           <thead><tr>${COLS.map(c => `<th class="${c.cls || ''}">${c.label}</th>`).join('')}</tr></thead>
@@ -1008,6 +1063,7 @@
           <tfoot></tfoot>
         </table>
       </div>`;
+    const summaryGrid = sectionEl.querySelector('.creative-summary-grid');
     const tbody = sectionEl.querySelector('tbody');
     const tfoot = sectionEl.querySelector('tfoot');
     rows.forEach(r => {
@@ -1047,6 +1103,43 @@
 
     // tfoot 합계 행 렌더링
     const sum = computeSummary(rows);
+    summaryGrid.innerHTML = `
+      <div class="creative-summary-card">
+        <div class="sum-title">집행 / 상태</div>
+        <dl>
+          <div><dt>일예산</dt><dd>${fmtKRW(sum.일예산)}</dd></div>
+          <div><dt>소재수</dt><dd>${fmtNum(sum.광고수)}</dd></div>
+          <div><dt>진행 중</dt><dd>${fmtNum(sum.진행중광고수)}</dd></div>
+          <div><dt>중단</dt><dd>${fmtNum(sum.중단광고수)}</dd></div>
+        </dl>
+      </div>
+      <div class="creative-summary-card">
+        <div class="sum-title">성과 합계</div>
+        <dl>
+          <div><dt>지출</dt><dd>${fmtKRW(sum.지출)}</dd></div>
+          <div><dt>매출</dt><dd>${fmtKRW(sum.매출)}</dd></div>
+          <div><dt>ROAS</dt><dd>${fmtROAS(sum.ROAS)}</dd></div>
+          <div><dt>구매수</dt><dd>${fmtNum(sum.구매수)}</dd></div>
+        </dl>
+      </div>
+      <div class="creative-summary-card">
+        <div class="sum-title">퍼널 요약</div>
+        <dl>
+          <div><dt>노출</dt><dd>${fmtNum(sum.노출)}</dd></div>
+          <div><dt>CTR</dt><dd>${fmtPct(sum.CTR, 2)}</dd></div>
+          <div><dt>LPV</dt><dd>${fmtNum(sum.LPV)}</dd></div>
+          <div><dt>LPV당구매</dt><dd>${fmtPct(sum.LPV당구매, 2)}</dd></div>
+        </dl>
+      </div>
+      <div class="creative-summary-card">
+        <div class="sum-title">판정 참고</div>
+        <dl>
+          <div><dt>AOV</dt><dd>${fmtKRW(sum.AOV)}</dd></div>
+          <div><dt>고유링크CVR</dt><dd>${fmtPct(sum.CVR, 2)}</dd></div>
+          <div><dt>기준 기간</dt><dd>${periodLabel}</dd></div>
+          <div><dt>판정 기준</dt><dd>${criteriaLabel}</dd></div>
+        </dl>
+      </div>`;
     const footTr = document.createElement('tr');
     footTr.innerHTML = COLS.map((col, i) => {
       if (i === 0) return `<td class="label" colspan="5">합계 (${sum.광고수}개 소재)</td>`;
