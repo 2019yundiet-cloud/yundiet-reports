@@ -992,11 +992,31 @@
     const k = judgeKey(r);
     return (JUDGE_RANK[k] ?? 99);
   };
+  const numOrNull = (v) => (v == null || v === '' || Number.isNaN(Number(v))) ? null : Number(v);
+  const normalizeCreative = (c) => {
+    const impressions = numOrNull(c.노출);
+    const purchases = numOrNull(c.구매수);
+    const revenue = numOrNull(c.구매전환값) ?? numOrNull(c.매출) ?? numOrNull(c.누적_매출);
+    const lpv = numOrNull(c.LPV) ?? numOrNull(c.LPView);
+    return {
+      ...c,
+      고유CTR: numOrNull(c.고유CTR) ?? numOrNull(c.CTR),
+      고유링크클릭수: numOrNull(c.고유링크클릭수),
+      노출당LPV율: numOrNull(c.노출당LPV율) ?? ((lpv != null && impressions) ? (lpv / impressions * 100) : null),
+      LPV당구매율: numOrNull(c.LPV당구매율) ?? ((lpv != null && purchases != null && lpv > 0) ? (purchases / lpv * 100) : null),
+      고유링크CVR: numOrNull(c.고유링크CVR) ?? numOrNull(c.CVR),
+      노출1천회당전환수: numOrNull(c.노출1천회당전환수) ?? ((impressions && purchases != null) ? (purchases / impressions * 1000) : null),
+      평균구매전환값: numOrNull(c.평균구매전환값) ?? ((revenue != null && purchases) ? (revenue / purchases) : null),
+      구매전환값: revenue,
+      LPV: lpv,
+    };
+  };
   const RUNNING_STATUSES = new Set(['ACTIVE', 'WITH_ISSUES']);
   const shouldDisplayCreative = (c) => {
     const status = c.현재상태 || '';
     if (RUNNING_STATUSES.has(status)) return true;
     if (c.위너이력 || c.위너여부) return true;
+    if (!RUNNING_STATUSES.has(status) && (numOrNull(c.누적_지출) ?? 0) > 0) return true;
     return false;
   };
 
@@ -1005,26 +1025,32 @@
     { key: '단백밥-테스트',  title: '단백밥 — 테스트캠' },
     { key: '단백밥-메인',    title: '단백밥 — 메인캠' },
     { key: '단백밥-ASC',     title: '단백밥 — ASC (Advantage+)' },
+    { key: '단백밥-OFF',     title: '단백밥 — OFF (조회기간 지출 있음)' },
     { key: '순수단백-테스트',title: '순수단백 — 테스트캠' },
     { key: '순수단백-메인',  title: '순수단백 — 메인캠' },
+    { key: '순수단백-OFF',   title: '순수단백 — OFF (조회기간 지출 있음)' },
     { key: '밸런시-테스트',  title: '밸런시 — 테스트캠' },
     { key: '밸런시-메인',    title: '밸런시 — 메인캠' },
+    { key: '밸런시-OFF',     title: '밸런시 — OFF (조회기간 지출 있음)' },
   ];
 
   function routeBucket(c) {
     if (c.위너여부 || c.위너이력) return 'winners';
     const prod = c.상품 || '기타';
     const type = c.캠페인유형 || '메인';
+    const status = c.현재상태 || '';
+    if (!RUNNING_STATUSES.has(status) && (numOrNull(c.누적_지출) ?? 0) > 0) return `${prod}-OFF`;
     return `${prod}-${type}`;
   }
 
   const buckets = {};
   SECTION_ORDER.forEach(s => buckets[s.key] = []);
   (DATA.creatives || []).forEach(c => {
-    if (!shouldDisplayCreative(c)) return;
-    const b = routeBucket(c);
-    if (buckets[b]) buckets[b].push(c);
-    else (buckets[`${c.상품}-메인`] || buckets['단백밥-메인']).push(c);
+    const row = normalizeCreative(c);
+    if (!shouldDisplayCreative(row)) return;
+    const b = routeBucket(row);
+    if (buckets[b]) buckets[b].push(row);
+    else (buckets[`${row.상품}-메인`] || buckets['단백밥-메인']).push(row);
   });
 
   // 섹션별 합계 계산 (가중평균 포함)
@@ -1033,10 +1059,12 @@
     const sumRev = rows.reduce((s, r) => s + (r.구매전환값 || 0), 0);
     const sumImpr = rows.reduce((s, r) => s + (r.노출 || 0), 0);
     const sumClicks = rows.reduce((s, r) => s + ((r.노출 || 0) * (r.CTR || 0) / 100), 0);
+    const sumUniqueClicks = rows.reduce((s, r) => s + (r.고유링크클릭수 || 0), 0);
     const sumUniqClicks = rows.reduce((s, r) => s + (r.고유링크클릭수 || 0), 0);
     const sumPurchase = rows.reduce((s, r) => s + (r.구매수 || 0), 0);
     const sumBudget = rows.reduce((s, r) => s + (r.일예산 || 0), 0);
     const sumLpv = rows.reduce((s, r) => s + (r.LPV || 0), 0);
+    const sumReach = rows.reduce((s, r) => s + (r.도달 || 0), 0);
     const running = rows.filter(r => RUNNING_STATUSES.has(r.현재상태 || '')).length;
     const off = rows.filter(r => !RUNNING_STATUSES.has(r.현재상태 || '')).length;
     return {
@@ -1045,16 +1073,62 @@
       매출: sumRev,
       ROAS: sumSpend > 0 ? (sumRev / sumSpend * 100) : null,
       CTR: sumImpr > 0 ? (sumClicks / sumImpr * 100) : null,
+      고유CTR: sumReach > 0 ? (sumUniqueClicks / sumReach * 100) : null,
+      고유링크클릭수: sumUniqueClicks,
       CVR: sumUniqClicks > 0 ? (sumPurchase / sumUniqClicks * 100) : null,
       구매수: sumPurchase,
       일예산: sumBudget,
       노출: sumImpr,
+      도달: sumReach,
       LPV: sumLpv,
+      노출당LPV율: sumImpr > 0 && sumLpv > 0 ? (sumLpv / sumImpr * 100) : null,
       LPV당구매: sumLpv > 0 ? (sumPurchase / sumLpv * 100) : null,
+      노출1천회당전환수: sumImpr > 0 ? (sumPurchase / sumImpr * 1000) : null,
       AOV: sumPurchase > 0 ? (sumRev / sumPurchase) : null,
+      구매전환값: sumRev,
       진행중광고수: running,
       중단광고수: off,
     };
+  }
+  function directActionPlan(r) {
+    const roas = numOrNull(r.누적_ROAS) ?? numOrNull(r.ROAS);
+    const ctr = numOrNull(r.CTR);
+    const cvr = numOrNull(r.고유링크CVR) ?? numOrNull(r.CVR);
+    const pattern = r.인사이트패턴 || '';
+    const tag = r.인사이트태그 || '';
+    const roasText = roas != null ? `${fmtROAS(roas)}` : 'ROAS 미집계';
+    if (pattern === 'P1' || tag === '상세페이지_불일치') {
+      return `CTA/CPC 성과는 확인되지만 전환율이 약해 ${roasText} 수준입니다. 상세페이지 첫 화면 메시지, 혜택 제시, 후기/신뢰요소 정렬을 우선 개선하세요.`;
+    }
+    if (pattern === 'P15' || tag === '결제_직전_이탈') {
+      return `구매 직전 이탈이 커서 ${roasText}에 머물고 있습니다. 배송비, 도착일, 구성, 환불안내를 결제 전 구간에서 더 선명하게 보여주도록 상세페이지를 수정하세요.`;
+    }
+    if (pattern === 'P2' || tag === '후킹_실패') {
+      return `초반 클릭 유도가 약해 ${roasText}를 기록 중입니다. 썸네일, 첫 1~3초 후킹, 헤드카피를 다시 구성한 신규 소재 테스트가 필요합니다.`;
+    }
+    if (pattern === 'P4' || tag === '경매_밀림') {
+      return `노출 확보가 충분하지 않아 학습이 덜 된 상태입니다. 타겟 폭, 입찰 강도, 캠페인 구조를 점검해 노출을 먼저 확보하세요.`;
+    }
+    if (pattern === 'P5' || tag === '소재_피로도') {
+      return `현재 성과는 유지되지만 피로도 신호가 보입니다. 위너 구조는 유지하고 후킹/구성만 바꾼 변형 소재를 2~3개 추가 준비하세요.`;
+    }
+    if (pattern === 'P7' || tag === 'CPC_과다') {
+      return `클릭 단가 부담으로 ${roasText}가 눌리고 있습니다. 후킹 문구를 더 선명하게 바꾸고, 타겟/플레이스먼트 조정으로 CPC를 낮추는 테스트가 필요합니다.`;
+    }
+    if (pattern === 'P18' || tag === '콘텐츠_성공_광고_실패') {
+      return `콘텐츠 반응 대비 클릭·전환 연결이 약합니다. 광고 안에서 CTA와 제안 문구를 더 앞단에 배치해 전환형 구조로 재편하세요.`;
+    }
+    if ((ctr != null && ctr >= 2) && (cvr != null && cvr < 3)) {
+      return `클릭 유입은 만들어지고 있지만 전환 효율이 약합니다. 상세페이지 메시지 정합성과 구매 유도 구간을 우선 개선하세요.`;
+    }
+    if ((ctr != null && ctr < 1.5)) {
+      return `초기 클릭 유도가 약합니다. 소재 후킹, 썸네일, 첫 문장 카피를 다시 설계한 신규 크리에이티브 테스트가 필요합니다.`;
+    }
+    return (r.액션플랜 || '')
+      .replace(/^[^\n:]*:\s*/, '')
+      .replace(/일\s*~?₩?[\d,\.]+\s*절감\.?\s*/g, '')
+      .replace(/예산은 .*?(이관|복증에 이관)\.?\s*/g, '')
+      .trim() || '상세 데이터 재확인 후 소재/상세페이지/타겟 중 병목 구간을 특정해 직접 개선 액션으로 전환하세요.';
   }
 
   const host = document.getElementById('creatives-sections');
@@ -1114,6 +1188,9 @@
           const tag = r.인사이트태그 ? `<span class="funnel-tag">${r.인사이트태그}</span>` : '<span class="funnel-tag">진단 없음</span>';
           return `<td class="col-funnel">${sev}${pattern}${tag}</td>`;
         }
+        if (col.key === '액션플랜') {
+          return `<td class="${col.cls || ''}">${directActionPlan(r)}</td>`;
+        }
         const v = r[col.key];
         const cls = col.cls || '';
         const val = col.fmt ? col.fmt(v) : (v ?? '-');
@@ -1141,6 +1218,8 @@
           <div><dt>매출</dt><dd>${fmtKRW(sum.매출)}</dd></div>
           <div><dt>ROAS</dt><dd>${fmtROAS(sum.ROAS)}</dd></div>
           <div><dt>구매수</dt><dd>${fmtNum(sum.구매수)}</dd></div>
+          <div><dt>구매전환값</dt><dd>${fmtKRW(sum.구매전환값)}</dd></div>
+          <div><dt>평균구매값</dt><dd>${fmtKRW(sum.AOV)}</dd></div>
         </dl>
       </div>
       <div class="creative-summary-card">
@@ -1148,8 +1227,12 @@
         <dl>
           <div><dt>노출</dt><dd>${fmtNum(sum.노출)}</dd></div>
           <div><dt>CTR</dt><dd>${fmtPct(sum.CTR, 2)}</dd></div>
+          <div><dt>고유CTR</dt><dd>${fmtPct(sum.고유CTR, 2)}</dd></div>
+          <div><dt>고유링크클릭</dt><dd>${fmtNum(sum.고유링크클릭수)}</dd></div>
           <div><dt>LPV</dt><dd>${fmtNum(sum.LPV)}</dd></div>
+          <div><dt>노출당LPV</dt><dd>${fmtPct(sum.노출당LPV율, 2)}</dd></div>
           <div><dt>LPV당구매</dt><dd>${fmtPct(sum.LPV당구매, 2)}</dd></div>
+          <div><dt>1K노출당전환</dt><dd>${fmtNum(sum.노출1천회당전환수, 2)}</dd></div>
         </dl>
       </div>
       <div class="creative-summary-card">
@@ -1157,6 +1240,8 @@
         <dl>
           <div><dt>AOV</dt><dd>${fmtKRW(sum.AOV)}</dd></div>
           <div><dt>고유링크CVR</dt><dd>${fmtPct(sum.CVR, 2)}</dd></div>
+          <div><dt>도달</dt><dd>${fmtNum(sum.도달)}</dd></div>
+          <div><dt>상태별 OFF</dt><dd>${fmtNum(sum.중단광고수)}</dd></div>
           <div><dt>기준 기간</dt><dd>${periodLabel}</dd></div>
           <div><dt>판정 기준</dt><dd>${criteriaLabel}</dd></div>
         </dl>
