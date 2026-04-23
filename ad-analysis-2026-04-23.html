@@ -2426,9 +2426,10 @@
       };
       paidOrders.forEach(order => {
         const family = order.entry_product_family || '기타';
-        pushMetric(entryMap, family, () => ({ entry_product_family: family, orders: 0, matched_orders: 0, revenue: 0, covered_net_profit: 0 }), row => {
+        pushMetric(entryMap, family, () => ({ entry_product_family: family, orders: 0, matched_orders: 0, revenue: 0, ad_spend: 0, covered_net_profit: 0 }), row => {
           row.orders += 1;
           row.revenue += Number(order.payment_amount || 0);
+          row.ad_spend += Number(order.ad_spend_allocated || 0);
           if (order.match_status !== '미매칭') {
             row.matched_orders += 1;
             row.covered_net_profit += Number(order.net_profit || 0);
@@ -2437,16 +2438,19 @@
         const firstTouch = order.first_touch_campaign || '(미지정)';
         const lastTouch = order.last_touch_campaign || '(미지정)';
         const landing = order.landing_page || '(미지정)';
-        pushMetric(firstTouchMap, firstTouch, () => ({ first_touch_campaign: firstTouch, orders: 0, matched_orders: 0, revenue: 0, covered_net_profit: 0 }), row => {
+        pushMetric(firstTouchMap, firstTouch, () => ({ first_touch_campaign: firstTouch, orders: 0, matched_orders: 0, revenue: 0, ad_spend: 0, covered_net_profit: 0 }), row => {
           row.orders += 1; row.revenue += Number(order.payment_amount || 0);
+          row.ad_spend += Number(order.ad_spend_allocated || 0);
           if (order.match_status !== '미매칭') { row.matched_orders += 1; row.covered_net_profit += Number(order.net_profit || 0); }
         });
-        pushMetric(lastTouchMap, lastTouch, () => ({ last_touch_campaign: lastTouch, orders: 0, matched_orders: 0, revenue: 0, covered_net_profit: 0 }), row => {
+        pushMetric(lastTouchMap, lastTouch, () => ({ last_touch_campaign: lastTouch, orders: 0, matched_orders: 0, revenue: 0, ad_spend: 0, covered_net_profit: 0 }), row => {
           row.orders += 1; row.revenue += Number(order.payment_amount || 0);
+          row.ad_spend += Number(order.ad_spend_allocated || 0);
           if (order.match_status !== '미매칭') { row.matched_orders += 1; row.covered_net_profit += Number(order.net_profit || 0); }
         });
-        pushMetric(landingMap, landing, () => ({ landing_page: landing, orders: 0, matched_orders: 0, revenue: 0, covered_net_profit: 0 }), row => {
+        pushMetric(landingMap, landing, () => ({ landing_page: landing, orders: 0, matched_orders: 0, revenue: 0, ad_spend: 0, covered_net_profit: 0 }), row => {
           row.orders += 1; row.revenue += Number(order.payment_amount || 0);
+          row.ad_spend += Number(order.ad_spend_allocated || 0);
           if (order.match_status !== '미매칭') { row.matched_orders += 1; row.covered_net_profit += Number(order.net_profit || 0); }
         });
 
@@ -2527,13 +2531,13 @@
 
     entryWrap.innerHTML = entryFamilies.map(row => {
       const family = row.entry_product_family || '기타';
-      const matchGap = (row.orders || 0) - (row.matched_orders || 0);
-      return `<div class="entry-card">
+        const matchGap = (row.orders || 0) - (row.matched_orders || 0);
+        return `<div class="entry-card">
         <h3>${family}${family === '미매칭' ? '<span class="warning-badge">미매칭 강조</span>' : ''}</h3>
         <div class="entry-headline">${fmtKRW(row.covered_net_profit)}<small>커버순이익</small></div>
         <div class="entry-meta">
           주문수 <b>${fmtNum(row.orders)}</b> · 매칭주문수 <b>${fmtNum(row.matched_orders)}</b><br>
-          제품군 매출 <b>${fmtKRW(row.revenue)}</b>
+          제품군 매출 <b>${fmtKRW(row.revenue)}</b> · 광고지출 <b>${fmtKRW(row.ad_spend)}</b>
           ${matchGap > 0 ? `<br><span class="warning-badge">미커버 ${fmtNum(matchGap)}건</span>` : ''}
         </div>
         <div class="entry-note">${noteForFamily(family)}</div>
