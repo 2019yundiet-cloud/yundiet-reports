@@ -2689,14 +2689,85 @@
       ...[...dayByCat.keys()],
     ])].filter(Boolean);
 
-    const noteFor = (mtd, ga4m) => {
-      const roas = mtd?.누적_ROAS;
-      const roi = ga4m?.실ROI;
-      if (roas == null && roi == null) return '비교 데이터가 아직 없습니다.';
-      if (roas >= 400 && roi != null && roi < 0) return '광고 관리자 효율은 좋아 보여도 실결제 기준으로는 적자입니다.';
-      if (roas < 350 && roi != null && roi >= 0) return '광고 효율은 약하지만 실결제 기준으로는 아직 버티는 구간입니다.';
-      if (roas >= 400 && roi != null && roi >= 0) return '광고 효율과 실결제 수익성이 함께 받쳐주는 카테고리입니다.';
-      return '효율과 수익성의 방향이 완전히 일치하는지 추가 관찰이 필요합니다.';
+    const recentGa4RowsForCat = (cat) => ga4DailyRows
+      .filter(r => (r.카테고리 || '기타') === cat)
+      .slice()
+      .sort((a, b) => String(b.날짜 || '').localeCompare(String(a.날짜 || '')));
+
+    const evaluateOperatingRule = (cat, mtd, ga4m) => {
+      const roas = numOrNull(mtd?.누적_ROAS);
+      const profit = numOrNull(ga4m?.순이익);
+      const roi = ga4m?.실ROI != null ? ga4m.실ROI : (ga4m?.광고비 ? ga4m.순이익 / ga4m.광고비 : null);
+      const recentRows = recentGa4RowsForCat(cat);
+      const recent3 = recentRows.slice(0, 3);
+      const latest = recentRows[0] || null;
+      const prev = recentRows[1] || null;
+      const latestProfit = numOrNull(latest?.순이익);
+      const prevProfit = numOrNull(prev?.순이익);
+      const latestRoi = latest?.실ROI != null ? latest.실ROI : (latest?.광고비 ? latest.순이익 / latest.광고비 : null);
+      const prevRoi = prev?.실ROI != null ? prev.실ROI : (prev?.광고비 ? prev.순이익 / prev.광고비 : null);
+      const nearZero = profit != null && Math.abs(profit) < 50000;
+      const improving = (
+        latestProfit != null && prevProfit != null && latestProfit > prevProfit
+      ) || (
+        latestRoi != null && prevRoi != null && latestRoi > prevRoi
+      );
+      const recentNegative = recent3.length >= 2 && recent3.every(r => Number(r?.순이익 || 0) < 0);
+
+      if (roas == null && roi == null) {
+        return {
+          label: '판단 보류',
+          tone: 'hold',
+          summary: '비교 데이터가 아직 부족합니다.',
+          action: 'GA4 실결제 순이익 데이터가 더 쌓인 뒤 판단하세요.'
+        };
+      }
+      if (recentNegative || ((roas == null || roas < 350) && roi != null && roi < 0)) {
+        return {
+          label: '중단/재설계',
+          tone: 'stop',
+          summary: 'Meta도 약하고 GA4 실결제 기준도 마이너스가 이어집니다.',
+          action: '빠르게 중단하거나 상세, 오퍼, 상품 믹스를 재설계하세요.'
+        };
+      }
+      if (roas != null && roas >= 400 && roi != null && roi > 0 && improving) {
+        return {
+          label: '확대',
+          tone: 'scale',
+          summary: 'Meta ROAS도 좋고 GA4 순이익도 플러스이며 최근 흐름도 개선 중입니다.',
+          action: '증액 대상입니다. 단, 최종 판단 우선순위는 GA4 실결제 기준을 유지하세요.'
+        };
+      }
+      if (roas != null && roas >= 400 && ((roi != null && roi < 0) || nearZero)) {
+        return {
+          label: '보류',
+          tone: 'hold',
+          summary: 'Meta 효율은 좋아 보이지만 실결제 기준 순이익이 마이너스이거나 0 근처입니다.',
+          action: '예산 확대는 금지하고 상세, 오퍼, 상품 믹스를 먼저 점검하세요.'
+        };
+      }
+      if ((roas == null || roas < 400) && roi != null && roi > 0) {
+        return {
+          label: '유지 테스트',
+          tone: 'test',
+          summary: '직접 반응형 광고는 아닐 수 있지만 실제 매출 회수력은 살아 있습니다.',
+          action: '즉시 중단보다 유지 테스트 가치가 있습니다. 소재와 상품 구성을 함께 점검하세요.'
+        };
+      }
+      if (roi != null && roi > 0) {
+        return {
+          label: '유지',
+          tone: 'keep',
+          summary: 'GA4 실결제 기준 순이익이 플러스라 기본 유지 구간입니다.',
+          action: '월별 순이익은 방향 확인용으로만 보고, 운영 판단은 GA4 기준으로 유지하세요.'
+        };
+      }
+      return {
+        label: '판단 보류',
+        tone: 'hold',
+        summary: '효율과 수익성의 방향이 완전히 일치하지 않습니다.',
+        action: '3~7일 누적 흐름을 더 본 뒤 확대/중단을 결정하세요.'
+      };
     };
 
     host.innerHTML = cats.map(cat => {
@@ -2706,6 +2777,7 @@
       const roi = ga4m?.실ROI != null ? ga4m.실ROI : (ga4m?.광고비 ? ga4m.순이익 / ga4m.광고비 : null);
       const roiText = roi == null ? '-' : `${roi >= 0 ? '+' : ''}${(roi * 100).toFixed(1)}%`;
       const matchRate = ga4d?.매칭률;
+      const decision = evaluateOperatingRule(cat, mtd, ga4m);
       return `<div class="bridge-card">
         <h3>${cat}<span class="bridge-chip">통합 보기</span></h3>
         <div class="bridge-headline">${roiText}<small>최신 실결제 기준 실ROI${ga4m?.월 ? ` · ${ga4m.월}` : ''}</small></div>
@@ -2717,7 +2789,9 @@
           <div><dt>GA4 월 광고비</dt><dd>${ga4m ? fmtKRW(ga4m.광고비) : '-'}</dd></div>
           <div><dt>최근 매칭률</dt><dd>${matchRate == null ? '-' : fmtPct(matchRate * 100, 1)}</dd></div>
         </dl>
-        <div class="bridge-note"><strong>해석:</strong> ${noteFor(mtd, ga4m)}</div>
+        <div class="bridge-note"><strong>운영 판단:</strong> ${decision.label} · ${decision.summary}</div>
+        <div class="bridge-note"><strong>액션플랜:</strong> ${decision.action}</div>
+        <div class="bridge-note"><strong>판단 우선순위:</strong> 월별 순이익은 방향 확인용, 최종 운영 판단은 GA4 실결제 기반 순이익을 우선합니다.</div>
       </div>`;
     }).join('');
   })();
