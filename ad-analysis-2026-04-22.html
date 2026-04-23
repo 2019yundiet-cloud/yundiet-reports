@@ -1002,6 +1002,12 @@
   <section>
     <h2>💰 월별 순이익 <span class="period-badge" id="badge-profit">-</span></h2>
     <div class="period-caption" id="caption-profit">원가율: 단백밥·밸런시 65% / 순수단백 77% · 순이익 = 매출 − 원가 − 광고지출</div>
+    <div class="profit-range-controls">
+      <label>조회 시작 월: <select id="profit-range-start"></select></label>
+      <label>조회 종료 월: <select id="profit-range-end"></select></label>
+      <button class="btn-secondary" id="profit-range-apply" type="button">적용</button>
+      <span class="range-help" id="profit-range-help"></span>
+    </div>
     <div class="profit-controls">
       <label>단백밥 정렬: <select id="sort-danbaekbob" data-product="단백밥">
         <option value="month-asc">월별 오름차순</option>
@@ -1992,6 +1998,56 @@
     '순수단백':  { canvas: 'chart-puresudanbak', select: 'sort-puresudanbak', headline: 'headline-puresudanbak', table: 'table-puresudanbak' },
   };
   const charts = {};
+  const profitRangeStart = document.getElementById('profit-range-start');
+  const profitRangeEnd = document.getElementById('profit-range-end');
+  const profitRangeApply = document.getElementById('profit-range-apply');
+  const profitRangeHelp = document.getElementById('profit-range-help');
+  const profitAllMonths = [...new Set(
+    Object.values(DATA.monthly_profit || {})
+      .flatMap(rows => (rows || []).map(row => String(row.월 || row.month || '').slice(0, 7)).filter(Boolean))
+  )].sort();
+
+  function getSelectedProfitRange() {
+    return {
+      start: profitRangeStart?.value || profitAllMonths[0] || '',
+      end: profitRangeEnd?.value || profitAllMonths[profitAllMonths.length - 1] || '',
+    };
+  }
+
+  function filterProfitRows(rows) {
+    const { start, end } = getSelectedProfitRange();
+    return rows.filter(row => {
+      const month = String(row.월 || row.month || '').slice(0, 7);
+      if (!month) return false;
+      if (start && month < start) return false;
+      if (end && month > end) return false;
+      return true;
+    });
+  }
+
+  function renderProfitRangeControls() {
+    if (!profitRangeStart || !profitRangeEnd) return;
+    const options = profitAllMonths.length ? profitAllMonths : [String(DATA.meta?.date || '').slice(0, 7)].filter(Boolean);
+    profitRangeStart.innerHTML = '';
+    profitRangeEnd.innerHTML = '';
+    options.forEach(month => {
+      const opt1 = document.createElement('option');
+      opt1.value = month;
+      opt1.textContent = month;
+      profitRangeStart.appendChild(opt1);
+      const opt2 = document.createElement('option');
+      opt2.value = month;
+      opt2.textContent = month;
+      profitRangeEnd.appendChild(opt2);
+    });
+    profitRangeStart.value = options[0] || '';
+    profitRangeEnd.value = options[options.length - 1] || '';
+    if (profitRangeHelp) {
+      profitRangeHelp.textContent = options.length
+        ? `· 조회 가능 월 ${options[0]} ~ ${options[options.length - 1]}`
+        : '· 조회 가능한 월 데이터 없음';
+    }
+  }
 
   function normalizeMonthlyProfitRows(product) {
     const rows = (DATA.monthly_profit?.[product] || []).map(r => ({ ...r }));
@@ -2102,7 +2158,7 @@
   function renderChart(product) {
     const cfg = CHART_MAP[product];
     const sel = document.getElementById(cfg.select);
-    const rows = normalizeMonthlyProfitRows(product);
+    const rows = filterProfitRows(normalizeMonthlyProfitRows(product));
     const sorted = sortRows(rows, sel.value);
     const labels = sorted.map(r => r.월);
     const cogs = sorted.map(r => r.원가액 || 0);
@@ -2190,6 +2246,18 @@
           }
         }
       }
+    });
+  }
+
+  renderProfitRangeControls();
+  if (profitRangeApply) {
+    profitRangeApply.addEventListener('click', () => {
+      const { start, end } = getSelectedProfitRange();
+      if (start && end && start > end) {
+        alert('조회 시작 월이 종료 월보다 늦습니다.');
+        return;
+      }
+      Object.keys(CHART_MAP).forEach(product => renderChart(product));
     });
   }
 
