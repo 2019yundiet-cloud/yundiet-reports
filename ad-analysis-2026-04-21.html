@@ -1040,8 +1040,8 @@
   </section>
 
   <section>
-    <h2>🧭 유입 제품군 → 실제 구매 분석 <span class="period-badge" id="badge-entry-analysis">-</span></h2>
-    <div class="period-caption" id="caption-entry-analysis">order-level 기준값은 실결제금액(`payment_amount`)·순이익(`net_profit`)을 사용하고, SKU별 분해값은 derived 배분값으로 표시합니다.</div>
+    <h2>🧭 광고 유입 제품군 → 실제 구매 분석 <span class="period-badge" id="badge-entry-analysis">-</span></h2>
+    <div class="period-caption" id="caption-entry-analysis">GA4 주문 attribution + 실제 주문/순이익 매칭 기준 · 제품군은 광고 캠페인/UTM/rules 분류 · SKU별 분해값은 derived 배분값</div>
 
     <h3 class="ga4-sub">1. 유입 제품군 요약 <span class="source-badge">rules: product-family-rules.json</span></h3>
     <div class="entry-grid" id="entry-family-summary"></div>
@@ -1063,14 +1063,14 @@
       </table>
     </div>
 
-    <h3 class="ga4-sub">3. 유입 제품군 → 구매 SKU 상세 <span class="derived-badge">derived</span></h3>
+    <h3 class="ga4-sub">3. 광고 캠페인 → 구매 SKU 상세 <span class="derived-badge">derived</span></h3>
     <div class="landing-grid" id="entry-sku-breakdown"></div>
 
     <h3 class="ga4-sub">4. First Touch / Last Touch 비교</h3>
     <div class="touch-grid" id="touch-comparison"></div>
 
-    <h3 class="ga4-sub">5. 랜딩페이지 기준 구매상품 분포</h3>
-    <div class="landing-grid" id="landing-analysis"></div>
+    <h3 class="ga4-sub">5. 광고 캠페인별 구매상품 분포</h3>
+    <div class="landing-grid" id="campaign-analysis"></div>
   </section>
 
   <section>
@@ -2347,7 +2347,7 @@
     const matrixBody = document.getElementById('entry-family-matrix-body');
     const skuWrap = document.getElementById('entry-sku-breakdown');
     const touchWrap = document.getElementById('touch-comparison');
-    const landingWrap = document.getElementById('landing-analysis');
+    const campaignWrap = document.getElementById('campaign-analysis');
 
     const ga4Attr = DATA.ga4_order_attribution || null;
     const productEntry = DATA.product_entry_analysis || null;
@@ -2368,7 +2368,7 @@
       matrixBody.innerHTML = `<tr><td colspan="6">데이터 없음</td></tr>`;
       skuWrap.innerHTML = emptyMsg;
       touchWrap.innerHTML = emptyMsg;
-      landingWrap.innerHTML = emptyMsg;
+      campaignWrap.innerHTML = emptyMsg;
       return;
     }
 
@@ -2418,8 +2418,7 @@
       const skuMap = new Map();
       const firstTouchMap = new Map();
       const lastTouchMap = new Map();
-      const landingMap = new Map();
-      const landingSkuMap = new Map();
+      const campaignSkuMap = new Map();
       const pushMetric = (map, key, init, mutator) => {
         if (!map.has(key)) map.set(key, init());
         mutator(map.get(key));
@@ -2437,18 +2436,12 @@
         });
         const firstTouch = order.first_touch_campaign || '(미지정)';
         const lastTouch = order.last_touch_campaign || '(미지정)';
-        const landing = order.landing_page || '(미지정)';
         pushMetric(firstTouchMap, firstTouch, () => ({ first_touch_campaign: firstTouch, orders: 0, matched_orders: 0, revenue: 0, ad_spend: 0, covered_net_profit: 0 }), row => {
           row.orders += 1; row.revenue += Number(order.payment_amount || 0);
           row.ad_spend += Number(order.ad_spend_allocated || 0);
           if (order.match_status !== '미매칭') { row.matched_orders += 1; row.covered_net_profit += Number(order.net_profit || 0); }
         });
         pushMetric(lastTouchMap, lastTouch, () => ({ last_touch_campaign: lastTouch, orders: 0, matched_orders: 0, revenue: 0, ad_spend: 0, covered_net_profit: 0 }), row => {
-          row.orders += 1; row.revenue += Number(order.payment_amount || 0);
-          row.ad_spend += Number(order.ad_spend_allocated || 0);
-          if (order.match_status !== '미매칭') { row.matched_orders += 1; row.covered_net_profit += Number(order.net_profit || 0); }
-        });
-        pushMetric(landingMap, landing, () => ({ landing_page: landing, orders: 0, matched_orders: 0, revenue: 0, ad_spend: 0, covered_net_profit: 0 }), row => {
           row.orders += 1; row.revenue += Number(order.payment_amount || 0);
           row.ad_spend += Number(order.ad_spend_allocated || 0);
           if (order.match_status !== '미매칭') { row.matched_orders += 1; row.covered_net_profit += Number(order.net_profit || 0); }
@@ -2476,9 +2469,9 @@
             row.revenue_allocated += Number(line.revenue_allocated || 0);
             row.net_profit_allocated += Number(line.net_profit_allocated || 0);
           });
-          const landingSkuKey = `${landing}__${line.sku || '-'}`;
-          pushMetric(landingSkuMap, landingSkuKey, () => ({
-            landing_page: landing, sku: line.sku || '-', order_count: 0,
+          const campaignSkuKey = `${lastTouch}__${line.sku || '-'}`;
+          pushMetric(campaignSkuMap, campaignSkuKey, () => ({
+            last_touch_campaign: lastTouch, sku: line.sku || '-', order_count: 0,
             revenue_allocated: 0, net_profit_allocated: 0
           }), row => {
             row.order_count += 1;
@@ -2494,8 +2487,7 @@
         entry_to_sku_breakdown: [...skuMap.values()].sort((a, b) => (b.revenue_allocated || 0) - (a.revenue_allocated || 0)),
         by_first_touch_campaign: [...firstTouchMap.values()].sort(sortRevenue),
         by_last_touch_campaign: [...lastTouchMap.values()].sort(sortRevenue),
-        by_landing_page: [...landingMap.values()].sort(sortRevenue),
-        product_mix_by_landing_page: [...landingSkuMap.values()].sort((a, b) => (b.revenue_allocated || 0) - (a.revenue_allocated || 0)),
+        campaign_to_sku_breakdown: [...campaignSkuMap.values()].sort((a, b) => (b.revenue_allocated || 0) - (a.revenue_allocated || 0)),
       };
     };
     const paidSummary = aggregate();
@@ -2555,19 +2547,20 @@
       </tr>
     `).join('') || `<tr><td colspan="6">데이터 없음</td></tr>`;
 
-    const skuByEntry = new Map();
-    skuRows.forEach(row => {
-      const key = row.entry_product_family || '기타';
-      if (!skuByEntry.has(key)) skuByEntry.set(key, []);
-      skuByEntry.get(key).push(row);
+    const skuByCampaign = new Map();
+    const campaignSkuRows = paidSummary?.campaign_to_sku_breakdown || [];
+    campaignSkuRows.forEach(row => {
+      const key = row.last_touch_campaign || '(미지정)';
+      if (!skuByCampaign.has(key)) skuByCampaign.set(key, []);
+      skuByCampaign.get(key).push(row);
     });
-    skuWrap.innerHTML = [...skuByEntry.entries()].map(([family, rows]) => {
+    skuWrap.innerHTML = [...skuByCampaign.entries()].slice(0, 8).map(([campaign, rows]) => {
       const top = rows
         .slice()
         .sort((a, b) => ((b.net_profit_allocated || 0) - (a.net_profit_allocated || 0)) || ((b.revenue_allocated || 0) - (a.revenue_allocated || 0)))
         .slice(0, 8);
       return `<div class="entry-card">
-        <h4>${family}<span class="derived-badge">derived</span></h4>
+        <h4>${campaign}<span class="derived-badge">derived</span></h4>
         <div class="analysis-table-wrap" style="margin:0;">
           <table class="analysis-table">
             <thead><tr><th>SKU</th><th class="num">주문수</th><th class="num">배분매출</th><th class="num">배분순이익</th></tr></thead>
@@ -2633,23 +2626,22 @@
       </div>
     `;
 
-    const landingRows = paidSummary?.by_landing_page || attr?.by_landing_page || [];
-    const landingMix = paidSummary?.product_mix_by_landing_page || attr?.product_mix_by_landing_page || [];
-    const mixByLanding = new Map();
-    landingMix.forEach(row => {
-      const key = row.landing_page || '(미지정)';
-      if (!mixByLanding.has(key)) mixByLanding.set(key, []);
-      mixByLanding.get(key).push(row);
+    const campaignRows = paidSummary?.by_last_touch_campaign || attr?.by_last_touch_campaign || [];
+    const mixByCampaign = new Map();
+    campaignSkuRows.forEach(row => {
+      const key = row.last_touch_campaign || '(미지정)';
+      if (!mixByCampaign.has(key)) mixByCampaign.set(key, []);
+      mixByCampaign.get(key).push(row);
     });
-    landingWrap.innerHTML = landingRows.slice(0, 8).map(row => {
-      const list = (mixByLanding.get(row.landing_page || '(미지정)') || [])
+    campaignWrap.innerHTML = campaignRows.slice(0, 8).map(row => {
+      const list = (mixByCampaign.get(row.last_touch_campaign || '(미지정)') || [])
         .slice()
         .sort((a, b) => (b.revenue_allocated || 0) - (a.revenue_allocated || 0))
         .slice(0, 5);
       return `<div class="entry-card">
-        <h4>${row.landing_page || '(미지정)'}</h4>
-        <div class="entry-headline">${fmtKRW(row.revenue)}<small>랜딩페이지 매출</small></div>
-        <div class="entry-meta">주문수 <b>${fmtNum(row.orders)}</b> · 커버순이익 <b>${fmtKRW(row.covered_net_profit)}</b></div>
+        <h4>${row.last_touch_campaign || '(미지정)'}</h4>
+        <div class="entry-headline">${fmtKRW(row.revenue)}<small>광고 캠페인 매출</small></div>
+        <div class="entry-meta">주문수 <b>${fmtNum(row.orders)}</b> · 광고지출 <b>${fmtKRW(row.ad_spend)}</b> · 커버순이익 <b>${fmtKRW(row.covered_net_profit)}</b></div>
         <ul class="mini-list">
           ${list.map(item => `
             <li>
