@@ -1063,13 +1063,7 @@
       </table>
     </div>
 
-    <h3 class="ga4-sub">3. 광고 캠페인 → 구매 SKU 상세 <span class="derived-badge">derived</span></h3>
-    <div id="entry-sku-breakdown"></div>
-
-    <h3 class="ga4-sub">4. First Touch / Last Touch 비교</h3>
-    <div id="touch-comparison"></div>
-
-    <h3 class="ga4-sub">5. 광고 캠페인별 구매상품 분포</h3>
+    <h3 class="ga4-sub">3. 광고 캠페인별 실제 구매 상세 <span class="derived-badge">derived</span></h3>
     <div id="campaign-analysis"></div>
   </section>
 
@@ -2345,14 +2339,11 @@
   (function renderEntryAnalysis() {
     const entryWrap = document.getElementById('entry-family-summary');
     const matrixBody = document.getElementById('entry-family-matrix-body');
-    const skuWrap = document.getElementById('entry-sku-breakdown');
-    const touchWrap = document.getElementById('touch-comparison');
     const campaignWrap = document.getElementById('campaign-analysis');
 
     const ga4Attr = DATA.ga4_order_attribution || null;
     const productEntry = DATA.product_entry_analysis || null;
     const summary = productEntry?.summary || null;
-    const attr = ga4Attr?.attribution_summary || null;
     const rules = productEntry?.rules || {};
     const orders = ga4Attr?.orders || [];
     const rulesPath = productEntry?.rules_file || '';
@@ -2363,11 +2354,9 @@
     }
 
     const emptyMsg = `<div class="ga4-empty">데이터 없음 — product_entry / attribution 산출물 주입 대기 중</div>`;
-    if (!summary && !attr && !orders.length) {
+    if (!summary && !orders.length) {
       entryWrap.innerHTML = emptyMsg;
       matrixBody.innerHTML = `<tr><td colspan="6">데이터 없음</td></tr>`;
-      skuWrap.innerHTML = emptyMsg;
-      touchWrap.innerHTML = emptyMsg;
       campaignWrap.innerHTML = emptyMsg;
       return;
     }
@@ -2376,6 +2365,18 @@
     const excludedCampaigns = new Set(['', '(direct)', '(organic)', '(referral)', '(not set)']);
     const paidMediums = new Set(['cpc', 'ppc', 'paid', 'paid_social', 'paid-social', 'paidsocial', 'display', 'brandmessage']);
     const excludedMediums = new Set(['', '(not set)', 'organic', 'referral']);
+    const knownOrderSkuOverrides = {
+      '202604211371790': {
+        sku: '밸런시 4종 혼합구성',
+        purchase_family: '밸런시',
+        note: '아임웹 주문확인: 마라/토마토/시그니처/커리 구성'
+      },
+      '202604213490270': {
+        sku: '밸런시 4종 혼합구성',
+        purchase_family: '밸런시',
+        note: '아임웹 주문확인: 마라/토마토/시그니처/커리 구성'
+      }
+    };
     const classify = (value, ruleset, fallback = '기타') => {
       const text = norm(value);
       if (!text) return fallback;
@@ -2415,17 +2416,17 @@
       if (!paidOrders.length) return null;
       const entryMap = new Map();
       const matrixMap = new Map();
-      const skuMap = new Map();
-      const firstTouchMap = new Map();
-      const lastTouchMap = new Map();
       const campaignSkuMap = new Map();
       const pushMetric = (map, key, init, mutator) => {
         if (!map.has(key)) map.set(key, init());
         mutator(map.get(key));
       };
+
       paidOrders.forEach(order => {
         const family = order.entry_product_family || '기타';
-        pushMetric(entryMap, family, () => ({ entry_product_family: family, orders: 0, matched_orders: 0, revenue: 0, ad_spend: 0, covered_net_profit: 0 }), row => {
+        pushMetric(entryMap, family, () => ({
+          entry_product_family: family, orders: 0, matched_orders: 0, revenue: 0, ad_spend: 0, covered_net_profit: 0
+        }), row => {
           row.orders += 1;
           row.revenue += Number(order.payment_amount || 0);
           row.ad_spend += Number(order.ad_spend_allocated || 0);
@@ -2434,59 +2435,53 @@
             row.covered_net_profit += Number(order.net_profit || 0);
           }
         });
-        const firstTouch = order.first_touch_campaign || '(미지정)';
-        const lastTouch = order.last_touch_campaign || '(미지정)';
-        pushMetric(firstTouchMap, firstTouch, () => ({ first_touch_campaign: firstTouch, orders: 0, matched_orders: 0, revenue: 0, ad_spend: 0, covered_net_profit: 0 }), row => {
-          row.orders += 1; row.revenue += Number(order.payment_amount || 0);
-          row.ad_spend += Number(order.ad_spend_allocated || 0);
-          if (order.match_status !== '미매칭') { row.matched_orders += 1; row.covered_net_profit += Number(order.net_profit || 0); }
-        });
-        pushMetric(lastTouchMap, lastTouch, () => ({ last_touch_campaign: lastTouch, orders: 0, matched_orders: 0, revenue: 0, ad_spend: 0, covered_net_profit: 0 }), row => {
-          row.orders += 1; row.revenue += Number(order.payment_amount || 0);
-          row.ad_spend += Number(order.ad_spend_allocated || 0);
-          if (order.match_status !== '미매칭') { row.matched_orders += 1; row.covered_net_profit += Number(order.net_profit || 0); }
-        });
 
+        const lastTouch = order.last_touch_campaign || '(미지정)';
         (order.sku_profitability || []).forEach(line => {
-          const purchaseFamily = classifyPurchaseFamily(line.sku || '');
+          const override = knownOrderSkuOverrides[order.order_no];
+          const resolvedSku = (override && (line.sku || '') === '미매칭') ? override.sku : (line.sku || '-');
+          const purchaseFamily = (override && (line.sku || '') === '미매칭')
+            ? override.purchase_family
+            : classifyPurchaseFamily(line.sku || '');
+
           const matrixKey = `${family}__${purchaseFamily}`;
           pushMetric(matrixMap, matrixKey, () => ({
-            entry_product_family: family, purchase_product_family: purchaseFamily,
-            order_count: 0, qty: 0, revenue_allocated: 0, net_profit_allocated: 0
+            entry_product_family: family,
+            purchase_product_family: purchaseFamily,
+            order_count: 0,
+            qty: 0,
+            revenue_allocated: 0,
+            net_profit_allocated: 0
           }), row => {
             row.order_count += 1;
             row.qty += Number(line.qty || 0);
             row.revenue_allocated += Number(line.revenue_allocated || 0);
             row.net_profit_allocated += Number(line.net_profit_allocated || 0);
           });
-          const skuKey = `${family}__${line.sku || '-'}`;
-          pushMetric(skuMap, skuKey, () => ({
-            entry_product_family: family, sku: line.sku || '-', order_count: 0,
-            qty: 0, revenue_allocated: 0, net_profit_allocated: 0
-          }), row => {
-            row.order_count += 1;
-            row.qty += Number(line.qty || 0);
-            row.revenue_allocated += Number(line.revenue_allocated || 0);
-            row.net_profit_allocated += Number(line.net_profit_allocated || 0);
-          });
-          const campaignSkuKey = `${lastTouch}__${line.sku || '-'}`;
+
+          const campaignSkuKey = `${family}__${lastTouch}__${resolvedSku}`;
           pushMetric(campaignSkuMap, campaignSkuKey, () => ({
-            last_touch_campaign: lastTouch, sku: line.sku || '-', order_count: 0,
-            revenue_allocated: 0, net_profit_allocated: 0
+            entry_product_family: family,
+            last_touch_campaign: lastTouch,
+            purchase_product_family: purchaseFamily,
+            sku: resolvedSku,
+            order_count: 0,
+            revenue_allocated: 0,
+            net_profit_allocated: 0,
+            note: override?.note || ''
           }), row => {
             row.order_count += 1;
             row.revenue_allocated += Number(line.revenue_allocated || 0);
             row.net_profit_allocated += Number(line.net_profit_allocated || 0);
+            if (override?.note) row.note = override.note;
           });
         });
       });
+
       const sortRevenue = (a, b) => (b.revenue || b.revenue_allocated || 0) - (a.revenue || a.revenue_allocated || 0);
       return {
         entry_family_summary: [...entryMap.values()].sort(sortRevenue),
         entry_to_purchase_family_matrix: [...matrixMap.values()].sort((a, b) => (b.revenue_allocated || 0) - (a.revenue_allocated || 0)),
-        entry_to_sku_breakdown: [...skuMap.values()].sort((a, b) => (b.revenue_allocated || 0) - (a.revenue_allocated || 0)),
-        by_first_touch_campaign: [...firstTouchMap.values()].sort(sortRevenue),
-        by_last_touch_campaign: [...lastTouchMap.values()].sort(sortRevenue),
         campaign_to_sku_breakdown: [...campaignSkuMap.values()].sort((a, b) => (b.revenue_allocated || 0) - (a.revenue_allocated || 0)),
       };
     };
@@ -2494,7 +2489,6 @@
 
     const entryFamilies = paidSummary?.entry_family_summary || summary?.entry_family_summary || [];
     const matrix = paidSummary?.entry_to_purchase_family_matrix || summary?.entry_to_purchase_family_matrix || [];
-    const skuRows = paidSummary?.entry_to_sku_breakdown || summary?.entry_to_sku_breakdown || [];
     const matrixByEntry = new Map();
     matrix.forEach(row => {
       const key = row.entry_product_family || '기타';
@@ -2510,7 +2504,6 @@
       const topCross = rows
         .filter(r => r.purchase_product_family !== family)
         .sort((a, b) => (b.revenue_allocated || 0) - (a.revenue_allocated || 0))[0];
-      if (family === '미매칭') return '미매칭 주문은 별도 추적이 필요합니다. 제품군 교차 분석보다 수집/매칭 보강이 우선입니다.';
       if (cross > same && topCross) {
         return `${family} 유입은 ${family} 자체 판매보다 ${topCross.purchase_product_family} 전환 기여가 더 큽니다. 입구 상품 역할 가능성을 우선 확인하세요.`;
       }
@@ -2525,6 +2518,7 @@
       const cross = rows.find(r => r.purchase_product_family !== family);
       return { same, cross };
     };
+
     entryWrap.innerHTML = entryFamilies.length ? `
       <div class="analysis-table-wrap">
         <table class="analysis-table">
@@ -2572,120 +2566,58 @@
       </tr>
     `).join('') || `<tr><td colspan="6">데이터 없음</td></tr>`;
 
-    const skuByCampaign = new Map();
     const campaignSkuRows = paidSummary?.campaign_to_sku_breakdown || [];
+    const campaignRowsByFamily = new Map();
     campaignSkuRows.forEach(row => {
-      const key = row.last_touch_campaign || '(미지정)';
-      if (!skuByCampaign.has(key)) skuByCampaign.set(key, []);
-      skuByCampaign.get(key).push(row);
+      const key = row.entry_product_family || '기타';
+      if (!campaignRowsByFamily.has(key)) campaignRowsByFamily.set(key, []);
+      campaignRowsByFamily.get(key).push(row);
     });
-    skuWrap.innerHTML = campaignSkuRows.length ? `
+    const familyOrder = ['단백밥', '밸런시', '순수단백', '기타'];
+    campaignWrap.innerHTML = campaignSkuRows.length ? `
       <div class="analysis-table-wrap">
         <table class="analysis-table">
           <thead>
             <tr>
+              <th>광고 제품군</th>
               <th>광고 캠페인</th>
-              <th>SKU</th>
+              <th>구매 제품군</th>
+              <th>구매 SKU</th>
               <th class="num">주문수</th>
               <th class="num">배분매출</th>
               <th class="num">배분순이익</th>
+              <th>비고</th>
             </tr>
           </thead>
           <tbody>
-            ${campaignSkuRows.slice(0, 30).map(row => `
-              <tr>
-                <td>${row.last_touch_campaign || '(미지정)'}</td>
-                <td>${row.sku || '-'}</td>
-                <td class="num">${fmtNum(row.order_count)}</td>
-                <td class="num">${fmtKRW(row.revenue_allocated)}</td>
-                <td class="num ${Number(row.net_profit_allocated) >= 0 ? 'profit-pos' : 'profit-neg'}">${fmtKRW(row.net_profit_allocated)}</td>
-              </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>` : emptyMsg;
-
-    const firstRows = paidSummary?.by_first_touch_campaign || attr?.by_first_touch_campaign || [];
-    const lastRows = paidSummary?.by_last_touch_campaign || attr?.by_last_touch_campaign || [];
-    const byName = new Map();
-    [...firstRows, ...lastRows].forEach(row => {
-      const key = row.first_touch_campaign || row.last_touch_campaign || '(미지정)';
-      if (!byName.has(key)) byName.set(key, {});
-      const cur = byName.get(key);
-      if (row.first_touch_campaign != null) cur.first = row;
-      if (row.last_touch_campaign != null) cur.last = row;
-    });
-    const touchRows = [...byName.entries()].map(([name, rows]) => ({ name, ...rows }))
-      .sort((a, b) => ((b.last?.revenue || b.first?.revenue || 0) - (a.last?.revenue || a.first?.revenue || 0)));
-    touchWrap.innerHTML = touchRows.length ? `
-      <div class="analysis-table-wrap">
-        <table class="analysis-table">
-          <thead>
-            <tr>
-              <th>캠페인</th>
-              <th class="num">First 주문수</th>
-              <th class="num">First 매출</th>
-              <th class="num">First 순이익</th>
-              <th class="num">Last 주문수</th>
-              <th class="num">Last 매출</th>
-              <th class="num">Last 순이익</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${touchRows.slice(0, 20).map(row => `
-              <tr>
-                <td>${row.name}</td>
-                <td class="num">${fmtNum(row.first?.orders)}</td>
-                <td class="num">${fmtKRW(row.first?.revenue)}</td>
-                <td class="num ${Number(row.first?.covered_net_profit || 0) >= 0 ? 'profit-pos' : 'profit-neg'}">${fmtKRW(row.first?.covered_net_profit)}</td>
-                <td class="num">${fmtNum(row.last?.orders)}</td>
-                <td class="num">${fmtKRW(row.last?.revenue)}</td>
-                <td class="num ${Number(row.last?.covered_net_profit || 0) >= 0 ? 'profit-pos' : 'profit-neg'}">${fmtKRW(row.last?.covered_net_profit)}</td>
-              </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>` : emptyMsg;
-
-    const campaignRows = paidSummary?.by_last_touch_campaign || attr?.by_last_touch_campaign || [];
-    const mixByCampaign = new Map();
-    campaignSkuRows.forEach(row => {
-      const key = row.last_touch_campaign || '(미지정)';
-      if (!mixByCampaign.has(key)) mixByCampaign.set(key, []);
-      mixByCampaign.get(key).push(row);
-    });
-    campaignWrap.innerHTML = campaignRows.length ? `
-      <div class="analysis-table-wrap">
-        <table class="analysis-table">
-          <thead>
-            <tr>
-              <th>광고 캠페인</th>
-              <th class="num">주문수</th>
-              <th class="num">매출</th>
-              <th class="num">광고지출</th>
-              <th class="num">커버순이익</th>
-              <th>대표 구매 SKU</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${campaignRows.slice(0, 20).map(row => {
-              const list = (mixByCampaign.get(row.last_touch_campaign || '(미지정)') || [])
-                .slice()
-                .sort((a, b) => (b.revenue_allocated || 0) - (a.revenue_allocated || 0))
-                .slice(0, 3)
-                .map(item => `${item.sku} (${fmtKRW(item.revenue_allocated)})`)
-                .join('<br>');
-              return `<tr>
-                <td>${row.last_touch_campaign || '(미지정)'}</td>
-                <td class="num">${fmtNum(row.orders)}</td>
-                <td class="num">${fmtKRW(row.revenue)}</td>
-                <td class="num">${fmtKRW(row.ad_spend)}</td>
-                <td class="num ${Number(row.covered_net_profit) >= 0 ? 'profit-pos' : 'profit-neg'}">${fmtKRW(row.covered_net_profit)}</td>
-                <td>${list || '-'}</td>
-              </tr>`;
-            }).join('')}
+            ${familyOrder
+              .filter(family => campaignRowsByFamily.has(family))
+              .map(family => {
+                const rows = campaignRowsByFamily.get(family)
+                  .slice()
+                  .sort((a, b) => (b.revenue_allocated || 0) - (a.revenue_allocated || 0));
+                return `
+                  <tr class="section-row">
+                    <td colspan="8">${family}</td>
+                  </tr>
+                  ${rows.map(row => `
+                    <tr>
+                      <td>${family}</td>
+                      <td>${row.last_touch_campaign || '(미지정)'}</td>
+                      <td>${row.purchase_product_family || '-'}</td>
+                      <td>${row.sku || '-'}</td>
+                      <td class="num">${fmtNum(row.order_count)}</td>
+                      <td class="num">${fmtKRW(row.revenue_allocated)}</td>
+                      <td class="num ${Number(row.net_profit_allocated) >= 0 ? 'profit-pos' : 'profit-neg'}">${fmtKRW(row.net_profit_allocated)}</td>
+                      <td>${row.note || '-'}</td>
+                    </tr>`).join('')}
+                `;
+              }).join('')}
           </tbody>
         </table>
       </div>` : emptyMsg;
   })();
+
 
   /* ---------- 섹션 1.7: 광고 효율 vs 실결제 수익 브리지 ---------- */
   (function renderBridge() {
