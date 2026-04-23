@@ -1044,7 +1044,7 @@
     <div class="period-caption" id="caption-entry-analysis">GA4 주문 attribution + 실제 주문/순이익 매칭 기준 · 제품군은 광고 캠페인/UTM/rules 분류 · SKU별 분해값은 derived 배분값</div>
 
     <h3 class="ga4-sub">1. 유입 제품군 요약 <span class="source-badge">rules: product-family-rules.json</span></h3>
-    <div class="entry-grid" id="entry-family-summary"></div>
+    <div id="entry-family-summary"></div>
 
     <h3 class="ga4-sub">2. 유입 제품군 → 구매 제품군 매트릭스 <span class="derived-badge">derived</span></h3>
     <div class="analysis-table-wrap">
@@ -1064,13 +1064,13 @@
     </div>
 
     <h3 class="ga4-sub">3. 광고 캠페인 → 구매 SKU 상세 <span class="derived-badge">derived</span></h3>
-    <div class="landing-grid" id="entry-sku-breakdown"></div>
+    <div id="entry-sku-breakdown"></div>
 
     <h3 class="ga4-sub">4. First Touch / Last Touch 비교</h3>
-    <div class="touch-grid" id="touch-comparison"></div>
+    <div id="touch-comparison"></div>
 
     <h3 class="ga4-sub">5. 광고 캠페인별 구매상품 분포</h3>
-    <div class="landing-grid" id="campaign-analysis"></div>
+    <div id="campaign-analysis"></div>
   </section>
 
   <section>
@@ -2495,7 +2495,6 @@
     const entryFamilies = paidSummary?.entry_family_summary || summary?.entry_family_summary || [];
     const matrix = paidSummary?.entry_to_purchase_family_matrix || summary?.entry_to_purchase_family_matrix || [];
     const skuRows = paidSummary?.entry_to_sku_breakdown || summary?.entry_to_sku_breakdown || [];
-    const familySummaryByName = new Map(entryFamilies.map(r => [r.entry_product_family, r]));
     const matrixByEntry = new Map();
     matrix.forEach(row => {
       const key = row.entry_product_family || '기타';
@@ -2520,21 +2519,47 @@
       }
       return `${family} 유입은 교차 구매 비중이 높습니다. 진입 제품군과 실제 구매 제품군 분리를 전제로 해석해야 합니다.`;
     };
-
-    entryWrap.innerHTML = entryFamilies.map(row => {
-      const family = row.entry_product_family || '기타';
-        const matchGap = (row.orders || 0) - (row.matched_orders || 0);
-        return `<div class="entry-card">
-        <h3>${family}${family === '미매칭' ? '<span class="warning-badge">미매칭 강조</span>' : ''}</h3>
-        <div class="entry-headline">${fmtKRW(row.covered_net_profit)}<small>커버순이익</small></div>
-        <div class="entry-meta">
-          주문수 <b>${fmtNum(row.orders)}</b> · 매칭주문수 <b>${fmtNum(row.matched_orders)}</b><br>
-          제품군 매출 <b>${fmtKRW(row.revenue)}</b> · 광고지출 <b>${fmtKRW(row.ad_spend)}</b>
-          ${matchGap > 0 ? `<br><span class="warning-badge">미커버 ${fmtNum(matchGap)}건</span>` : ''}
-        </div>
-        <div class="entry-note">${noteForFamily(family)}</div>
-      </div>`;
-    }).join('') || emptyMsg;
+    const topCrossForFamily = (family) => {
+      const rows = (matrixByEntry.get(family) || []).slice().sort((a, b) => (b.revenue_allocated || 0) - (a.revenue_allocated || 0));
+      const same = rows.find(r => r.purchase_product_family === family);
+      const cross = rows.find(r => r.purchase_product_family !== family);
+      return { same, cross };
+    };
+    entryWrap.innerHTML = entryFamilies.length ? `
+      <div class="analysis-table-wrap">
+        <table class="analysis-table">
+          <thead>
+            <tr>
+              <th>유입 제품군</th>
+              <th class="num">주문수</th>
+              <th class="num">매칭주문수</th>
+              <th class="num">매출</th>
+              <th class="num">광고지출</th>
+              <th class="num">커버순이익</th>
+              <th>자체 전환</th>
+              <th>주요 교차 전환</th>
+              <th>해석</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${entryFamilies.map(row => {
+              const family = row.entry_product_family || '기타';
+              const top = topCrossForFamily(family);
+              return `<tr>
+                <td>${family}${family === '기타' ? ' <span class="warning-badge">분류 필요</span>' : ''}</td>
+                <td class="num">${fmtNum(row.orders)}</td>
+                <td class="num">${fmtNum(row.matched_orders)}</td>
+                <td class="num">${fmtKRW(row.revenue)}</td>
+                <td class="num">${fmtKRW(row.ad_spend)}</td>
+                <td class="num ${Number(row.covered_net_profit) >= 0 ? 'profit-pos' : 'profit-neg'}">${fmtKRW(row.covered_net_profit)}</td>
+                <td>${top.same ? `${top.same.purchase_product_family} · ${fmtKRW(top.same.revenue_allocated)}` : '-'}</td>
+                <td>${top.cross ? `${top.cross.purchase_product_family} · ${fmtKRW(top.cross.revenue_allocated)}` : '-'}</td>
+                <td>${noteForFamily(family)}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>` : emptyMsg;
 
     matrixBody.innerHTML = matrix.slice(0, 40).map(row => `
       <tr>
@@ -2554,77 +2579,71 @@
       if (!skuByCampaign.has(key)) skuByCampaign.set(key, []);
       skuByCampaign.get(key).push(row);
     });
-    skuWrap.innerHTML = [...skuByCampaign.entries()].slice(0, 8).map(([campaign, rows]) => {
-      const top = rows
-        .slice()
-        .sort((a, b) => ((b.net_profit_allocated || 0) - (a.net_profit_allocated || 0)) || ((b.revenue_allocated || 0) - (a.revenue_allocated || 0)))
-        .slice(0, 8);
-      return `<div class="entry-card">
-        <h4>${campaign}<span class="derived-badge">derived</span></h4>
-        <div class="analysis-table-wrap" style="margin:0;">
-          <table class="analysis-table">
-            <thead><tr><th>SKU</th><th class="num">주문수</th><th class="num">배분매출</th><th class="num">배분순이익</th></tr></thead>
-            <tbody>
-              ${top.map(row => `
-                <tr>
-                  <td>${row.sku || '-'}</td>
-                  <td class="num">${fmtNum(row.order_count)}</td>
-                  <td class="num">${fmtKRW(row.revenue_allocated)}</td>
-                  <td class="num ${Number(row.net_profit_allocated) >= 0 ? 'profit-pos' : 'profit-neg'}">${fmtKRW(row.net_profit_allocated)}</td>
-                </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>`;
-    }).join('') || emptyMsg;
+    skuWrap.innerHTML = campaignSkuRows.length ? `
+      <div class="analysis-table-wrap">
+        <table class="analysis-table">
+          <thead>
+            <tr>
+              <th>광고 캠페인</th>
+              <th>SKU</th>
+              <th class="num">주문수</th>
+              <th class="num">배분매출</th>
+              <th class="num">배분순이익</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${campaignSkuRows.slice(0, 30).map(row => `
+              <tr>
+                <td>${row.last_touch_campaign || '(미지정)'}</td>
+                <td>${row.sku || '-'}</td>
+                <td class="num">${fmtNum(row.order_count)}</td>
+                <td class="num">${fmtKRW(row.revenue_allocated)}</td>
+                <td class="num ${Number(row.net_profit_allocated) >= 0 ? 'profit-pos' : 'profit-neg'}">${fmtKRW(row.net_profit_allocated)}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>` : emptyMsg;
 
-    const renderTopList = (rows, labelKey) => {
-      const top = (rows || []).slice(0, 6);
-      if (!top.length) return '<div class="ga4-empty">데이터 없음</div>';
-      return `<ul class="mini-list">${top.map(row => `
-        <li>
-          <span><strong>${row[labelKey] || '(미분류)'}</strong><br><span class="muted-inline">${fmtNum(row.orders)}건 · ${fmtKRW(row.covered_net_profit)}</span></span>
-          <span>${fmtKRW(row.revenue)}</span>
-        </li>`).join('')}</ul>`;
-    };
-    const renderMixList = (rows, labelKey) => {
-      const grouped = new Map();
-      (rows || []).forEach(row => {
-        const key = row[labelKey] || '(미분류)';
-        if (!grouped.has(key)) grouped.set(key, { revenue: 0, net: 0, orders: 0 });
-        const prev = grouped.get(key);
-        prev.revenue += row.revenue_allocated || 0;
-        prev.net += row.net_profit_allocated || 0;
-        prev.orders += row.order_count || 0;
-      });
-      const top = [...grouped.entries()]
-        .map(([name, value]) => ({ name, ...value }))
-        .sort((a, b) => b.revenue - a.revenue)
-        .slice(0, 6);
-      if (!top.length) return '<div class="ga4-empty">데이터 없음</div>';
-      return `<ul class="mini-list">${top.map(row => `
-        <li>
-          <span><strong>${row.name}</strong><br><span class="muted-inline">${fmtNum(row.orders)}건 · ${fmtKRW(row.net)}</span></span>
-          <span>${fmtKRW(row.revenue)}</span>
-        </li>`).join('')}</ul>`;
-    };
-
-    touchWrap.innerHTML = `
-      <div class="entry-card">
-        <h4>First Touch 캠페인 기준</h4>
-        <div class="touch-lists">
-          <div><div class="entry-meta">광고 first touch 캠페인별 커버 순이익</div>${renderTopList(paidSummary?.by_first_touch_campaign || attr?.by_first_touch_campaign, 'first_touch_campaign')}</div>
-          <div><div class="entry-meta">첫 유입 이후 실제 구매로 이어진 제품군 분포</div>${renderTopList(entryFamilies.map(row => ({ first_touch_campaign: row.entry_product_family, orders: row.orders, covered_net_profit: row.covered_net_profit, revenue: row.revenue })), 'first_touch_campaign')}</div>
-        </div>
-      </div>
-      <div class="entry-card">
-        <h4>Last Touch 캠페인 기준</h4>
-        <div class="touch-lists">
-          <div><div class="entry-meta">광고 last touch 캠페인별 커버 순이익</div>${renderTopList(paidSummary?.by_last_touch_campaign || attr?.by_last_touch_campaign, 'last_touch_campaign')}</div>
-          <div><div class="entry-meta">최종 광고 유입 기준 실제 구매 SKU 분포</div>${renderTopList(entryFamilies.map(row => ({ last_touch_campaign: row.entry_product_family, orders: row.orders, covered_net_profit: row.covered_net_profit, revenue: row.revenue })), 'last_touch_campaign')}</div>
-        </div>
-      </div>
-    `;
+    const firstRows = paidSummary?.by_first_touch_campaign || attr?.by_first_touch_campaign || [];
+    const lastRows = paidSummary?.by_last_touch_campaign || attr?.by_last_touch_campaign || [];
+    const byName = new Map();
+    [...firstRows, ...lastRows].forEach(row => {
+      const key = row.first_touch_campaign || row.last_touch_campaign || '(미지정)';
+      if (!byName.has(key)) byName.set(key, {});
+      const cur = byName.get(key);
+      if (row.first_touch_campaign != null) cur.first = row;
+      if (row.last_touch_campaign != null) cur.last = row;
+    });
+    const touchRows = [...byName.entries()].map(([name, rows]) => ({ name, ...rows }))
+      .sort((a, b) => ((b.last?.revenue || b.first?.revenue || 0) - (a.last?.revenue || a.first?.revenue || 0)));
+    touchWrap.innerHTML = touchRows.length ? `
+      <div class="analysis-table-wrap">
+        <table class="analysis-table">
+          <thead>
+            <tr>
+              <th>캠페인</th>
+              <th class="num">First 주문수</th>
+              <th class="num">First 매출</th>
+              <th class="num">First 순이익</th>
+              <th class="num">Last 주문수</th>
+              <th class="num">Last 매출</th>
+              <th class="num">Last 순이익</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${touchRows.slice(0, 20).map(row => `
+              <tr>
+                <td>${row.name}</td>
+                <td class="num">${fmtNum(row.first?.orders)}</td>
+                <td class="num">${fmtKRW(row.first?.revenue)}</td>
+                <td class="num ${Number(row.first?.covered_net_profit || 0) >= 0 ? 'profit-pos' : 'profit-neg'}">${fmtKRW(row.first?.covered_net_profit)}</td>
+                <td class="num">${fmtNum(row.last?.orders)}</td>
+                <td class="num">${fmtKRW(row.last?.revenue)}</td>
+                <td class="num ${Number(row.last?.covered_net_profit || 0) >= 0 ? 'profit-pos' : 'profit-neg'}">${fmtKRW(row.last?.covered_net_profit)}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>` : emptyMsg;
 
     const campaignRows = paidSummary?.by_last_touch_campaign || attr?.by_last_touch_campaign || [];
     const mixByCampaign = new Map();
@@ -2633,24 +2652,39 @@
       if (!mixByCampaign.has(key)) mixByCampaign.set(key, []);
       mixByCampaign.get(key).push(row);
     });
-    campaignWrap.innerHTML = campaignRows.slice(0, 8).map(row => {
-      const list = (mixByCampaign.get(row.last_touch_campaign || '(미지정)') || [])
-        .slice()
-        .sort((a, b) => (b.revenue_allocated || 0) - (a.revenue_allocated || 0))
-        .slice(0, 5);
-      return `<div class="entry-card">
-        <h4>${row.last_touch_campaign || '(미지정)'}</h4>
-        <div class="entry-headline">${fmtKRW(row.revenue)}<small>광고 캠페인 매출</small></div>
-        <div class="entry-meta">주문수 <b>${fmtNum(row.orders)}</b> · 광고지출 <b>${fmtKRW(row.ad_spend)}</b> · 커버순이익 <b>${fmtKRW(row.covered_net_profit)}</b></div>
-        <ul class="mini-list">
-          ${list.map(item => `
-            <li>
-              <span><strong>${item.sku || '-'}</strong><br><span class="muted-inline">${fmtNum(item.order_count)}건</span></span>
-              <span>${fmtKRW(item.revenue_allocated)}</span>
-            </li>`).join('') || '<li><span>구매 SKU 데이터 없음</span><span>-</span></li>'}
-        </ul>
-      </div>`;
-    }).join('') || emptyMsg;
+    campaignWrap.innerHTML = campaignRows.length ? `
+      <div class="analysis-table-wrap">
+        <table class="analysis-table">
+          <thead>
+            <tr>
+              <th>광고 캠페인</th>
+              <th class="num">주문수</th>
+              <th class="num">매출</th>
+              <th class="num">광고지출</th>
+              <th class="num">커버순이익</th>
+              <th>대표 구매 SKU</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${campaignRows.slice(0, 20).map(row => {
+              const list = (mixByCampaign.get(row.last_touch_campaign || '(미지정)') || [])
+                .slice()
+                .sort((a, b) => (b.revenue_allocated || 0) - (a.revenue_allocated || 0))
+                .slice(0, 3)
+                .map(item => `${item.sku} (${fmtKRW(item.revenue_allocated)})`)
+                .join('<br>');
+              return `<tr>
+                <td>${row.last_touch_campaign || '(미지정)'}</td>
+                <td class="num">${fmtNum(row.orders)}</td>
+                <td class="num">${fmtKRW(row.revenue)}</td>
+                <td class="num">${fmtKRW(row.ad_spend)}</td>
+                <td class="num ${Number(row.covered_net_profit) >= 0 ? 'profit-pos' : 'profit-neg'}">${fmtKRW(row.covered_net_profit)}</td>
+                <td>${list || '-'}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>` : emptyMsg;
   })();
 
   /* ---------- 섹션 1.7: 광고 효율 vs 실결제 수익 브리지 ---------- */
