@@ -1759,6 +1759,10 @@
   }
 
   const host = document.getElementById('creatives-sections');
+  const isVideoCreative = (r) => {
+    const text = `${r.소재명 || ''} ${r.캠페인명 || ''}`.toLowerCase();
+    return /(영상|릴스|reel|video)/.test(text);
+  };
   const creativeTypeLabel = (r) => {
     if (r.위너여부) return { text: '위너', cls: 'type-winner' };
     if (r.위너이력) return { text: '위너이력', cls: 'type-winner' };
@@ -1815,7 +1819,10 @@
       tr.innerHTML = COLS.map(col => {
         if (col.key === '__type') {
           const typeMeta = creativeTypeLabel(r);
-          return `<td class="col-type"><span class="type-chip ${typeMeta.cls}">${typeMeta.text}</span></td>`;
+          const videoChip = isVideoCreative(r)
+            ? ' <span class="type-chip type-video">영상</span>'
+            : '';
+          return `<td class="col-type"><span class="type-chip ${typeMeta.cls}">${typeMeta.text}</span>${videoChip}</td>`;
         }
         if (col.key === '__thumb') {
           const img = r.소재이미지URL ? `<img src="${r.소재이미지URL}" alt="" loading="lazy" />` : '—';
