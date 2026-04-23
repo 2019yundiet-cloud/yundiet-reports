@@ -2004,6 +2004,8 @@
     return rows.map(row => {
       const rowMonth = String(row.월 || row.month || '').slice(0, 7);
       if (rowMonth !== currentMonth) return row;
+      const source = String(row.source || '');
+      if (source.includes('imweb_orders_line_items')) return row;
 
       const monthlyRevenue = numOrNull(row.매출) ?? numOrNull(row.구매전환값) ?? numOrNull(row.revenue);
       const mtdRevenue = numOrNull(mtd.누적_매출) ?? numOrNull(mtd.revenue);
