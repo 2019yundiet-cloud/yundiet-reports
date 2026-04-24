@@ -1197,6 +1197,7 @@
     <h2>🎯 신규 소재판정 + 액션플랜 + 퍼널진단 <span class="period-badge" id="badge-creatives">-</span></h2>
     <div class="period-caption" id="caption-creatives">신규 소재 제작/개선 판단용 · 각 소재에서 판정/액션/퍼널진단을 한 번에 확인 · 섹션별 하단에 합계 요약</div>
     <div class="creative-controls">
+      <div class="period-caption" id="caption-creatives-reference">조회기준일: -</div>
       <label>소재 조회기간
         <select id="creative-range-days">
           <option value="4" selected>D+4 이하</option>
@@ -1977,8 +1978,13 @@
     const visibleCount = Object.values(buckets).reduce((sum, rows) => sum + rows.length, 0);
     const totalCount = allRows.length;
     const caption = document.getElementById('caption-creatives');
+    const referenceDate = DATA.meta?.date || '-';
     if (caption) {
-      caption.textContent = `${dataPeriod} 집계 · 현재 보기: ${filterLabel} · 표시 ${fmtNum(visibleCount)}개 / 전체 ${fmtNum(totalCount)}개 · 각 소재에서 판정/액션/퍼널진단을 한 번에 확인`;
+      caption.textContent = `${dataPeriod} 집계 · 조회기준일 ${referenceDate} · 현재 보기: ${filterLabel} · 표시 ${fmtNum(visibleCount)}개 / 전체 ${fmtNum(totalCount)}개 · 각 소재에서 판정/액션/퍼널진단을 한 번에 확인`;
+    }
+    const referenceCaption = document.getElementById('caption-creatives-reference');
+    if (referenceCaption) {
+      referenceCaption.textContent = `조회기준일: ${referenceDate} · D+N은 이 날짜 기준 경과일`;
     }
 
     let currentCategory = null;
