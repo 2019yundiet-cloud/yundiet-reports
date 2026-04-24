@@ -695,6 +695,17 @@
   .ga4-sub { font-size: 16px; font-weight: 700; margin: 20px 0 8px; color: var(--brand-dark); }
   .ga4-cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 8px 0 24px; }
   @media (max-width: 1200px) { .ga4-cat-grid { grid-template-columns: 1fr; } }
+  .ga4-total-card {
+    background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px;
+    margin: 8px 0 18px; box-shadow: 0 2px 10px rgba(45,80,22,0.05);
+  }
+  .ga4-total-title { font-size: 13px; font-weight: 800; color: var(--muted); margin-bottom: 6px; }
+  .ga4-total-headline {
+    font-size: 36px; font-weight: 900; line-height: 1.05; color: var(--ink);
+    display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  }
+  .ga4-total-headline small { font-size: 17px; font-weight: 700; color: var(--muted); }
+  .ga4-total-sub { margin-top: 8px; font-size: 13px; color: var(--muted); font-weight: 700; }
   .ga4-cat-card {
     background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 16px;
     box-shadow: 0 2px 8px rgba(45,80,22,0.06);
@@ -1077,6 +1088,7 @@
     <div class="ga4-cat-grid" id="ga4-daily-cats"></div>
 
     <h3 class="ga4-sub">📙 월별 (전체 · 카테고리별)</h3>
+    <div id="ga4-monthly-total-summary"></div>
     <div class="ga4-cat-grid" id="ga4-monthly-cats"></div>
   </section>
 
@@ -2523,12 +2535,28 @@
 
     // ---- 월별 카테고리 카드 ----
     (function renderMonthlyCats() {
+      const summaryHost = document.getElementById('ga4-monthly-total-summary');
       const host = document.getElementById('ga4-monthly-cats');
-      const byCat = groupByCategory(splitGa4RowsIfNeeded(DATA.ga4_profit_monthly, 'monthly'));
+      const monthlyRows = splitGa4RowsIfNeeded(DATA.ga4_profit_monthly, 'monthly');
+      const byCat = groupByCategory(monthlyRows);
       const cats = orderedCats(byCat);
       if (cats.length === 0) {
+        if (summaryHost) summaryHost.innerHTML = '';
         host.innerHTML = `<div class="ga4-empty">데이터 없음 — 노션 DB 동기화 대기 중</div>`;
         return;
+      }
+      const monthlyOverallRows = monthlyRows.filter(r => (r.카테고리 || '전체') === '전체' || (r.카테고리 || '기타') === '기타');
+      const monthlyOverall = monthlyOverallRows.slice().sort((a, b) => (b.월 || '').localeCompare(a.월 || ''))[0] || monthlyRows.slice().sort((a, b) => (b.월 || '').localeCompare(a.월 || ''))[0];
+      const overallROI = monthlyOverall?.실ROI != null ? monthlyOverall.실ROI
+        : (monthlyOverall?.광고비 ? monthlyOverall.순이익 / monthlyOverall.광고비 : null);
+      if (summaryHost && monthlyOverall) {
+        summaryHost.innerHTML = `<div class="ga4-total-card">
+          <div class="ga4-total-title">월별 총합 순이익</div>
+          <div class="ga4-total-headline">${fmtKRW(monthlyOverall.순이익)}
+            <small>(${monthlyOverall.월} · 실ROI ${fmtPctSigned(overallROI)})</small>
+          </div>
+          <div class="ga4-total-sub">총 매출 ${fmtKRW(monthlyOverall.매출)} · 총 광고비 ${fmtKRW(monthlyOverall.광고비)} · 주문수 ${fmtNum(monthlyOverall.주문수)}</div>
+        </div>`;
       }
       host.innerHTML = cats.map(cat => {
         const catRows = byCat.get(cat).slice()
