@@ -1144,6 +1144,7 @@
           <option value="4" selected>D+4 이하</option>
           <option value="7">D+7 이하</option>
           <option value="14">D+14 이하</option>
+          <option value="21">D+21 이하</option>
           <option value="30">D+30 이하</option>
           <option value="all">전체</option>
         </select>
@@ -1159,6 +1160,9 @@
       <label>운영 조회기간
         <select id="ops-range-days">
           <option value="all" selected>전체</option>
+          <option value="7">D+7 이하</option>
+          <option value="14">D+14 이하</option>
+          <option value="21">D+21 이하</option>
           <option value="30">D+30 이하</option>
           <option value="60">D+60 이하</option>
           <option value="90">D+90 이하</option>
@@ -1647,7 +1651,7 @@
     const status = c.현재상태 || '';
     if (RUNNING_STATUSES.has(status)) return true;
     if (c.위너이력 || c.위너여부) return true;
-    if (!RUNNING_STATUSES.has(status) && (numOrNull(c.누적_지출) ?? 0) > 0) return true;
+    if (!RUNNING_STATUSES.has(status) && (numOrNull(c.노출) ?? 0) >= 1) return true;
     return false;
   };
 
@@ -1655,20 +1659,15 @@
     { key: '단백밥-테스트',  title: '단백밥 — 테스트캠' },
     { key: '단백밥-메인',    title: '단백밥 — 메인캠' },
     { key: '단백밥-ASC',     title: '단백밥 — ASC (Advantage+)' },
-    { key: '단백밥-OFF',     title: '단백밥 — OFF (조회기간 지출 있음)' },
     { key: '순수단백-테스트',title: '순수단백 — 테스트캠' },
     { key: '순수단백-메인',  title: '순수단백 — 메인캠' },
-    { key: '순수단백-OFF',   title: '순수단백 — OFF (조회기간 지출 있음)' },
     { key: '밸런시-테스트',  title: '밸런시 — 테스트캠' },
     { key: '밸런시-메인',    title: '밸런시 — 메인캠' },
-    { key: '밸런시-OFF',     title: '밸런시 — OFF (조회기간 지출 있음)' },
   ];
 
   function routeBucket(c) {
     const prod = c.상품 || '기타';
     const type = c.캠페인유형 || '메인';
-    const status = c.현재상태 || '';
-    if (!RUNNING_STATUSES.has(status) && (numOrNull(c.누적_지출) ?? 0) > 0) return `${prod}-OFF`;
     return `${prod}-${type}`;
   }
 
@@ -1955,7 +1954,7 @@
         divider.className = 'category-divider';
         divider.innerHTML = `
           <h2>${category}</h2>
-          <div class="sub">테스트 · 메인 · ASC · OFF를 같은 카테고리 안에서 이어서 확인</div>`;
+          <div class="sub">테스트 · 메인 · ASC를 같은 카테고리 안에서 이어서 확인 · OFF 소재도 노출 1 이상이면 함께 표시</div>`;
         host.appendChild(divider);
       }
 
