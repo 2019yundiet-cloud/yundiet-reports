@@ -457,6 +457,11 @@
   .type-chip.type-video { background: #f3e8ff; color: #6b21a8; border-color: #dcc7fb; }
   .type-stack { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
   .type-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .ops-table { min-width: 1320px !important; }
+  .ops-table td.col-name, .ops-table th.col-name { min-width: 320px !important; max-width: 320px !important; }
+  .ops-table td.col-ops-state, .ops-table th.col-ops-state { min-width: 120px; text-align: center; }
+  .ops-table td.col-ops-type, .ops-table th.col-ops-type { min-width: 110px; text-align: center; }
+  .ops-table td.col-ops-status, .ops-table th.col-ops-status { min-width: 120px; text-align: center; }
 
   /* 소재명 링크 */
   table.creatives td.col-name a.ad-link {
@@ -1129,10 +1134,10 @@
     <div class="bridge-grid" id="bridge-grid"></div>
   </section>
 
-  <!-- ====== 섹션 2: 소재 판정 + 액션플랜 + 퍼널진단 ====== -->
+  <!-- ====== 섹션 2: 신규 소재 판정 + 액션플랜 + 퍼널진단 ====== -->
   <section>
-    <h2>🎯 소재판정 + 액션플랜 + 퍼널진단 <span class="period-badge" id="badge-creatives">-</span></h2>
-    <div class="period-caption" id="caption-creatives">이번 달(MTD) 집계 · 각 소재에서 판정/액션/퍼널진단을 한 번에 확인 · 섹션별 하단에 합계 요약</div>
+    <h2>🎯 신규 소재판정 + 액션플랜 + 퍼널진단 <span class="period-badge" id="badge-creatives">-</span></h2>
+    <div class="period-caption" id="caption-creatives">신규 소재 제작/개선 판단용 · 각 소재에서 판정/액션/퍼널진단을 한 번에 확인 · 섹션별 하단에 합계 요약</div>
     <div class="creative-controls">
       <label>소재 조회기간
         <select id="creative-range-days">
@@ -1145,6 +1150,31 @@
       </label>
     </div>
     <div id="creatives-sections"></div>
+  </section>
+
+  <section>
+    <h2>📊 운영 현황 대시보드 <span class="period-badge" id="badge-ops">-</span></h2>
+    <div class="period-caption" id="caption-ops">현재 운영 중인 메인/테스트/ASC/OFF와 위너 상태를 한 번에 확인</div>
+    <div class="creative-controls">
+      <label>운영 조회기간
+        <select id="ops-range-days">
+          <option value="all" selected>전체</option>
+          <option value="30">D+30 이하</option>
+          <option value="60">D+60 이하</option>
+          <option value="90">D+90 이하</option>
+        </select>
+      </label>
+      <label>운영 상태
+        <select id="ops-status-filter">
+          <option value="all" selected>전체</option>
+          <option value="running">진행중만</option>
+          <option value="winner">위너만</option>
+          <option value="winner_history">위너+위너이력</option>
+          <option value="off">OFF만</option>
+        </select>
+      </label>
+    </div>
+    <div id="ops-sections"></div>
   </section>
 
   <!-- ====== 섹션 3: 퍼널 인사이트 진단 (숨김: 소재판정표에 통합) ====== -->
@@ -2059,6 +2089,187 @@
     creativeRangeSelect.addEventListener('change', renderCreativeSections);
   }
   renderCreativeSections();
+
+  const opsHost = document.getElementById('ops-sections');
+  const opsRangeSelect = document.getElementById('ops-range-days');
+  const opsStatusSelect = document.getElementById('ops-status-filter');
+  const getOpsRangeDays = () => opsRangeSelect?.value || 'all';
+  const inOpsRange = (r) => {
+    const selected = getOpsRangeDays();
+    if (selected === 'all') return true;
+    const limit = Number(selected);
+    const age = numOrNull(r.DN_일수);
+    if (age == null) return true;
+    return age <= limit;
+  };
+  const getOpsStatusFilter = () => opsStatusSelect?.value || 'all';
+  const matchOpsStatus = (r) => {
+    const selected = getOpsStatusFilter();
+    const running = RUNNING_STATUSES.has(r.현재상태 || '');
+    if (selected === 'running') return running;
+    if (selected === 'winner') return !!r.위너여부;
+    if (selected === 'winner_history') return !!r.위너여부 || !!r.위너이력;
+    if (selected === 'off') return !running;
+    return true;
+  };
+  const renderOpsSections = () => {
+    if (!opsHost) return;
+    opsHost.innerHTML = '';
+    const buckets = {};
+    SECTION_ORDER.forEach(s => buckets[s.key] = []);
+    const allRows = [];
+    (DATA.creatives || []).forEach(c => {
+      const row = normalizeCreative(c);
+      if (!shouldDisplayCreative(row)) return;
+      allRows.push(row);
+      if (!inOpsRange(row)) return;
+      if (!matchOpsStatus(row)) return;
+      const b = routeBucket(row);
+      if (buckets[b]) buckets[b].push(row);
+    });
+
+    const selected = getOpsRangeDays();
+    const rangeLabel = selected === 'all' ? '전체 소재' : `D+${selected} 이하 소재`;
+    const statusFilter = getOpsStatusFilter();
+    const statusLabelMap = {
+      all: '전체',
+      running: '진행중만',
+      winner: '위너만',
+      winner_history: '위너+위너이력',
+      off: 'OFF만'
+    };
+    const visibleCount = Object.values(buckets).reduce((sum, rows) => sum + rows.length, 0);
+    const totalCount = allRows.length;
+    const caption = document.getElementById('caption-ops');
+    if (caption) {
+      caption.textContent = `현재 운영 스냅샷 · 기간 ${rangeLabel} · 상태 ${statusLabelMap[statusFilter] || '전체'} · 표시 ${fmtNum(visibleCount)}개 / 전체 ${fmtNum(totalCount)}개`;
+    }
+    const badge = document.getElementById('badge-ops');
+    if (badge) {
+      badge.textContent = `${DATA.meta?.periods?.creatives?.label || '이번 달(MTD)'} · 운영 현황`;
+    }
+
+    let currentCategory = null;
+    SECTION_ORDER.forEach(sec => {
+      const rows = buckets[sec.key] || [];
+      if (!rows.length) return;
+      rows.sort((a, b) => judgeRank(a) - judgeRank(b));
+      const category = sec.key.split('-')[0];
+      if (category !== currentCategory) {
+        currentCategory = category;
+        const divider = document.createElement('div');
+        divider.className = 'category-divider';
+        divider.innerHTML = `
+          <h2>${category}</h2>
+          <div class="sub">현재 운영 중인 캠페인 위치와 위너 상태를 함께 확인</div>`;
+        opsHost.appendChild(divider);
+      }
+      const typeCounts = rows.reduce((acc, r) => {
+        const t = r.캠페인유형 || '메인';
+        acc[t] = (acc[t] || 0) + 1;
+        return acc;
+      }, {});
+      const winnerCounts = rows.reduce((acc, r) => {
+        const key = r.위너여부 ? '위너' : (r.위너이력 ? '위너이력' : '일반');
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
+      const breakdown = ['테스트', '메인', 'ASC']
+        .filter(t => typeCounts[t])
+        .map(t => `${t} ${typeCounts[t]}`)
+        .join(' · ');
+      const winnerBreakdown = ['위너', '위너이력', '일반']
+        .filter(t => winnerCounts[t])
+        .map(t => `${t} ${winnerCounts[t]}`)
+        .join(' · ');
+
+      const sectionEl = document.createElement('div');
+      sectionEl.className = 'creative-section';
+      sectionEl.innerHTML = `
+        <h3>${sec.title}${breakdown ? ` <span class="meta-inline">${breakdown}</span>` : ''}${winnerBreakdown ? ` <span class="meta-inline">| ${winnerBreakdown}</span>` : ''} <span class="count">${rows.length}</span></h3>
+        <div class="creative-summary-grid"></div>
+        <div class="table-scroll">
+          <table class="creatives ops-table">
+            <thead><tr>
+              <th class="col-type">캠페인</th>
+              <th class="col-ops-type">위너 상태</th>
+              <th class="col-name">소재명</th>
+              <th class="col-ops-status">현재상태</th>
+              <th>판정</th>
+              <th class="num">DN</th>
+              <th class="num">일예산</th>
+              <th class="num">지출</th>
+              <th class="num">매출</th>
+              <th class="num">ROAS</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>`;
+      const summaryGrid = sectionEl.querySelector('.creative-summary-grid');
+      const tbody = sectionEl.querySelector('tbody');
+      rows.forEach(r => {
+        const typeMeta = creativeTypeLabel(r);
+        const winnerChip = r.위너여부
+          ? '<span class="type-chip type-winner">위너</span>'
+          : (r.위너이력 ? '<span class="type-chip type-winner-history">위너이력</span>' : '<span class="type-chip type-normal">일반</span>');
+        const statusChip = RUNNING_STATUSES.has(r.현재상태 || '')
+          ? '<span class="type-chip type-asc">진행중</span>'
+          : '<span class="type-chip type-winner-history">OFF</span>';
+        const judgeMeta = JUDGE_BADGE[(r.판정 || '').replace(/\s/g, '')] || { cls: 'off', icon: '❔' };
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="col-type"><span class="type-chip ${typeMeta.cls}">${typeMeta.text}</span></td>
+          <td class="col-ops-type">${winnerChip}</td>
+          <td class="col-name">
+            <span class="ad-name" title="${(r.소재명 || '').replace(/"/g, '&quot;')}">${r.소재명 || '-'}</span>
+            <span class="ad-meta">${r.캠페인명 || ''}</span>
+          </td>
+          <td class="col-ops-status">${statusChip}</td>
+          <td><span class="badge ${judgeMeta.cls}">${judgeMeta.icon} ${r.판정 || '-'}</span></td>
+          <td class="num">${fmtNum(r.DN_일수)}</td>
+          <td class="num">${fmtKRW(r.일예산)}</td>
+          <td class="num">${fmtKRW(r.누적_지출)}</td>
+          <td class="num">${fmtKRW(r.구매전환값)}</td>
+          <td class="num">${fmtROAS(r.누적_ROAS)}</td>`;
+        tbody.appendChild(tr);
+      });
+      const sum = computeSummary(rows);
+      const winnerTotal = rows.filter(r => r.위너여부).length;
+      const winnerHistoryTotal = rows.filter(r => r.위너이력 && !r.위너여부).length;
+      summaryGrid.innerHTML = `
+      <div class="creative-summary-card">
+        <div class="sum-title">운영 상태</div>
+        <dl>
+          <div><dt>소재수</dt><dd>${fmtNum(sum.광고수)}</dd></div>
+          <div><dt>진행중</dt><dd>${fmtNum(sum.진행중광고수)}</dd></div>
+          <div><dt>OFF</dt><dd>${fmtNum(sum.중단광고수)}</dd></div>
+          <div><dt>위너</dt><dd>${fmtNum(winnerTotal)}</dd></div>
+          <div><dt>위너이력</dt><dd>${fmtNum(winnerHistoryTotal)}</dd></div>
+        </dl>
+      </div>
+      <div class="creative-summary-card">
+        <div class="sum-title">성과 합계</div>
+        <dl>
+          <div><dt>지출</dt><dd>${fmtKRW(sum.지출)}</dd></div>
+          <div><dt>매출</dt><dd>${fmtKRW(sum.매출)}</dd></div>
+          <div><dt>ROAS</dt><dd>${fmtROAS(sum.ROAS)}</dd></div>
+          <div><dt>구매수</dt><dd>${fmtNum(sum.구매수)}</dd></div>
+        </dl>
+      </div>
+      <div class="creative-summary-card">
+        <div class="sum-title">조회 기준</div>
+        <dl>
+          <div><dt>기간</dt><dd>${rangeLabel}</dd></div>
+          <div><dt>상태</dt><dd>${statusLabelMap[statusFilter] || '전체'}</dd></div>
+          <div><dt>데이터</dt><dd>${DATA.meta?.periods?.creatives?.label || '이번 달(MTD)'}</dd></div>
+        </dl>
+      </div>`;
+      opsHost.appendChild(sectionEl);
+    });
+  };
+  if (opsRangeSelect) opsRangeSelect.addEventListener('change', renderOpsSections);
+  if (opsStatusSelect) opsStatusSelect.addEventListener('change', renderOpsSections);
+  renderOpsSections();
 
   /* ---------- 섹션 2.5: 데이터 검증 ---------- */
   const val = DATA.validation || {};
