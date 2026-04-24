@@ -462,6 +462,64 @@
   .ops-table td.col-ops-state, .ops-table th.col-ops-state { min-width: 120px; text-align: center; }
   .ops-table td.col-ops-type, .ops-table th.col-ops-type { min-width: 110px; text-align: center; }
   .ops-table td.col-ops-status, .ops-table th.col-ops-status { min-width: 120px; text-align: center; }
+  .ops-summary-wide {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px 22px;
+    box-shadow: 0 2px 10px rgba(45,80,22,0.05);
+  }
+  .ops-summary-wide .ops-badge {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--brand-cream);
+    color: var(--brand-green);
+    font-size: 14px;
+    font-weight: 800;
+    margin-bottom: 18px;
+  }
+  .ops-summary-wide .ops-headline {
+    font-size: 56px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--ink);
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .ops-summary-wide .ops-headline small {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+  .ops-summary-wide .ops-live {
+    font-size: 20px;
+    font-weight: 800;
+    color: #2f78a7;
+    margin-bottom: 18px;
+  }
+  .ops-summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 24px;
+  }
+  .ops-summary-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px dashed #ddd7c8;
+    font-size: 18px;
+  }
+  .ops-summary-item dt { color: var(--muted); }
+  .ops-summary-item dd { margin: 0; font-weight: 800; color: var(--ink); }
+  @media (max-width: 900px) {
+    .ops-summary-wide .ops-headline { font-size: 42px; }
+    .ops-summary-grid { grid-template-columns: 1fr; }
+  }
 
   /* 소재명 링크 */
   table.creatives td.col-name a.ad-link {
@@ -2260,33 +2318,26 @@
       const sum = computeSummary(rows);
       const winnerTotal = rows.filter(r => r.위너여부).length;
       const winnerHistoryTotal = rows.filter(r => r.위너이력 && !r.위너여부).length;
+      const summaryItems = [
+        ['고유CTR (링크 클릭률)', fmtPct(sum.고유CTR, 2)],
+        ['고유링크CVR', fmtPct(sum.CVR, 2)],
+        ['노출당LPV', fmtPct(sum.노출당LPV율, 2)],
+        ['LPV당구매', fmtPct(sum.LPV당구매율, 2)],
+        ['AOV', fmtKRW(sum.AOV)],
+        ['누적지출', fmtKRW(sum.지출)],
+        ['누적매출', fmtKRW(sum.매출)],
+        ['진행 중 광고', `${fmtNum(sum.진행중광고수)}개`],
+        ['중단된 광고', `${fmtNum(sum.중단광고수)}개`],
+        ['소재 수', `${fmtNum(sum.광고수)}개`],
+      ];
       summaryGrid.innerHTML = `
-      <div class="creative-summary-card">
-        <div class="sum-title">운영 상태</div>
-        <dl>
-          <div><dt>소재수</dt><dd>${fmtNum(sum.광고수)}</dd></div>
-          <div><dt>진행중</dt><dd>${fmtNum(sum.진행중광고수)}</dd></div>
-          <div><dt>OFF</dt><dd>${fmtNum(sum.중단광고수)}</dd></div>
-          <div><dt>위너</dt><dd>${fmtNum(winnerTotal)}</dd></div>
-          <div><dt>위너이력</dt><dd>${fmtNum(winnerHistoryTotal)}</dd></div>
-        </dl>
-      </div>
-      <div class="creative-summary-card">
-        <div class="sum-title">성과 합계</div>
-        <dl>
-          <div><dt>지출</dt><dd>${fmtKRW(sum.지출)}</dd></div>
-          <div><dt>매출</dt><dd>${fmtKRW(sum.매출)}</dd></div>
-          <div><dt>ROAS</dt><dd>${fmtROAS(sum.ROAS)}</dd></div>
-          <div><dt>구매수</dt><dd>${fmtNum(sum.구매수)}</dd></div>
-        </dl>
-      </div>
-      <div class="creative-summary-card">
-        <div class="sum-title">조회 기준</div>
-        <dl>
-          <div><dt>기간</dt><dd>${rangeLabel}</dd></div>
-          <div><dt>상태</dt><dd>${statusLabelMap[statusFilter] || '전체'}</dd></div>
-          <div><dt>데이터</dt><dd>${DATA.meta?.periods?.creatives?.label || '이번 달(MTD)'}</dd></div>
-        </dl>
+      <div class="ops-summary-wide">
+        <div class="ops-badge">${category}</div>
+        <div class="ops-headline">${fmtROAS(sum.ROAS)} <small>누적 ROAS</small></div>
+        <div class="ops-live">일예산 LIVE: ${fmtKRW(sum.일예산)}</div>
+        <div class="ops-summary-grid">
+          ${summaryItems.map(([label, value]) => `<dl class="ops-summary-item"><dt>${label}</dt><dd>${value}</dd></dl>`).join('')}
+        </div>
       </div>`;
       opsHost.appendChild(sectionEl);
     });
