@@ -2358,8 +2358,8 @@
         <div class="sum-title">운영 기준</div>
         <dl>
           <div><dt>카테고리</dt><dd>${category}</dd></div>
-          <div><dt>조회기간</dt><dd>${label}</dd></div>
-          <div><dt>상태 필터</dt><dd>${statusMode}</dd></div>
+          <div><dt>조회기간</dt><dd>${rangeLabel}</dd></div>
+          <div><dt>상태 필터</dt><dd>${statusLabelMap[statusFilter] || '전체'}</dd></div>
           <div><dt>위너 포함</dt><dd>${winnerTotal > 0 ? '있음' : '없음'}</dd></div>
           <div><dt>위너이력 포함</dt><dd>${winnerHistoryTotal > 0 ? '있음' : '없음'}</dd></div>
           <div><dt>소재 수</dt><dd>${fmtNum(sum.광고수)}개</dd></div>
