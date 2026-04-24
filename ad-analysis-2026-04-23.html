@@ -2320,12 +2320,18 @@
           : '<span class="type-chip type-winner-history">OFF</span>';
         const judgeMeta = JUDGE_BADGE[(r.판정 || '').replace(/\s/g, '')] || { cls: 'off', icon: '❔' };
         const opsPlanHtml = buildActionPlanHtml(directActionPlan(r));
+        const opsTitle = (r.소재명 || '').replace(/"/g, '&quot;');
+        const opsName = r.소재명 || '-';
+        const opsUrl = r.ad_manager_url;
+        const opsNameHtml = opsUrl
+          ? `<a class="ad-link" href="${opsUrl}" target="_blank" rel="noopener" title="Meta 광고 관리자에서 열기: ${opsTitle}">${opsName}</a>`
+          : `<span class="ad-name" title="${opsTitle}">${opsName}</span>`;
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td class="col-type"><span class="type-chip ${typeMeta.cls}">${typeMeta.text}</span></td>
           <td class="col-ops-type">${winnerChip}</td>
           <td class="col-name">
-            <span class="ad-name" title="${(r.소재명 || '').replace(/"/g, '&quot;')}">${r.소재명 || '-'}</span>
+            ${opsNameHtml}
             <span class="ad-meta">${r.캠페인명 || ''}</span>
           </td>
           <td class="col-ops-status">${statusChip}</td>
