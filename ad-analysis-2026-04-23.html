@@ -2318,26 +2318,39 @@
       const sum = computeSummary(rows);
       const winnerTotal = rows.filter(r => r.위너여부).length;
       const winnerHistoryTotal = rows.filter(r => r.위너이력 && !r.위너여부).length;
-      const summaryItems = [
-        ['고유CTR (링크 클릭률)', fmtPct(sum.고유CTR, 2)],
-        ['고유링크CVR', fmtPct(sum.CVR, 2)],
-        ['노출당LPV', fmtPct(sum.노출당LPV율, 2)],
-        ['LPV당구매', fmtPct(sum.LPV당구매율, 2)],
-        ['AOV', fmtKRW(sum.AOV)],
-        ['누적지출', fmtKRW(sum.지출)],
-        ['누적매출', fmtKRW(sum.매출)],
-        ['진행 중 광고', `${fmtNum(sum.진행중광고수)}개`],
-        ['중단된 광고', `${fmtNum(sum.중단광고수)}개`],
-        ['소재 수', `${fmtNum(sum.광고수)}개`],
-      ];
       summaryGrid.innerHTML = `
-      <div class="ops-summary-wide">
-        <div class="ops-badge">${category}</div>
-        <div class="ops-headline">${fmtROAS(sum.ROAS)} <small>누적 ROAS</small></div>
-        <div class="ops-live">일예산 LIVE: ${fmtKRW(sum.일예산)}</div>
-        <div class="ops-summary-grid">
-          ${summaryItems.map(([label, value]) => `<dl class="ops-summary-item"><dt>${label}</dt><dd>${value}</dd></dl>`).join('')}
-        </div>
+      <div class="creative-summary-card">
+        <div class="sum-title">${category}</div>
+        <div style="font-size:52px;font-weight:900;line-height:1;color:var(--ink);margin:6px 0 12px;">${fmtROAS(sum.ROAS)}</div>
+        <div style="font-size:16px;font-weight:800;color:#2f78a7;">일예산 LIVE: ${fmtKRW(sum.일예산)}</div>
+      </div>
+      <div class="creative-summary-card">
+        <div class="sum-title">퍼널 요약</div>
+        <dl>
+          <div><dt>고유CTR (링크 클릭률)</dt><dd>${fmtPct(sum.고유CTR, 2)}</dd></div>
+          <div><dt>고유링크CVR</dt><dd>${fmtPct(sum.CVR, 2)}</dd></div>
+          <div><dt>노출당LPV</dt><dd>${fmtPct(sum.노출당LPV율, 2)}</dd></div>
+          <div><dt>LPV당구매</dt><dd>${fmtPct(sum.LPV당구매율, 2)}</dd></div>
+        </dl>
+      </div>
+      <div class="creative-summary-card">
+        <div class="sum-title">성과 합계</div>
+        <dl>
+          <div><dt>AOV</dt><dd>${fmtKRW(sum.AOV)}</dd></div>
+          <div><dt>누적지출</dt><dd>${fmtKRW(sum.지출)}</dd></div>
+          <div><dt>누적매출</dt><dd>${fmtKRW(sum.매출)}</dd></div>
+          <div><dt>구매수</dt><dd>${fmtNum(sum.구매수)}</dd></div>
+        </dl>
+      </div>
+      <div class="creative-summary-card">
+        <div class="sum-title">운영 상태</div>
+        <dl>
+          <div><dt>진행 중 광고</dt><dd>${fmtNum(sum.진행중광고수)}개</dd></div>
+          <div><dt>중단된 광고</dt><dd>${fmtNum(sum.중단광고수)}개</dd></div>
+          <div><dt>위너</dt><dd>${fmtNum(winnerTotal)}개</dd></div>
+          <div><dt>위너이력</dt><dd>${fmtNum(winnerHistoryTotal)}개</dd></div>
+          <div><dt>소재 수</dt><dd>${fmtNum(sum.광고수)}개</dd></div>
+        </dl>
       </div>`;
       opsHost.appendChild(sectionEl);
     });
