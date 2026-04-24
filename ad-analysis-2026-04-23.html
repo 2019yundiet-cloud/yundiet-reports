@@ -2611,8 +2611,15 @@
     renderHeadline(product, sorted);
     renderProfitTable(product, sorted);
 
+    if (typeof Chart === 'undefined') {
+      return;
+    }
+
     if (charts[product]) charts[product].destroy();
-    const ctx = document.getElementById(cfg.canvas).getContext('2d');
+    const canvasEl = document.getElementById(cfg.canvas);
+    if (!canvasEl) return;
+    const ctx = canvasEl.getContext('2d');
+    if (!ctx) return;
     charts[product] = new Chart(ctx, {
       type: 'bar',
       data: {
