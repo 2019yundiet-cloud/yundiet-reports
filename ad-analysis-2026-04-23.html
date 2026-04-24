@@ -2749,11 +2749,12 @@
     const buildGa4SplitShares = () => {
       const explicit = DATA.meta?.ga4_category_split?.shares;
       if (explicit && Object.keys(explicit).length) return explicit;
-      const spend = { '단백밥': 0, '밸런시': 0, '순수단백': 0, '기타': 0 };
+      const spend = { '단백밥': 0, '단백밥 ASC': 0, '밸런시': 0, '순수단백': 0, '기타': 0 };
       (DATA.mtd_kpis || []).forEach(r => {
         const cat = r.카테고리 || r.category;
         const s = numOrNull(r.누적_지출) ?? numOrNull(r.spend) ?? 0;
-        if (cat === '단백밥' || cat === '단백밥 ASC') spend['단백밥'] += s;
+        if (cat === '단백밥') spend['단백밥'] += s;
+        else if (cat === '단백밥 ASC') spend['단백밥 ASC'] += s;
         else if (cat === '밸런시') spend['밸런시'] += s;
         else if (cat === '순수단백') spend['순수단백'] += s;
         else spend['기타'] += s;
@@ -2769,7 +2770,7 @@
       if (!(cats.size === 1 && (cats.has('기타') || cats.has('전체')))) return rows;
       const shares = buildGa4SplitShares();
       if (!shares) return rows;
-      const targetCats = ['단백밥', '밸런시', '순수단백'];
+      const targetCats = ['단백밥', '단백밥 ASC', '밸런시', '순수단백'];
       const numericKeys = kind === 'daily'
         ? ['매출', '주문수', '원가', '배송비', '수수료', '광고비', '소재수', '순이익']
         : ['매출', '주문수', '원가', '배송비', '수수료', '광고비', '일수', '순이익'];
@@ -3359,11 +3360,12 @@
     const buildGa4SplitShares = () => {
       const explicit = DATA.meta?.ga4_category_split?.shares;
       if (explicit && Object.keys(explicit).length) return explicit;
-      const spend = { '단백밥': 0, '밸런시': 0, '순수단백': 0, '기타': 0 };
+      const spend = { '단백밥': 0, '단백밥 ASC': 0, '밸런시': 0, '순수단백': 0, '기타': 0 };
       (DATA.mtd_kpis || []).forEach(r => {
         const cat = r.카테고리 || r.category;
         const s = numOrNull(r.누적_지출) ?? numOrNull(r.spend) ?? 0;
-        if (cat === '단백밥' || cat === '단백밥 ASC') spend['단백밥'] += s;
+        if (cat === '단백밥') spend['단백밥'] += s;
+        else if (cat === '단백밥 ASC') spend['단백밥 ASC'] += s;
         else if (cat === '밸런시') spend['밸런시'] += s;
         else if (cat === '순수단백') spend['순수단백'] += s;
         else spend['기타'] += s;
@@ -3376,10 +3378,10 @@
       const rows = (arr || []).slice();
       if (!rows.length) return rows;
       const cats = new Set(rows.map(r => r.카테고리 || '기타'));
-      if (!(cats.size === 1 && cats.has('기타'))) return rows;
+      if (!(cats.size === 1 && (cats.has('기타') || cats.has('전체')))) return rows;
       const shares = buildGa4SplitShares();
       if (!shares) return rows;
-      const targetCats = ['단백밥', '밸런시', '순수단백'];
+      const targetCats = ['단백밥', '단백밥 ASC', '밸런시', '순수단백'];
       const numericKeys = kind === 'daily'
         ? ['매출', '주문수', '원가', '배송비', '수수료', '광고비', '소재수', '순이익']
         : ['매출', '주문수', '원가', '배송비', '수수료', '광고비', '일수', '순이익'];
@@ -3401,7 +3403,7 @@
       return splitRows;
     };
     const ga4MonthlyRows = splitGa4RowsIfNeeded(DATA.ga4_profit_monthly, 'monthly');
-    const ga4DailyRows = splitGa4RowsIfNeeded(DATA.ga4_profit_daily, 'daily');
+    const ga4DailyRows = splitGa4RowsIfNeeded(getEffectiveGa4DailyRows(), 'daily');
     const monthByCat = new Map();
     ga4MonthlyRows.forEach(r => {
       const cat = r.카테고리 || '기타';
