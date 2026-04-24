@@ -1388,7 +1388,10 @@
   setBadge('badge-profit', P.monthly_profit);
   setBadge('badge-ga4-profit', P.ga4_profit || P.monthly_profit || P.mtd);
   setBadge('badge-entry-analysis', P.ga4_profit || P.monthly_profit || P.mtd);
-  setBadge('badge-bridge', P.ga4_profit || P.monthly_profit || P.mtd);
+  const bridgeBadge = document.getElementById('badge-bridge');
+  if (bridgeBadge) {
+    bridgeBadge.textContent = P.bridge?.label || '브리지 · DB 전환 대상';
+  }
 
   /* ---------- 날짜 선택기 ---------- */
   const dateSelect = document.getElementById('date-select');
