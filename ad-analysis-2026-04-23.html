@@ -2545,8 +2545,11 @@
         host.innerHTML = `<div class="ga4-empty">데이터 없음 — 노션 DB 동기화 대기 중</div>`;
         return;
       }
-      const monthlyOverallRows = monthlyRows.filter(r => (r.카테고리 || '전체') === '전체' || (r.카테고리 || '기타') === '기타');
-      const monthlyOverall = monthlyOverallRows.slice().sort((a, b) => (b.월 || '').localeCompare(a.월 || ''))[0] || monthlyRows.slice().sort((a, b) => (b.월 || '').localeCompare(a.월 || ''))[0];
+      const rawMonthlyRows = Array.isArray(DATA.ga4_profit_monthly) ? DATA.ga4_profit_monthly.slice() : [];
+      const monthlyOverallRows = rawMonthlyRows.filter(r => (r.카테고리 || '전체') === '전체' || (r.카테고리 || '기타') === '기타');
+      const monthlyOverall = monthlyOverallRows.slice().sort((a, b) => (b.월 || '').localeCompare(a.월 || ''))[0]
+        || rawMonthlyRows.slice().sort((a, b) => (b.월 || '').localeCompare(a.월 || ''))[0]
+        || monthlyRows.slice().sort((a, b) => (b.월 || '').localeCompare(a.월 || ''))[0];
       const overallROI = monthlyOverall?.실ROI != null ? monthlyOverall.실ROI
         : (monthlyOverall?.광고비 ? monthlyOverall.순이익 / monthlyOverall.광고비 : null);
       if (summaryHost && monthlyOverall) {
