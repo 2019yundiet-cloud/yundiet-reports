@@ -452,8 +452,11 @@
   .type-chip.type-main { background: #f6f1e8; color: #7d6608; border-color: #e6d8b8; }
   .type-chip.type-asc { background: #eef9f1; color: #1e8449; border-color: #cfe8d5; }
   .type-chip.type-winner { background: #fcf3cf; color: #7d6608; border-color: #d4ac0d; }
+  .type-chip.type-normal { background: #f6f7f8; color: #5f6a72; border-color: #d6dbdf; }
   .type-chip.type-winner-history { background: #f2f3f4; color: #626567; border-color: #b2babb; }
   .type-chip.type-video { background: #f3e8ff; color: #6b21a8; border-color: #dcc7fb; }
+  .type-stack { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+  .type-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 
   /* 소재명 링크 */
   table.creatives td.col-name a.ad-link {
@@ -1843,9 +1846,11 @@
     host.innerHTML = '';
     const buckets = {};
     SECTION_ORDER.forEach(s => buckets[s.key] = []);
+    const allRows = [];
     (DATA.creatives || []).forEach(c => {
       const row = normalizeCreative(c);
       if (!shouldDisplayCreative(row)) return;
+      allRows.push(row);
       if (!inCreativeRange(row)) return;
       const b = routeBucket(row);
       if (buckets[b]) buckets[b].push(row);
@@ -1855,9 +1860,11 @@
     const selected = getCreativeRangeDays();
     const filterLabel = selected === 'all' ? '전체 소재' : `D+${selected} 이하 소재`;
     const dataPeriod = DATA.meta?.periods?.creatives?.label || (DATA.meta?.period_rule === 'LAST_30D' ? '최근 30일' : '이번 달 MTD');
+    const visibleCount = Object.values(buckets).reduce((sum, rows) => sum + rows.length, 0);
+    const totalCount = allRows.length;
     const caption = document.getElementById('caption-creatives');
     if (caption) {
-      caption.textContent = `${dataPeriod} 집계 · 현재 보기: ${filterLabel} · 각 소재에서 판정/액션/퍼널진단을 한 번에 확인`;
+      caption.textContent = `${dataPeriod} 집계 · 현재 보기: ${filterLabel} · 표시 ${fmtNum(visibleCount)}개 / 전체 ${fmtNum(totalCount)}개 · 각 소재에서 판정/액션/퍼널진단을 한 번에 확인`;
     }
 
     let currentCategory = null;
@@ -1871,9 +1878,18 @@
         acc[t] = (acc[t] || 0) + 1;
         return acc;
       }, {});
+      const winnerCounts = rows.reduce((acc, r) => {
+        const key = r.위너여부 ? '위너' : (r.위너이력 ? '위너이력' : '일반');
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
       const breakdown = ['테스트', '메인', 'ASC']
         .filter(t => typeCounts[t])
         .map(t => `${t} ${typeCounts[t]}`)
+        .join(' · ');
+      const winnerBreakdown = ['위너', '위너이력', '일반']
+        .filter(t => winnerCounts[t])
+        .map(t => `${t} ${winnerCounts[t]}`)
         .join(' · ');
       const category = sec.key.split('-')[0];
       if (category !== currentCategory) {
@@ -1893,7 +1909,7 @@
         ? '신규/위너 혼합 · 실제 캠페인 위치 기준'
         : '신규 소재 기준';
       sectionEl.innerHTML = `
-        <h3>${sec.title}${breakdown ? ` <span class="meta-inline">${breakdown}</span>` : ''} <span class="count">${rows.length}</span></h3>
+        <h3>${sec.title}${breakdown ? ` <span class="meta-inline">${breakdown}</span>` : ''}${winnerBreakdown ? ` <span class="meta-inline">| ${winnerBreakdown}</span>` : ''} <span class="count">${rows.length}</span></h3>
         <div class="creative-summary-grid"></div>
         <div class="table-scroll">
           <table class="creatives">
@@ -1911,12 +1927,12 @@
         if (col.key === '__type') {
           const typeMeta = creativeTypeLabel(r);
           const winnerChip = r.위너여부
-            ? ' <span class="type-chip type-winner">위너</span>'
-            : (r.위너이력 ? ' <span class="type-chip type-winner-history">위너이력</span>' : '');
+            ? '<span class="type-chip type-winner">위너</span>'
+            : (r.위너이력 ? '<span class="type-chip type-winner-history">위너이력</span>' : '<span class="type-chip type-normal">일반</span>');
           const videoChip = isVideoCreative(r)
-            ? ' <span class="type-chip type-video">영상</span>'
+            ? '<span class="type-chip type-video">영상</span>'
             : '';
-          return `<td class="col-type"><span class="type-chip ${typeMeta.cls}">${typeMeta.text}</span>${winnerChip}${videoChip}</td>`;
+          return `<td class="col-type"><div class="type-stack"><div class="type-row"><span class="type-chip ${typeMeta.cls}">${typeMeta.text}</span>${winnerChip}</div>${videoChip ? `<div class="type-row">${videoChip}</div>` : ''}</div></td>`;
         }
         if (col.key === '__thumb') {
           const img = r.소재이미지URL ? `<img src="${r.소재이미지URL}" alt="" loading="lazy" />` : '—';
