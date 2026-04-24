@@ -1198,7 +1198,6 @@
     <div class="period-caption" id="caption-creatives">신규 소재 제작/개선 판단용 · 각 소재에서 판정/액션/퍼널진단을 한 번에 확인 · 섹션별 하단에 합계 요약</div>
     <div class="period-caption" id="caption-creatives-reference-top">조회기준일: -</div>
     <div class="creative-controls">
-      <div class="period-caption" id="caption-creatives-reference">조회기준일: -</div>
       <label>소재 조회기간
         <select id="creative-range-days">
           <option value="4" selected>D+4 이하</option>
@@ -1386,8 +1385,14 @@
   setBadge('badge-funnel', P.funnel || P.creatives);
   setBadge('badge-val', P.validation || P.mtd);
   setBadge('badge-profit', P.monthly_profit);
-  setBadge('badge-ga4-profit', P.ga4_profit || P.monthly_profit || P.mtd);
-  setBadge('badge-entry-analysis', P.ga4_profit || P.monthly_profit || P.mtd);
+  const ga4ProfitBadge = document.getElementById('badge-ga4-profit');
+  if (ga4ProfitBadge) {
+    ga4ProfitBadge.textContent = 'GA4 실결제 기준';
+  }
+  const entryAnalysisBadge = document.getElementById('badge-entry-analysis');
+  if (entryAnalysisBadge) {
+    entryAnalysisBadge.textContent = '광고 유입 구매 분석';
+  }
   const bridgeBadge = document.getElementById('badge-bridge');
   if (bridgeBadge) {
     bridgeBadge.textContent = P.bridge?.label || '브리지 · DB 전환 대상';
@@ -1986,10 +1991,6 @@
     const referenceDate = DATA.meta?.date || '-';
     if (caption) {
       caption.textContent = `${dataPeriod} 집계 · 조회기준일 ${referenceDate} · 현재 보기: ${filterLabel} · 표시 ${fmtNum(visibleCount)}개 / 전체 ${fmtNum(totalCount)}개 · 각 소재에서 판정/액션/퍼널진단을 한 번에 확인`;
-    }
-    const referenceCaption = document.getElementById('caption-creatives-reference');
-    if (referenceCaption) {
-      referenceCaption.textContent = `조회기준일: ${referenceDate} · D+N은 이 날짜 기준 경과일`;
     }
     const referenceCaptionTop = document.getElementById('caption-creatives-reference-top');
     if (referenceCaptionTop) {
@@ -3399,6 +3400,28 @@
     const host = document.getElementById('bridge-grid');
     const CAT_ORDER = ['단백밥', '단백밥 ASC', '밸런시', '순수단백', '기타'];
     const mtdMap = new Map((DATA.mtd_kpis || []).map(r => [r.카테고리 || r.category, r]));
+    const getEffectiveGa4DailyRowsForBridge = () => {
+      const currentRows = Array.isArray(DATA.ga4_profit_daily) ? DATA.ga4_profit_daily.slice() : [];
+      const uniqueDates = [...new Set(currentRows.map(r => r.날짜).filter(Boolean))];
+      if (uniqueDates.length > 1) return currentRows;
+      const archiveRows = Array.isArray(DATA.meta?.archive_summary?.ga4_event_rows)
+        ? DATA.meta.archive_summary.ga4_event_rows.map(r => ({
+            날짜: r.date,
+            카테고리: '전체',
+            매출: null,
+            주문수: null,
+            매칭률: null,
+            원가: null,
+            배송비: null,
+            수수료: null,
+            광고비: r.total_ad_spend,
+            소재수: null,
+            순이익: r.total_profit,
+            실ROI: r.total_roi,
+          }))
+        : [];
+      return archiveRows.length > currentRows.length ? archiveRows : currentRows;
+    };
     const buildGa4SplitShares = () => {
       const explicit = DATA.meta?.ga4_category_split?.shares;
       if (explicit && Object.keys(explicit).length) return explicit;
@@ -3445,7 +3468,7 @@
       return splitRows;
     };
     const ga4MonthlyRows = splitGa4RowsIfNeeded(DATA.ga4_profit_monthly, 'monthly');
-    const ga4DailyRows = splitGa4RowsIfNeeded(getEffectiveGa4DailyRows(), 'daily');
+    const ga4DailyRows = splitGa4RowsIfNeeded(getEffectiveGa4DailyRowsForBridge(), 'daily');
     const monthByCat = new Map();
     ga4MonthlyRows.forEach(r => {
       const cat = r.카테고리 || '기타';
