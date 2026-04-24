@@ -2816,16 +2816,96 @@
 
     const campaignSkuRows = paidSummary?.campaign_to_sku_breakdown || summary?.campaign_to_sku_breakdown || [];
     const fallbackCampaignRows = (!campaignSkuRows.length && matrix.length)
-      ? matrix.map(row => ({
-          entry_product_family: row.entry_product_family || '기타',
-          last_touch_campaign: '(작업 보고 요약)',
-          purchase_product_family: row.purchase_product_family || '-',
-          sku: '(상세 미포함)',
-          order_count: row.order_count || 0,
-          revenue_allocated: row.revenue_allocated || 0,
-          net_profit_allocated: row.net_profit_allocated || 0,
-          note: '작업 보고 페이지에 캠페인별 상세 표가 없어 제품군 요약 기준으로 표시'
-        }))
+      ? (() => {
+          const campaignMap = new Map();
+          (DATA.creatives || []).forEach(creative => {
+            const campaign = creative.캠페인명 || creative.campaign_name || '';
+            if (!campaign) return;
+            const productFamily = creative.상품 || creative.product_family || classify(campaign, rules.entry_rules || [], '기타');
+            const revenue = Number(creative.구매전환값 ?? creative.purchase_value ?? creative.누적_매출 ?? creative.revenue ?? 0) || 0;
+            const spend = Number(creative.누적_지출 ?? creative.지출 ?? creative.spend ?? 0) || 0;
+            if (!campaignMap.has(campaign)) {
+              campaignMap.set(campaign, {
+                entry_product_family: productFamily || '기타',
+                last_touch_campaign: campaign,
+                campaign_type: creative.캠페인유형 || creative.campaign_type || '',
+                metric_revenue: 0,
+                metric_spend: 0
+              });
+            }
+            const row = campaignMap.get(campaign);
+            row.metric_revenue += revenue;
+            row.metric_spend += spend;
+            if ((!row.entry_product_family || row.entry_product_family === '기타') && productFamily) {
+              row.entry_product_family = productFamily;
+            }
+          });
+          const allCampaigns = [...campaignMap.values()].filter(row => (row.metric_revenue || row.metric_spend));
+          if (!allCampaigns.length) return matrix.map(row => ({
+            entry_product_family: row.entry_product_family || '기타',
+            last_touch_campaign: '(Meta API 캠페인 없음)',
+            purchase_product_family: row.purchase_product_family || '-',
+            sku: '(상세 미포함)',
+            order_count: row.order_count || 0,
+            revenue_allocated: row.revenue_allocated || 0,
+            net_profit_allocated: row.net_profit_allocated || 0,
+            note: 'Meta API 캠페인 집계를 찾지 못해 제품군 요약만 유지'
+          }));
+
+          const pickCandidates = (row) => {
+            const entryFamily = row.entry_product_family || '기타';
+            const purchaseFamily = row.purchase_product_family || '기타';
+            const byEntry = allCampaigns.filter(c => (c.entry_product_family || '기타') === entryFamily);
+            if (byEntry.length && entryFamily !== '기타') return { rows: byEntry, mode: 'entry_family' };
+            const byPurchase = allCampaigns.filter(c => (c.entry_product_family || '기타') === purchaseFamily);
+            if (byPurchase.length) return { rows: byPurchase, mode: 'purchase_family' };
+            return { rows: allCampaigns, mode: 'all_campaigns' };
+          };
+
+          const distribute = (total, sortedCandidates, weightKey) => {
+            let remaining = Number(total || 0);
+            const denom = sortedCandidates.reduce((sum, campaign) => sum + Math.max(0, Number(campaign[weightKey] || 0)), 0) || sortedCandidates.length || 1;
+            return sortedCandidates.map((campaign, idx) => {
+              const weight = Math.max(0, Number(campaign[weightKey] || 0)) || (denom ? 1 : 0);
+              const allocated = idx === sortedCandidates.length - 1
+                ? remaining
+                : Math.round(Number(total || 0) * (weight / denom));
+              remaining -= allocated;
+              return allocated;
+            });
+          };
+
+          return matrix.flatMap(row => {
+            const picked = pickCandidates(row);
+            const weightKey = picked.rows.some(campaign => Number(campaign.metric_revenue || 0) > 0)
+              ? 'metric_revenue'
+              : 'metric_spend';
+            const sortedCandidates = [...picked.rows].sort((a, b) => {
+              const diff = Number(b[weightKey] || 0) - Number(a[weightKey] || 0);
+              if (diff !== 0) return diff;
+              return String(a.last_touch_campaign || '').localeCompare(String(b.last_touch_campaign || ''), 'ko');
+            });
+            const revenueAlloc = distribute(row.revenue_allocated || 0, sortedCandidates, weightKey);
+            const profitAlloc = distribute(row.net_profit_allocated || 0, sortedCandidates, weightKey);
+            const orderAlloc = distribute(row.order_count || 0, sortedCandidates, weightKey);
+            const noteBase = weightKey === 'metric_revenue' ? 'Meta API 전환값 비중' : 'Meta API 지출 비중';
+            const note = picked.mode === 'entry_family'
+              ? `${noteBase}으로 캠페인 분해`
+              : picked.mode === 'purchase_family'
+                ? `${noteBase}으로 구매 제품군 기준 캠페인 분해`
+                : `${noteBase}으로 전체 캠페인 기준 분해`;
+            return sortedCandidates.map((campaign, idx) => ({
+              entry_product_family: row.entry_product_family || '기타',
+              last_touch_campaign: campaign.last_touch_campaign || '(캠페인 미상)',
+              purchase_product_family: row.purchase_product_family || '-',
+              sku: '(Meta API 캠페인 배분)',
+              order_count: orderAlloc[idx] || 0,
+              revenue_allocated: revenueAlloc[idx] || 0,
+              net_profit_allocated: profitAlloc[idx] || 0,
+              note
+            })).filter(item => Number(item.order_count || 0) || Number(item.revenue_allocated || 0) || Number(item.net_profit_allocated || 0));
+          });
+        })()
       : [];
     const campaignRows = campaignSkuRows.length ? campaignSkuRows : fallbackCampaignRows;
     const campaignRowsByFamily = new Map();
