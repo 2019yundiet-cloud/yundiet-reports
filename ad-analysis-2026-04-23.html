@@ -1196,6 +1196,7 @@
   <section>
     <h2>🎯 신규 소재판정 + 액션플랜 + 퍼널진단 <span class="period-badge" id="badge-creatives">-</span></h2>
     <div class="period-caption" id="caption-creatives">신규 소재 제작/개선 판단용 · 각 소재에서 판정/액션/퍼널진단을 한 번에 확인 · 섹션별 하단에 합계 요약</div>
+    <div class="period-caption" id="caption-creatives-reference-top">조회기준일: -</div>
     <div class="creative-controls">
       <div class="period-caption" id="caption-creatives-reference">조회기준일: -</div>
       <label>소재 조회기간
@@ -1215,6 +1216,7 @@
   <section>
     <h2>📊 운영 현황 대시보드 <span class="period-badge" id="badge-ops">-</span></h2>
     <div class="period-caption" id="caption-ops">현재 운영 중인 메인/테스트/ASC/OFF와 위너 상태를 한 번에 확인</div>
+    <div class="period-caption" id="caption-ops-reference">조회기준일: -</div>
     <div class="creative-controls">
       <label>운영 조회기간
         <select id="ops-range-days">
@@ -1986,6 +1988,10 @@
     if (referenceCaption) {
       referenceCaption.textContent = `조회기준일: ${referenceDate} · D+N은 이 날짜 기준 경과일`;
     }
+    const referenceCaptionTop = document.getElementById('caption-creatives-reference-top');
+    if (referenceCaptionTop) {
+      referenceCaptionTop.textContent = `조회기준일: ${referenceDate} · D+N은 이 날짜 기준 경과일`;
+    }
 
     let currentCategory = null;
     SECTION_ORDER.forEach(sec => {
@@ -2228,6 +2234,10 @@
     const caption = document.getElementById('caption-ops');
     if (caption) {
       caption.textContent = `현재 운영 스냅샷 · 기간 ${rangeLabel} · 상태 ${statusLabelMap[statusFilter] || '전체'} · 표시 ${fmtNum(visibleCount)}개 / 전체 ${fmtNum(totalCount)}개`;
+    }
+    const opsReference = document.getElementById('caption-ops-reference');
+    if (opsReference) {
+      opsReference.textContent = `조회기준일: ${DATA.meta?.date || '-'} · 운영 현황 스냅샷 기준일`;
     }
     const badge = document.getElementById('badge-ops');
     if (badge) {
