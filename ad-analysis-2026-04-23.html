@@ -2389,6 +2389,12 @@
       source: derivedOffAds ? '카테고리별 OFF광고수 합계 (대시보드 표시 기준)' : (val.off_ads?.source || ''),
     },
   };
+  const derivedCategoryAdCounts = new Map((DATA.mtd_kpis || []).map(row => {
+    const cat = row.카테고리 || row.category;
+    const active = numOrNull(row.활성광고수) || 0;
+    const off = numOrNull(row.OFF광고수) || 0;
+    return [cat, active + off];
+  }));
   const valKpi = document.getElementById('val-kpi');
   const KPI_ORDER = [
     { k: 'total_spend', lbl: '총 지출 (MTD)', fmt: fmtKRW },
@@ -2409,13 +2415,15 @@
 
   const valTbody = document.querySelector('#val-table tbody');
   (val.by_category || []).forEach(c => {
+    const cat = c.카테고리 || '-';
+    const derivedAdCount = derivedCategoryAdCounts.get(cat);
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${c.카테고리 || '-'}</td>
+      <td>${cat}</td>
       <td>${fmtKRW(c.지출)}</td>
       <td>${fmtKRW(c.매출)}</td>
       <td>${fmtROAS(c.ROAS)}</td>
-      <td>${fmtNum(c.광고수)}</td>`;
+      <td>${fmtNum(derivedAdCount != null ? derivedAdCount : c.광고수)}</td>`;
     valTbody.appendChild(tr);
   });
   if (val.notes) document.getElementById('val-notes').textContent = '💡 ' + val.notes;
