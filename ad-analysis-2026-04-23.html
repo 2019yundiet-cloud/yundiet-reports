@@ -1861,6 +1861,33 @@
     );
   }
 
+  function parseActionPlan(planText) {
+    const raw = String(planText || '');
+    const sections = { reason: '', front1: '', front2: '', ga4: '', judge: '' };
+    const reasonSplit = raw.split('제안 근거: ');
+    const withReason = reasonSplit.length > 1 ? reasonSplit[1] : raw;
+    const [reasonPart, afterReason = ''] = withReason.split('<br>소재액션1: ');
+    sections.reason = reasonPart || '';
+    const [front1Part, afterFront1 = ''] = afterReason.split('<br>소재액션2: ');
+    sections.front1 = front1Part || '';
+    const [front2Part, afterFront2 = ''] = afterFront1.split('<br>GA4 액션: ');
+    sections.front2 = front2Part || '';
+    const [ga4Part, judgePart = ''] = afterFront2.split('<br>판정 기준: ');
+    sections.ga4 = ga4Part || '';
+    sections.judge = judgePart || '';
+    return sections;
+  }
+  function buildActionPlanHtml(planText) {
+    const parsed = parseActionPlan(planText);
+    return [
+      parsed.reason ? `<div class="action-line"><strong>제안 근거</strong><span>${parsed.reason}</span></div>` : '',
+      parsed.front1 ? `<div class="action-line"><strong>소재액션1</strong><span>${parsed.front1}</span></div>` : '',
+      parsed.front2 ? `<div class="action-line"><strong>소재액션2</strong><span>${parsed.front2}</span></div>` : '',
+      parsed.ga4 ? `<div class="action-line"><strong>GA4 액션</strong><span>${parsed.ga4}</span></div>` : '',
+      parsed.judge ? `<div class="action-line"><strong>판정 기준</strong><span>${parsed.judge}</span></div>` : '',
+    ].filter(Boolean).join('');
+  }
+
   const host = document.getElementById('creatives-sections');
   const isVideoCreative = (r) => {
     const text = `${r.소재명 || ''} ${r.캠페인명 || ''}`.toLowerCase();
@@ -1995,12 +2022,7 @@
           return `<td class="col-funnel">${sev}${pattern}${tag}</td>`;
         }
         if (col.key === '액션플랜') {
-          const planHtml = directActionPlan(r)
-            .replace('제안 근거: ', '<div class="action-line"><strong>제안 근거</strong><span>')
-            .replace('<br>소재액션1: ', '</span></div><div class="action-line"><strong>소재액션1</strong><span>')
-            .replace('<br>소재액션2: ', '</span></div><div class="action-line"><strong>소재액션2</strong><span>')
-            .replace('<br>GA4 액션: ', '</span></div><div class="action-line"><strong>GA4 액션</strong><span>')
-            .replace('<br>판정 기준: ', '</span></div><div class="action-line"><strong>판정 기준</strong><span>') + '</span></div>';
+          const planHtml = buildActionPlanHtml(directActionPlan(r));
           return `<td class="${col.cls || ''}"><div class="action-plan">${planHtml}</div></td>`;
         }
         const v = r[col.key];
@@ -2196,6 +2218,7 @@
               <th class="col-name">소재명</th>
               <th class="col-ops-status">현재상태</th>
               <th>판정</th>
+              <th class="col-action">제안 근거 / 소재액션 / GA4액션</th>
               <th class="num">DN</th>
               <th class="num">일예산</th>
               <th class="num">지출</th>
@@ -2216,6 +2239,7 @@
           ? '<span class="type-chip type-asc">진행중</span>'
           : '<span class="type-chip type-winner-history">OFF</span>';
         const judgeMeta = JUDGE_BADGE[(r.판정 || '').replace(/\s/g, '')] || { cls: 'off', icon: '❔' };
+        const opsPlanHtml = buildActionPlanHtml(directActionPlan(r));
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td class="col-type"><span class="type-chip ${typeMeta.cls}">${typeMeta.text}</span></td>
@@ -2226,6 +2250,7 @@
           </td>
           <td class="col-ops-status">${statusChip}</td>
           <td><span class="badge ${judgeMeta.cls}">${judgeMeta.icon} ${r.판정 || '-'}</span></td>
+          <td class="col-action"><div class="action-plan">${opsPlanHtml}</div></td>
           <td class="num">${fmtNum(r.DN_일수)}</td>
           <td class="num">${fmtKRW(r.일예산)}</td>
           <td class="num">${fmtKRW(r.누적_지출)}</td>
