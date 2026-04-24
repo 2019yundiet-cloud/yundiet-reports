@@ -2815,14 +2815,27 @@
     `).join('') || `<tr><td colspan="6">데이터 없음</td></tr>`;
 
     const campaignSkuRows = paidSummary?.campaign_to_sku_breakdown || summary?.campaign_to_sku_breakdown || [];
+    const fallbackCampaignRows = (!campaignSkuRows.length && matrix.length)
+      ? matrix.map(row => ({
+          entry_product_family: row.entry_product_family || '기타',
+          last_touch_campaign: '(작업 보고 요약)',
+          purchase_product_family: row.purchase_product_family || '-',
+          sku: '(상세 미포함)',
+          order_count: row.order_count || 0,
+          revenue_allocated: row.revenue_allocated || 0,
+          net_profit_allocated: row.net_profit_allocated || 0,
+          note: '작업 보고 페이지에 캠페인별 상세 표가 없어 제품군 요약 기준으로 표시'
+        }))
+      : [];
+    const campaignRows = campaignSkuRows.length ? campaignSkuRows : fallbackCampaignRows;
     const campaignRowsByFamily = new Map();
-    campaignSkuRows.forEach(row => {
+    campaignRows.forEach(row => {
       const key = row.entry_product_family || '기타';
       if (!campaignRowsByFamily.has(key)) campaignRowsByFamily.set(key, []);
       campaignRowsByFamily.get(key).push(row);
     });
     const familyOrder = ['단백밥', '밸런시', '순수단백', '기타'];
-    campaignWrap.innerHTML = campaignSkuRows.length ? `
+    campaignWrap.innerHTML = campaignRows.length ? `
       <div class="analysis-table-wrap">
         <table class="analysis-table">
           <thead>
