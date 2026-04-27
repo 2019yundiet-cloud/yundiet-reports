@@ -328,7 +328,7 @@
   }
 
   /* ============ 소재 판정표 (섹션 1) ============ */
-  .creative-section { margin-top: 22px; }
+  .creative-section { margin-top: 22px; max-width: 100%; }
   .creative-section h3 {
     display: flex; align-items: center; gap: 8px;
     font-size: 16px; background: var(--brand-cream);
@@ -361,14 +361,19 @@
     font-size: 12px;
   }
   .table-scroll {
-    overflow-x: auto; border: 1px solid var(--border);
+    width: 100%;
+    max-width: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    border: 1px solid var(--border);
     border-radius: 10px; background: white;
     max-height: 72vh;
   }
   table.creatives {
     border-collapse: separate; border-spacing: 0;
     font-size: 12px; min-width: 2520px;
-    width: 100%;
+    width: max-content;
   }
   table.creatives thead th {
     position: sticky; top: 0; z-index: 3;
