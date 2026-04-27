@@ -483,7 +483,7 @@
   .asc-chip.asc-empty { background: #f6f7f8; color: #6f767d; border-color: #d6dbdf; }
   .type-stack { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
   .type-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-  .ops-table { min-width: 1320px !important; }
+  .ops-table { min-width: 1450px !important; }
   .ops-table td.col-name, .ops-table th.col-name { min-width: 320px !important; max-width: 320px !important; }
   .ops-table td.col-ops-state, .ops-table th.col-ops-state { min-width: 120px; text-align: center; }
   .ops-table td.col-ops-type, .ops-table th.col-ops-type { min-width: 110px; text-align: center; }
@@ -2348,6 +2348,7 @@
               <th class="col-name">소재명</th>
               <th class="col-ops-status">현재상태</th>
               <th>판정</th>
+              <th class="col-asc-candidate">ASC 후보/탈락</th>
               <th class="col-action">제안 근거 / 소재액션 / GA4액션</th>
               <th class="num">DN</th>
               <th class="num">일예산</th>
@@ -2369,6 +2370,7 @@
           ? '<span class="type-chip type-asc">진행중</span>'
           : '<span class="type-chip type-winner-history">OFF</span>';
         const judgeMeta = JUDGE_BADGE[(r.판정 || '').replace(/\s/g, '')] || { cls: 'off', icon: '❔' };
+        const ascMeta = ascCandidateMeta(r);
         const opsPlanHtml = buildActionPlanHtml(directActionPlan(r));
         const opsTitle = (r.소재명 || '').replace(/"/g, '&quot;');
         const opsName = r.소재명 || '-';
@@ -2386,6 +2388,7 @@
           </td>
           <td class="col-ops-status">${statusChip}</td>
           <td><span class="badge ${judgeMeta.cls}">${judgeMeta.icon} ${r.판정 || '-'}</span></td>
+          <td class="col-asc-candidate"><span class="asc-chip ${ascMeta.cls}">${ascMeta.text}</span></td>
           <td class="col-action"><div class="action-plan">${opsPlanHtml}</div></td>
           <td class="num">${fmtNum(r.DN_일수)}</td>
           <td class="num">${fmtKRW(r.일예산)}</td>
