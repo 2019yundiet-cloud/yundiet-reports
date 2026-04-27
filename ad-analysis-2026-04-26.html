@@ -2607,11 +2607,7 @@
       if (monthlyRevenue == null || mtdRevenue == null || mtdSpend == null || monthlyRevenue <= 0) return row;
 
       const gapRatio = Math.abs(monthlyRevenue - mtdRevenue) / monthlyRevenue;
-      const isDbMonthlyProfit = source.includes('meta_ad_profit_category_monthly')
-        || source.includes('supabase')
-        || source.includes('db_monthly');
-      const needsAdBasisOverride = !isDbMonthlyProfit
-        && (source.includes('imweb_orders_line_items') || gapRatio >= 0.25);
+      const needsAdBasisOverride = source.includes('imweb_orders_line_items') || gapRatio >= 0.25;
       if (!needsAdBasisOverride) return row;
 
       const revenue = mtdRevenue;
