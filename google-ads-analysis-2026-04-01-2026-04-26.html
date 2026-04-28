@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>윤식단 Google Ads 분석 대시보드</title>
+  <style>
+    :root {
+      --ink:#3c4043; --muted:#5f6368; --line:#dadce0; --bg:#fff; --panel:#ffffff;
+      --blue:#1a73e8; --green:#188038; --yellow:#f9ab00; --red:#d93025; --soft-blue:#e8f0fe; --soft-red:#fce8e6;
+    }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:var(--ink); background:var(--bg); }
+    header { padding:44px 52px 18px; background:#fff; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:24px; }
+    .brand { display:flex; align-items:center; gap:10px; min-width:0; }
+    .ads-mark { position:relative; width:26px; height:25px; flex:0 0 auto; }
+    .ads-mark::before { content:""; position:absolute; left:4px; bottom:1px; width:8px; height:24px; border-radius:5px; background:#34a853; transform:rotate(28deg); transform-origin:bottom center; }
+    .ads-mark::after { content:""; position:absolute; left:12px; bottom:1px; width:8px; height:24px; border-radius:5px; background:#4285f4; transform:rotate(-28deg); transform-origin:bottom center; }
+    .ads-dot { position:absolute; left:0; bottom:0; width:9px; height:9px; border-radius:50%; background:#fbbc04; z-index:2; }
+    h1 { margin:0; font-size:24px; font-weight:650; letter-spacing:0; color:#202124; }
+    .period { font-size:20px; font-weight:650; color:#202124; white-space:nowrap; }
+    .gear { position:fixed; top:10px; right:14px; width:24px; height:24px; color:#202124; }
+    h2 { margin:0 0 14px; font-size:18px; }
+    p { margin:6px 0 0; color:var(--muted); }
+    main { padding:0 52px 36px; max-width:1920px; margin:0 auto; }
+    .settings { padding:0 52px 16px; max-width:1920px; margin:0 auto; }
+    .settings-title { margin:0 0 18px; font-size:20px; font-weight:650; color:#202124; }
+    .settings-row { display:grid; grid-template-columns:410px minmax(520px,1fr); gap:18px; align-items:end; }
+    .control-group label { display:block; margin:0 0 10px; color:#777; font-size:17px; font-weight:650; }
+    .compare-box, .date-box, .quick-range { height:54px; border:1px solid var(--line); border-radius:5px; background:#fff; display:flex; align-items:center; }
+    .compare-box { justify-content:space-between; padding:0 16px 0 22px; font-size:16px; color:#202124; }
+    .compare-box strong { font-weight:650; color:#202124; }
+    .compare-box span { color:#80868b; font-weight:650; }
+    .chevron { width:0; height:0; border-left:7px solid transparent; border-right:7px solid transparent; border-top:8px solid #c4c7c5; }
+    .period-controls { display:grid; grid-template-columns:182px 26px 182px minmax(420px,1fr); gap:14px; align-items:center; }
+    .date-box { overflow:hidden; }
+    .calendar-icon { width:54px; height:54px; border-right:1px solid var(--line); display:flex; align-items:center; justify-content:center; color:#3c4043; }
+    .date-box input { width:100%; height:100%; border:0; padding:0 14px; color:#202124; font-size:18px; font-weight:500; outline:none; font-family:inherit; }
+    .date-box input::-webkit-calendar-picker-indicator { opacity:0; position:absolute; }
+    .tilde { text-align:center; font-size:24px; color:#202124; }
+    .quick-range { justify-content:space-around; padding:0 16px; gap:8px; }
+    .quick-range button { border:0; background:transparent; color:#3c4043; font:600 18px inherit; padding:12px 14px; border-radius:4px; cursor:default; white-space:nowrap; }
+    .hero-panel { border:1px solid var(--line); border-radius:2px; padding:22px; margin-top:4px; }
+    .grid { display:grid; gap:12px; }
+    .summary-grid { grid-template-columns:repeat(5,minmax(0,1fr)); gap:16px 18px; }
+    .metric-card { min-height:140px; border:1px solid var(--line); border-radius:11px; padding:17px 17px 14px; background:#fff; }
+    .metric-card span { display:block; font-size:16px; font-weight:650; color:#3c4043; }
+    .metric-card strong { display:block; margin-top:10px; font-size:40px; line-height:1.08; font-weight:750; letter-spacing:.5px; color:#3c4043; }
+    .delta { display:inline-flex; align-items:center; gap:7px; margin-top:10px; font-size:21px; line-height:1; }
+    .delta i { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:6px; font-style:normal; font-size:16px; }
+    .delta.up { color:#d93025; }
+    .delta.down { color:#1a73e8; }
+    .delta.up i { background:var(--soft-red); }
+    .delta.down i { background:#e3f2fd; }
+    .delta.neutral { color:var(--muted); }
+    .kpis { grid-template-columns:repeat(6,minmax(150px,1fr)); display:none; }
+    .kpi { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:14px; min-height:96px; }
+    .kpi span { display:block; color:var(--muted); font-size:13px; }
+    .kpi strong { display:block; margin-top:10px; font-size:23px; }
+    .kpi small, td small { display:block; margin-top:5px; color:var(--muted); font-size:12px; line-height:1.35; }
+    section.block { margin-top:18px; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:18px; }
+    table { width:100%; border-collapse:collapse; table-layout:fixed; }
+    th, td { padding:11px 10px; border-bottom:1px solid #edf1f5; text-align:left; vertical-align:top; font-size:13px; overflow-wrap:anywhere; }
+    th { color:#475467; font-weight:700; background:#fafbfd; }
+    .badge { display:inline-block; padding:4px 8px; border-radius:999px; background:#e8f0fe; color:#174ea6; font-weight:700; font-size:12px; }
+    ul { margin:0; padding-left:20px; color:#344054; }
+    li { margin:7px 0; }
+    script[type="application/json"] { display:none; }
+    @media (max-width: 980px) {
+      header, main { padding-left:16px; padding-right:16px; }
+      header { padding-top:28px; }
+      .settings { padding-left:16px; padding-right:16px; }
+      .settings-row { grid-template-columns:1fr; }
+      .period-controls { grid-template-columns:1fr 24px 1fr; }
+      .quick-range { grid-column:1 / -1; overflow-x:auto; justify-content:flex-start; }
+      .topbar { align-items:flex-start; flex-direction:column; gap:12px; }
+      h1 { font-size:20px; }
+      .period { font-size:15px; white-space:normal; }
+      .hero-panel { padding:14px; }
+      .summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .metric-card { min-height:112px; padding:13px; }
+      .metric-card span { font-size:13px; }
+      .metric-card strong { font-size:28px; }
+      .delta { font-size:15px; }
+      table { table-layout:auto; }
+      .table-wrap { overflow-x:auto; }
+    }
+    @media (max-width: 1500px) {
+      header { padding-left:32px; padding-right:32px; }
+      main { padding-left:32px; padding-right:32px; }
+      .settings { padding-left:32px; padding-right:32px; }
+      .settings-row { grid-template-columns:390px minmax(520px,1fr); }
+      .period { font-size:17px; }
+      .metric-card { min-height:126px; padding:15px; }
+      .metric-card strong { font-size:32px; letter-spacing:0; }
+      .delta { font-size:16px; }
+    }
+    @media (max-width: 980px) {
+      header, main { padding-left:16px; padding-right:16px; }
+      .settings { padding-left:16px; padding-right:16px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <svg class="gear" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 15.4a3.4 3.4 0 1 0 0-6.8 3.4 3.4 0 0 0 0 6.8Z" stroke="currentColor" stroke-width="1.7"/><path d="M19.4 13.4c.1-.5.1-.9.1-1.4s0-.9-.1-1.4l2-1.5-2-3.5-2.4 1a7.8 7.8 0 0 0-2.4-1.4L14.3 2h-4.6l-.4 3.2c-.8.3-1.6.8-2.3 1.4l-2.5-1-2 3.5 2.1 1.5c-.1.5-.1.9-.1 1.4s0 .9.1 1.4l-2.1 1.5 2 3.5 2.5-1c.7.6 1.4 1.1 2.3 1.4l.4 3.2h4.6l.4-3.2c.8-.3 1.6-.8 2.4-1.4l2.4 1 2-3.5-2.1-1.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+    <div class="topbar">
+      <div class="brand"><span class="ads-mark"><span class="ads-dot"></span></span><h1>구글 Ads - 윤식단(4039686849)</h1></div>
+      <div class="period">선택 기간 :2026년 04월 01일 ~2026년 04월 26일</div>
+    </div>
+  </header>
+  <section class="settings" aria-label="조회 기간 설정">
+    <h2 class="settings-title">설정</h2>
+    <div class="settings-row">
+      <div class="control-group">
+        <label>비교 기간</label>
+        <div class="compare-box"><span>이전 기간 2026-03-06 - 2026-03-31</span><i class="chevron"></i></div>
+      </div>
+      <div class="control-group">
+        <label>조회 기간</label>
+        <div class="period-controls">
+          <div class="date-box"><span class="calendar-icon">▦</span><input type="date" value="2026-04-01" aria-label="조회 시작일"></div>
+          <div class="tilde">~</div>
+          <div class="date-box"><span class="calendar-icon">▦</span><input type="date" value="2026-04-26" aria-label="조회 종료일"></div>
+          <div class="quick-range" aria-label="빠른 조회 기간">
+            <button>어제</button>
+            <button>7일</button>
+            <button>14일</button>
+            <button>30일</button>
+            <button>3개월</button>
+            <button>6개월</button>
+            <button>12개월</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <main>
+    <section class="hero-panel">
+      <div class="grid summary-grid">
+        
+        <section class="metric-card">
+          <span>노출수</span>
+          <strong>190,493</strong>
+          <span class="delta down"><i>▼</i> 2.44%</span>
+        </section>
+        
+        
+        <section class="metric-card">
+          <span>클릭수</span>
+          <strong>4,938</strong>
+          <span class="delta up"><i>▲</i> 11.22%</span>
+        </section>
+        
+        
+        <section class="metric-card">
+          <span>전환수</span>
+          <strong>163.75</strong>
+          <span class="delta down"><i>▼</i> 13.50%</span>
+        </section>
+        
+        
+        <section class="metric-card">
+          <span>CTR</span>
+          <strong>2.59%</strong>
+          <span class="delta up"><i>▲</i> 14.00%</span>
+        </section>
+        
+        
+        <section class="metric-card">
+          <span>CPC</span>
+          <strong>₩ 247</strong>
+          <span class="delta up"><i>▼</i> 1.11%</span>
+        </section>
+        
+        
+        <section class="metric-card">
+          <span>CPM</span>
+          <strong>₩ 6,396</strong>
+          <span class="delta down"><i>▲</i> 12.74%</span>
+        </section>
+        
+        
+        <section class="metric-card">
+          <span>CPA</span>
+          <strong>7,441</strong>
+          <span class="delta down"><i>▲</i> 27.16%</span>
+        </section>
+        
+        
+        <section class="metric-card">
+          <span>전환 ROAS</span>
+          <strong>879.77%</strong>
+          <span class="delta down"><i>▼</i> 12.92%</span>
+        </section>
+        
+        
+        <section class="metric-card">
+          <span>광고비</span>
+          <strong>₩ 1,218,451</strong>
+          <span class="delta up"><i>▲</i> 9.99%</span>
+        </section>
+        
+        
+        <section class="metric-card">
+          <span>전환 매출</span>
+          <strong>₩ 10,719,594</strong>
+          <span class="delta down"><i>▼</i> 4.23%</span>
+        </section>
+        
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>채널별 성과</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>채널</th><th>캠페인</th><th>광고비</th><th>전환값</th><th>전환</th><th>CPA</th><th>ROAS</th><th>CTR</th><th>CVR</th></tr></thead>
+          <tbody>
+        <tr>
+          <td>PERFORMANCE_MAX</td>
+          <td>3</td>
+          <td>882,965원</td>
+          <td>8,621,601원</td>
+          <td>133.58</td>
+          <td>6,610원</td>
+          <td>9.76x</td>
+          <td>2.45%</td>
+          <td>2.92%</td>
+        </tr>
+        
+
+        <tr>
+          <td>SEARCH</td>
+          <td>2</td>
+          <td>335,486원</td>
+          <td>2,097,993원</td>
+          <td>30.17</td>
+          <td>11,121원</td>
+          <td>6.25x</td>
+          <td>8.37%</td>
+          <td>8.13%</td>
+        </tr>
+        
+
+        <tr>
+          <td>SMART</td>
+          <td>1</td>
+          <td>0원</td>
+          <td>0원</td>
+          <td>0.00</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+        </tr>
+        
+
+        <tr>
+          <td>DISPLAY</td>
+          <td>1</td>
+          <td>0원</td>
+          <td>0원</td>
+          <td>0.00</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+        </tr>
+        </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>캠페인 성과 진단</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>캠페인</th><th>상태</th><th>채널</th><th>광고비</th><th>전환값</th><th>전환</th><th>CPA</th><th>ROAS</th><th>CTR</th><th>CVR</th><th>판정</th></tr></thead>
+          <tbody>
+        <tr>
+          <td><b>단백밥 실적최대화_240820</b><small>21606712964</small></td>
+          <td>ENABLED</td>
+          <td>PERFORMANCE_MAX</td>
+          <td>882,965원</td>
+          <td>8,621,601원</td>
+          <td>133.58</td>
+          <td>6,610원</td>
+          <td>9.76x</td>
+          <td>2.45%</td>
+          <td>2.92%</td>
+          <td><span class="badge">확장검토</span><small>전환 모수와 CPA/ROAS가 양호</small></td>
+        </tr>
+        
+
+        <tr>
+          <td><b>단백밥 키워드 검색광고_240806</b><small>21543577166</small></td>
+          <td>ENABLED</td>
+          <td>SEARCH</td>
+          <td>335,486원</td>
+          <td>2,097,993원</td>
+          <td>30.17</td>
+          <td>11,121원</td>
+          <td>6.25x</td>
+          <td>8.37%</td>
+          <td>8.13%</td>
+          <td><span class="badge">유지</span><small>현재 성과는 유지권</small></td>
+        </tr>
+        
+
+        <tr>
+          <td><b>윤식단 테스트</b><small>14773642747</small></td>
+          <td>REMOVED</td>
+          <td>SMART</td>
+          <td>0원</td>
+          <td>0원</td>
+          <td>0.00</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+          <td><span class="badge">비활성</span><small>현재 집행 상태가 아니므로 성과 판단에서 분리</small></td>
+        </tr>
+        
+
+        <tr>
+          <td><b>윤식단 - 구글 키워드 광고 (트래픽)</b><small>15856253206</small></td>
+          <td>PAUSED</td>
+          <td>SEARCH</td>
+          <td>0원</td>
+          <td>0원</td>
+          <td>0.00</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+          <td><span class="badge">비활성</span><small>현재 집행 상태가 아니므로 성과 판단에서 분리</small></td>
+        </tr>
+        
+
+        <tr>
+          <td><b>윤간식 - 와디즈 광고 테스트</b><small>16594626230</small></td>
+          <td>PAUSED</td>
+          <td>DISPLAY</td>
+          <td>0원</td>
+          <td>0원</td>
+          <td>0.00</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+          <td><span class="badge">비활성</span><small>현재 집행 상태가 아니므로 성과 판단에서 분리</small></td>
+        </tr>
+        
+
+        <tr>
+          <td><b>샐러드 실적 최대화 광고_240806</b><small>21547744936</small></td>
+          <td>PAUSED</td>
+          <td>PERFORMANCE_MAX</td>
+          <td>0원</td>
+          <td>0원</td>
+          <td>0.00</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+          <td><span class="badge">비활성</span><small>현재 집행 상태가 아니므로 성과 판단에서 분리</small></td>
+        </tr>
+        
+
+        <tr>
+          <td><b>단백밥 전환가치 극대화_240909</b><small>21676059096</small></td>
+          <td>PAUSED</td>
+          <td>PERFORMANCE_MAX</td>
+          <td>0원</td>
+          <td>0원</td>
+          <td>0.00</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+          <td>데이터없음</td>
+          <td><span class="badge">비활성</span><small>현재 집행 상태가 아니므로 성과 판단에서 분리</small></td>
+        </tr>
+        </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>데이터 수집 공백</h2>
+      <ul><li>campaign_budget.amount_micros 수집 전이라 예산 소진율/페이싱은 세부 계산하지 않음</li>
+<li>asset_group / asset_group_asset 수집 전이라 PMax asset group 진단은 캠페인 단위로 제한</li>
+<li>search_term_view / keyword 수집 전이라 검색어·키워드 낭비 진단은 미표시</li>
+<li>Shopping product/listing group view 수집 전이라 상품 단위 진단은 미표시</li></ul>
+    </section>
+  </main>
+  <script id="dashboard-data" type="application/json">{
+  &quot;generated_at&quot;: &quot;2026-04-28T21:01:41&quot;,
+  &quot;date_range&quot;: {
+    &quot;since&quot;: &quot;2026-04-01&quot;,
+    &quot;until&quot;: &quot;2026-04-26&quot;
+  },
+  &quot;previous_date_range&quot;: {
+    &quot;since&quot;: &quot;2026-03-06&quot;,
+    &quot;until&quot;: &quot;2026-03-31&quot;
+  },
+  &quot;customer&quot;: {
+    &quot;id&quot;: &quot;4039686849&quot;,
+    &quot;name&quot;: &quot;윤식단&quot;,
+    &quot;currency_code&quot;: &quot;KRW&quot;,
+    &quot;time_zone&quot;: &quot;Asia/Seoul&quot;
+  },
+  &quot;account_summary&quot;: {
+    &quot;impressions&quot;: 190493.0,
+    &quot;clicks&quot;: 4938.0,
+    &quot;cost&quot;: 1218451.0,
+    &quot;conversions&quot;: 163.750098,
+    &quot;conversion_value&quot;: 10719593.900658,
+    &quot;ctr&quot;: 0.02592221236475881,
+    &quot;cvr&quot;: 0.033161218712029164,
+    &quot;cpc&quot;: 246.74989874443094,
+    &quot;cpm&quot;: 6396.3032762358725,
+    &quot;cpa&quot;: 7440.917684214149,
+    &quot;roas&quot;: 8.797722600792317
+  },
+  &quot;previous_account_summary&quot;: {
+    &quot;impressions&quot;: 195261.0,
+    &quot;clicks&quot;: 4440.0,
+    &quot;cost&quot;: 1107830.0,
+    &quot;conversions&quot;: 189.316671,
+    &quot;conversion_value&quot;: 11192497.057387445,
+    &quot;ctr&quot;: 0.02273879576566749,
+    &quot;cvr&quot;: 0.042638889864864866,
+    &quot;cpc&quot;: 249.51126126126127,
+    &quot;cpm&quot;: 5673.585611053923,
+    &quot;cpa&quot;: 5851.729771859341,
+    &quot;roas&quot;: 10.103081752062542
+  },
+  &quot;comparison&quot;: {
+    &quot;impressions&quot;: -0.024418598696104188,
+    &quot;clicks&quot;: 0.11216216216216217,
+    &quot;cost&quot;: 0.09985376817742794,
+    &quot;conversions&quot;: -0.1350466013634901,
+    &quot;conversion_value&quot;: -0.042251800854154524,
+    &quot;ctr&quot;: 0.13999934877368697,
+    &quot;cvr&quot;: -0.22227762455526442,
+    &quot;cpc&quot;: -0.011067085721389267,
+    &quot;cpm&quot;: 0.12738287825848077,
+    &quot;cpa&quot;: 0.27157575183958915,
+    &quot;roas&quot;: -0.12920405706939225
+  },
+  &quot;campaigns&quot;: [
+    {
+      &quot;id&quot;: &quot;21606712964&quot;,
+      &quot;name&quot;: &quot;단백밥 실적최대화_240820&quot;,
+      &quot;status&quot;: &quot;ENABLED&quot;,
+      &quot;channel_type&quot;: &quot;PERFORMANCE_MAX&quot;,
+      &quot;impressions&quot;: 186061,
+      &quot;clicks&quot;: 4567,
+      &quot;cost&quot;: 882965,
+      &quot;conversions&quot;: 133.583431,
+      &quot;conversion_value&quot;: 8621600.515668001,
+      &quot;ctr&quot;: 0.02454571350256099,
+      &quot;cvr&quot;: 0.029249711188964307,
+      &quot;cpa&quot;: 6609.839209774452,
+      &quot;roas&quot;: 9.764374030304714,
+      &quot;judgment&quot;: &quot;확장검토&quot;,
+      &quot;judgment_reason&quot;: &quot;전환 모수와 CPA/ROAS가 양호&quot;
+    },
+    {
+      &quot;id&quot;: &quot;21543577166&quot;,
+      &quot;name&quot;: &quot;단백밥 키워드 검색광고_240806&quot;,
+      &quot;status&quot;: &quot;ENABLED&quot;,
+      &quot;channel_type&quot;: &quot;SEARCH&quot;,
+      &quot;impressions&quot;: 4432,
+      &quot;clicks&quot;: 371,
+      &quot;cost&quot;: 335486,
+      &quot;conversions&quot;: 30.166667,
+      &quot;conversion_value&quot;: 2097993.38499,
+      &quot;ctr&quot;: 0.08370938628158844,
+      &quot;cvr&quot;: 0.08131177088948788,
+      &quot;cpa&quot;: 11121.082750043284,
+      &quot;roas&quot;: 6.253594442063156,
+      &quot;judgment&quot;: &quot;유지&quot;,
+      &quot;judgment_reason&quot;: &quot;현재 성과는 유지권&quot;
+    },
+    {
+      &quot;id&quot;: &quot;14773642747&quot;,
+      &quot;name&quot;: &quot;윤식단 테스트&quot;,
+      &quot;status&quot;: &quot;REMOVED&quot;,
+      &quot;channel_type&quot;: &quot;SMART&quot;,
+      &quot;impressions&quot;: 0,
+      &quot;clicks&quot;: 0,
+      &quot;cost&quot;: 0,
+      &quot;conversions&quot;: 0.0,
+      &quot;conversion_value&quot;: 0.0,
+      &quot;ctr&quot;: null,
+      &quot;cvr&quot;: null,
+      &quot;cpa&quot;: null,
+      &quot;roas&quot;: null,
+      &quot;judgment&quot;: &quot;비활성&quot;,
+      &quot;judgment_reason&quot;: &quot;현재 집행 상태가 아니므로 성과 판단에서 분리&quot;
+    },
+    {
+      &quot;id&quot;: &quot;15856253206&quot;,
+      &quot;name&quot;: &quot;윤식단 - 구글 키워드 광고 (트래픽)&quot;,
+      &quot;status&quot;: &quot;PAUSED&quot;,
+      &quot;channel_type&quot;: &quot;SEARCH&quot;,
+      &quot;impressions&quot;: 0,
+      &quot;clicks&quot;: 0,
+      &quot;cost&quot;: 0,
+      &quot;conversions&quot;: 0.0,
+      &quot;conversion_value&quot;: 0.0,
+      &quot;ctr&quot;: null,
+      &quot;cvr&quot;: null,
+      &quot;cpa&quot;: null,
+      &quot;roas&quot;: null,
+      &quot;judgment&quot;: &quot;비활성&quot;,
+      &quot;judgment_reason&quot;: &quot;현재 집행 상태가 아니므로 성과 판단에서 분리&quot;
+    },
+    {
+      &quot;id&quot;: &quot;16594626230&quot;,
+      &quot;name&quot;: &quot;윤간식 - 와디즈 광고 테스트&quot;,
+      &quot;status&quot;: &quot;PAUSED&quot;,
+      &quot;channel_type&quot;: &quot;DISPLAY&quot;,
+      &quot;impressions&quot;: 0,
+      &quot;clicks&quot;: 0,
+      &quot;cost&quot;: 0,
+      &quot;conversions&quot;: 0.0,
+      &quot;conversion_value&quot;: 0.0,
+      &quot;ctr&quot;: null,
+      &quot;cvr&quot;: null,
+      &quot;cpa&quot;: null,
+      &quot;roas&quot;: null,
+      &quot;judgment&quot;: &quot;비활성&quot;,
+      &quot;judgment_reason&quot;: &quot;현재 집행 상태가 아니므로 성과 판단에서 분리&quot;
+    },
+    {
+      &quot;id&quot;: &quot;21547744936&quot;,
+      &quot;name&quot;: &quot;샐러드 실적 최대화 광고_240806&quot;,
+      &quot;status&quot;: &quot;PAUSED&quot;,
+      &quot;channel_type&quot;: &quot;PERFORMANCE_MAX&quot;,
+      &quot;impressions&quot;: 0,
+      &quot;clicks&quot;: 0,
+      &quot;cost&quot;: 0,
+      &quot;conversions&quot;: 0.0,
+      &quot;conversion_value&quot;: 0.0,
+      &quot;ctr&quot;: null,
+      &quot;cvr&quot;: null,
+      &quot;cpa&quot;: null,
+      &quot;roas&quot;: null,
+      &quot;judgment&quot;: &quot;비활성&quot;,
+      &quot;judgment_reason&quot;: &quot;현재 집행 상태가 아니므로 성과 판단에서 분리&quot;
+    },
+    {
+      &quot;id&quot;: &quot;21676059096&quot;,
+      &quot;name&quot;: &quot;단백밥 전환가치 극대화_240909&quot;,
+      &quot;status&quot;: &quot;PAUSED&quot;,
+      &quot;channel_type&quot;: &quot;PERFORMANCE_MAX&quot;,
+      &quot;impressions&quot;: 0,
+      &quot;clicks&quot;: 0,
+      &quot;cost&quot;: 0,
+      &quot;conversions&quot;: 0.0,
+      &quot;conversion_value&quot;: 0.0,
+      &quot;ctr&quot;: null,
+      &quot;cvr&quot;: null,
+      &quot;cpa&quot;: null,
+      &quot;roas&quot;: null,
+      &quot;judgment&quot;: &quot;비활성&quot;,
+      &quot;judgment_reason&quot;: &quot;현재 집행 상태가 아니므로 성과 판단에서 분리&quot;
+    }
+  ],
+  &quot;channels&quot;: [
+    {
+      &quot;campaign_count&quot;: 3,
+      &quot;impressions&quot;: 186061,
+      &quot;clicks&quot;: 4567,
+      &quot;cost&quot;: 882965,
+      &quot;conversions&quot;: 133.583431,
+      &quot;conversion_value&quot;: 8621600.515668001,
+      &quot;channel_type&quot;: &quot;PERFORMANCE_MAX&quot;,
+      &quot;ctr&quot;: 0.02454571350256099,
+      &quot;cvr&quot;: 0.029249711188964307,
+      &quot;cpa&quot;: 6609.839209774452,
+      &quot;roas&quot;: 9.764374030304714
+    },
+    {
+      &quot;campaign_count&quot;: 2,
+      &quot;impressions&quot;: 4432,
+      &quot;clicks&quot;: 371,
+      &quot;cost&quot;: 335486,
+      &quot;conversions&quot;: 30.166667,
+      &quot;conversion_value&quot;: 2097993.38499,
+      &quot;channel_type&quot;: &quot;SEARCH&quot;,
+      &quot;ctr&quot;: 0.08370938628158844,
+      &quot;cvr&quot;: 0.08131177088948788,
+      &quot;cpa&quot;: 11121.082750043284,
+      &quot;roas&quot;: 6.253594442063156
+    },
+    {
+      &quot;campaign_count&quot;: 1,
+      &quot;impressions&quot;: 0,
+      &quot;clicks&quot;: 0,
+      &quot;cost&quot;: 0,
+      &quot;conversions&quot;: 0.0,
+      &quot;conversion_value&quot;: 0.0,
+      &quot;channel_type&quot;: &quot;SMART&quot;,
+      &quot;ctr&quot;: null,
+      &quot;cvr&quot;: null,
+      &quot;cpa&quot;: null,
+      &quot;roas&quot;: null
+    },
+    {
+      &quot;campaign_count&quot;: 1,
+      &quot;impressions&quot;: 0,
+      &quot;clicks&quot;: 0,
+      &quot;cost&quot;: 0,
+      &quot;conversions&quot;: 0.0,
+      &quot;conversion_value&quot;: 0.0,
+      &quot;channel_type&quot;: &quot;DISPLAY&quot;,
+      &quot;ctr&quot;: null,
+      &quot;cvr&quot;: null,
+      &quot;cpa&quot;: null,
+      &quot;roas&quot;: null
+    }
+  ],
+  &quot;collector_gaps&quot;: [
+    &quot;campaign_budget.amount_micros 수집 전이라 예산 소진율/페이싱은 세부 계산하지 않음&quot;,
+    &quot;asset_group / asset_group_asset 수집 전이라 PMax asset group 진단은 캠페인 단위로 제한&quot;,
+    &quot;search_term_view / keyword 수집 전이라 검색어·키워드 낭비 진단은 미표시&quot;,
+    &quot;Shopping product/listing group view 수집 전이라 상품 단위 진단은 미표시&quot;
+  ]
+}</script>
+</body>
+</html>
