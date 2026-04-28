@@ -1560,6 +1560,23 @@
   };
   const normalizeStatus = (v) => String(v || '').trim().toUpperCase();
   const statusOf = (r) => normalizeStatus(r?.effective_status || r?.현재상태 || r?.status || '');
+  const normalizedCampaignType = (value) => {
+    const raw = String(value || '메인').trim();
+    if (/^test$/i.test(raw)) return '테스트';
+    if (/^main$/i.test(raw)) return '메인';
+    if (/^asc$/i.test(raw) || /advantage\\+?/i.test(raw)) return 'ASC';
+    return raw || '메인';
+  };
+  function inferProductBucket(r) {
+    const raw = String(r?.상품 || '').trim();
+    if (raw && !['기타', '단백밥 ASC'].includes(raw)) return raw;
+    const text = `${r?.상품 || ''} ${r?.캠페인명 || ''} ${r?.소재명 || ''} ${r?.셋팅대상명 || ''}`;
+    if (/순수단백/.test(text)) return '순수단백';
+    if (/밸런시/.test(text)) return '밸런시';
+    if (/단백밥|윤식단 ASC|ASC_/i.test(text)) return '단백밥';
+    if (normalizedCampaignType(r?.캠페인유형) === 'ASC') return '단백밥';
+    return raw || '기타';
+  }
   const money = (v) => parseNum(v) ?? 0;
   const count = (v) => parseNum(v) ?? 0;
   const ratio = (v) => {
@@ -1865,8 +1882,10 @@
     const runningStatuses = new Set(['ACTIVE', 'WITH_ISSUES']);
     const activeByImpression = (DATA.creatives || [])
       .filter(r => {
-        if (cat === '단백밥 ASC') return r.캠페인유형 === 'ASC' && (r.상품 === '단백밥' || r.상품 === '기타');
-        return r.상품 === cat && r.캠페인유형 !== 'ASC';
+        const type = normalizedCampaignType(r.캠페인유형);
+        const product = inferProductBucket(r);
+        if (cat === '단백밥 ASC') return type === 'ASC' && product === '단백밥';
+        return product === cat && type !== 'ASC';
       })
       .filter(r => runningStatuses.has(statusOf(r)) && (numOrNull(r.노출) ?? 0) > 0)
       .length;
@@ -1929,6 +1948,7 @@
 
   const JUDGE_BADGE = {
     '위너': { cls: 'winner', icon: '🏆' },
+    '위너복증': { cls: 'winner', icon: '🏆' },
     '위너승격': { cls: 'winner', icon: '🏆' },
     '위너종료': { cls: 'winner-end', icon: '🏆→❌' },
     '수명종료': { cls: 'winner-end', icon: '🏆→❌' },
@@ -2044,18 +2064,8 @@
     return null;
   };
   const truthyFlag = (value) => boolish(value) === true;
-  const hasWinnerFlag = (r) => truthyFlag(r.위너여부) || /🏆|위너/.test(String(r.판정 || ''));
+  const hasWinnerFlag = (r) => truthyFlag(r.위너여부) || /🏆|위너|메인\s*승격/.test(String(r.판정 || ''));
   const hasWinnerHistory = (r) => hasWinnerFlag(r) || truthyFlag(r.위너이력) || /수명종료|위너이력/.test(String(r.판정 || ''));
-  const inferProductBucket = (r) => {
-    const raw = String(r.상품 || '').trim();
-    if (raw && !['기타', '단백밥 ASC'].includes(raw)) return raw;
-    const text = `${r.상품 || ''} ${r.캠페인명 || ''} ${r.소재명 || ''} ${r.셋팅대상명 || ''}`;
-    if (/순수단백/.test(text)) return '순수단백';
-    if (/밸런시/.test(text)) return '밸런시';
-    if (/단백밥|윤식단 ASC|ASC_/i.test(text)) return '단백밥';
-    if ((r.캠페인유형 || '') === 'ASC') return '단백밥';
-    return raw || '기타';
-  };
   const ascCandidateMeta = (r) => {
     const raw = String(
       r.ASC판정
@@ -2088,10 +2098,10 @@
     const judge = String(r.판정 || '');
     const roas = numOrNull(r.누적_ROAS) ?? numOrNull(r.ROAS) ?? 0;
     const purchases = numOrNull(r.구매수) ?? 0;
-    return hasWinnerFlag(r) || /메인\s*승격/.test(judge) || (roas >= 400 && purchases >= 30);
+    return hasWinnerFlag(r) || /1차\s*통과|메인\s*승격/.test(judge) || (roas >= 400 && purchases >= 30);
   };
   const promotionStatusMeta = (r) => {
-    const type = String(r.캠페인유형 || '메인').trim().toUpperCase();
+    const type = normalizedCampaignType(r.캠페인유형);
     const asc = ascCandidateMeta(r);
     if (boolish(r.셋팅전용행)) {
       const actionType = String(r.액션유형 || r.셋팅액션유형 || '').trim();
@@ -2100,7 +2110,7 @@
       if (/ASC/i.test(actionType) || type === 'ASC') return { cls: 'asc-candidate', text: 'ASC 반영 추적' };
       return { cls: 'asc-hold', text: '셋팅 추적' };
     }
-    if (type === '테스트' || type === 'TEST') {
+    if (type === '테스트') {
       if (isOffJudgment(r)) return { cls: 'asc-drop', text: '테스트 OFF' };
       if (isTestWinner(r)) return { cls: 'asc-candidate', text: '메인 승격' };
       if ((numOrNull(r.누적_ROAS) ?? 0) >= 400) return { cls: 'asc-hold', text: '메인 검증 대기' };
@@ -2163,8 +2173,7 @@
 
   function routeBucket(c) {
     const prod = inferProductBucket(c);
-    const rawType = String(c.캠페인유형 || '메인').trim();
-    const type = /^test$/i.test(rawType) ? '테스트' : (/^main$/i.test(rawType) ? '메인' : rawType);
+    const type = normalizedCampaignType(c.캠페인유형);
     return `${prod}-${type}`;
   }
 
@@ -2357,7 +2366,10 @@
   }
 
   function parseActionPlan(planText) {
-    const raw = String(planText || '');
+    const raw = String(planText || '')
+      .replace(/\r?\n/g, '<br>')
+      .replace(/<(?:strong|b)>/gi, '')
+      .replace(/<\/(?:strong|b)>/gi, '');
     const sections = { reason: '', front1: '', front2: '', ga4: '', judge: '' };
     const reasonSplit = raw.split('제안 근거: ');
     const withReason = reasonSplit.length > 1 ? reasonSplit[1] : raw;
@@ -2389,8 +2401,7 @@
     return /(영상|릴스|reel|video)/.test(text);
   };
   const creativeTypeLabel = (r) => {
-    const rawType = String(r.캠페인유형 || '메인').trim();
-    const type = /^test$/i.test(rawType) ? '테스트' : (/^main$/i.test(rawType) ? '메인' : rawType);
+    const type = normalizedCampaignType(r.캠페인유형);
     if (boolish(r.셋팅전용행)) {
       if (type === 'ASC') return { text: 'ASC 추적', cls: 'type-asc' };
       if (type === '테스트') return { text: '테스트 추적', cls: 'type-test' };
@@ -2780,12 +2791,12 @@
         opsHost.appendChild(divider);
       }
       const typeCounts = rows.reduce((acc, r) => {
-        const t = r.캠페인유형 || '메인';
+        const t = normalizedCampaignType(r.캠페인유형);
         acc[t] = (acc[t] || 0) + 1;
         return acc;
       }, {});
       const winnerCounts = rows.reduce((acc, r) => {
-        const key = truthyFlag(r.위너여부) ? '위너' : (truthyFlag(r.위너이력) ? '위너이력' : '일반');
+        const key = hasWinnerFlag(r) ? '위너' : (hasWinnerHistory(r) ? '위너이력' : '일반');
         acc[key] = (acc[key] || 0) + 1;
         return acc;
       }, {});
