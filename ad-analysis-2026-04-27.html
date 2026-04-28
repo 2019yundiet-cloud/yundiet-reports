@@ -1975,6 +1975,7 @@
     if (isTestWinner(r)) return { cls: 'asc-hold', text: '메인 안정성 확인' };
     return { cls: 'asc-empty', text: '메인 유지' };
   };
+  const safeChipText = (v) => esc(v || '-');
   const normalizeCreative = (c) => {
     const impressions = numOrNull(c.노출);
     const purchases = numOrNull(c.구매수);
@@ -2366,13 +2367,13 @@
         acc[key] = (acc[key] || 0) + 1;
         return acc;
       }, {});
-      const breakdown = ['테스트', '메인', 'ASC']
+    const breakdown = ['테스트', '메인', 'ASC']
         .filter(t => typeCounts[t])
-        .map(t => `${t} ${typeCounts[t]}`)
+        .map(t => `${esc(t)} ${fmtNum(typeCounts[t])}`)
         .join(' · ');
       const winnerBreakdown = ['위너', '위너이력', '일반']
         .filter(t => winnerCounts[t])
-        .map(t => `${t} ${winnerCounts[t]}`)
+        .map(t => `${esc(t)} ${fmtNum(winnerCounts[t])}`)
         .join(' · ');
       const category = sec.key.split('-')[0];
       if (category !== currentCategory) {
@@ -2380,7 +2381,7 @@
         const divider = document.createElement('div');
         divider.className = 'category-divider';
         divider.innerHTML = `
-          <h2>${category}</h2>
+          <h2>${esc(category)}</h2>
           <div class="sub">테스트 · 메인 · ASC를 같은 카테고리 안에서 이어서 확인 · OFF 소재도 노출 1 이상이면 함께 표시</div>`;
         host.appendChild(divider);
       }
@@ -2392,11 +2393,11 @@
         ? '신규/위너 혼합 · 실제 캠페인 위치 기준'
         : '신규 소재 기준';
       sectionEl.innerHTML = `
-        <h3>${sec.title}${breakdown ? ` <span class="meta-inline">${breakdown}</span>` : ''}${winnerBreakdown ? ` <span class="meta-inline">| ${winnerBreakdown}</span>` : ''} <span class="count">${rows.length}</span></h3>
+        <h3>${esc(sec.title)}${breakdown ? ` <span class="meta-inline">${breakdown}</span>` : ''}${winnerBreakdown ? ` <span class="meta-inline">| ${winnerBreakdown}</span>` : ''} <span class="count">${fmtNum(rows.length)}</span></h3>
         <div class="creative-summary-grid"></div>
         <div class="table-scroll">
           <table class="creatives">
-            <thead><tr>${COLS.map(c => `<th class="${c.cls || ''}">${c.label}</th>`).join('')}</tr></thead>
+            <thead><tr>${COLS.map(c => `<th class="${esc(c.cls || '')}">${esc(c.label)}</th>`).join('')}</tr></thead>
             <tbody></tbody>
             <tfoot></tfoot>
           </table>
@@ -2444,12 +2445,12 @@
         }
 	        if (col.key === '__asc_candidate') {
 	          const asc = promotionStatusMeta(r);
-	          return `<td class="col-asc-candidate"><span class="asc-chip ${asc.cls}">${asc.text}</span></td>`;
+          return `<td class="col-asc-candidate"><span class="asc-chip ${asc.cls}">${safeChipText(asc.text)}</span></td>`;
 	        }
         if (col.key === '__funnel') {
-          const sev = r.인사이트_severity ? `<span class="funnel-chip">${r.인사이트_severity}</span>` : '';
-          const pattern = r.인사이트패턴 ? `<span class="funnel-chip">${r.인사이트패턴}</span>` : '';
-          const tag = r.인사이트태그 ? `<span class="funnel-tag">${r.인사이트태그}</span>` : '<span class="funnel-tag">진단 없음</span>';
+          const sev = r.인사이트_severity ? `<span class="funnel-chip">${esc(r.인사이트_severity)}</span>` : '';
+          const pattern = r.인사이트패턴 ? `<span class="funnel-chip">${esc(r.인사이트패턴)}</span>` : '';
+          const tag = r.인사이트태그 ? `<span class="funnel-tag">${esc(r.인사이트태그)}</span>` : '<span class="funnel-tag">진단 없음</span>';
           return `<td class="col-funnel">${sev}${pattern}${tag}</td>`;
         }
         if (col.key === '액션플랜') {
@@ -2464,7 +2465,7 @@
         }
         const v = r[col.key];
         const cls = col.cls || '';
-        const val = col.fmt ? col.fmt(v) : (v ?? '-');
+        const val = col.fmt ? col.fmt(v) : esc(v ?? '-');
         return `<td class="${cls}">${val}</td>`;
         }).join('');
         tbody.appendChild(tr);
@@ -2513,14 +2514,14 @@
           <div><dt>고유링크CVR</dt><dd>${fmtPct(sum.CVR, 2)}</dd></div>
           <div><dt>도달</dt><dd>${fmtNum(sum.도달)}</dd></div>
           <div><dt>상태별 OFF</dt><dd>${fmtNum(sum.중단광고수)}</dd></div>
-          <div><dt>데이터 기간</dt><dd>${dataPeriod}</dd></div>
-          <div><dt>소재 필터</dt><dd>${filterLabel}</dd></div>
-          <div><dt>판정 기준</dt><dd>${criteriaLabel}</dd></div>
+          <div><dt>데이터 기간</dt><dd>${esc(dataPeriod)}</dd></div>
+          <div><dt>소재 필터</dt><dd>${esc(filterLabel)}</dd></div>
+          <div><dt>판정 기준</dt><dd>${esc(criteriaLabel)}</dd></div>
         </dl>
       </div>`;
       const footTr = document.createElement('tr');
       footTr.innerHTML = COLS.map((col, i) => {
-      if (i === 0) return `<td class="label" colspan="6">합계 (${sum.광고수}개 소재)</td>`;
+      if (i === 0) return `<td class="label" colspan="6">합계 (${fmtNum(sum.광고수)}개 소재)</td>`;
       if (i > 0 && i < 6) return '';
       switch (col.key) {
         case '일예산': return `<td class="num">${fmtKRW(sum.일예산)}</td>`;
@@ -2624,7 +2625,7 @@
         const divider = document.createElement('div');
         divider.className = 'category-divider';
         divider.innerHTML = `
-          <h2>${category}</h2>
+          <h2>${esc(category)}</h2>
           <div class="sub">현재 운영 중인 캠페인 위치와 위너 상태를 함께 확인</div>`;
         opsHost.appendChild(divider);
       }
@@ -2645,21 +2646,21 @@
       }, {});
       const breakdown = ['테스트', '메인', 'ASC']
         .filter(t => typeCounts[t])
-        .map(t => `${t} ${typeCounts[t]}`)
+        .map(t => `${esc(t)} ${fmtNum(typeCounts[t])}`)
         .join(' · ');
       const winnerBreakdown = ['위너', '위너이력', '일반']
         .filter(t => winnerCounts[t])
-        .map(t => `${t} ${winnerCounts[t]}`)
+        .map(t => `${esc(t)} ${fmtNum(winnerCounts[t])}`)
         .join(' · ');
       const ascBreakdown = ['ASC합격', 'ASC후보', 'ASC관찰', 'ASC탈락', 'ASC제외']
         .filter(t => ascCounts[t])
-        .map(t => `${t} ${ascCounts[t]}`)
+        .map(t => `${esc(t)} ${fmtNum(ascCounts[t])}`)
         .join(' · ');
 
       const sectionEl = document.createElement('div');
       sectionEl.className = 'creative-section';
       sectionEl.innerHTML = `
-        <h3>${sec.title}${breakdown ? ` <span class="meta-inline">${breakdown}</span>` : ''}${winnerBreakdown ? ` <span class="meta-inline">| ${winnerBreakdown}</span>` : ''}${ascBreakdown ? ` <span class="meta-inline">| ${ascBreakdown}</span>` : ''} <span class="count">${rows.length}</span></h3>
+        <h3>${esc(sec.title)}${breakdown ? ` <span class="meta-inline">${breakdown}</span>` : ''}${winnerBreakdown ? ` <span class="meta-inline">| ${winnerBreakdown}</span>` : ''}${ascBreakdown ? ` <span class="meta-inline">| ${ascBreakdown}</span>` : ''} <span class="count">${fmtNum(rows.length)}</span></h3>
         <div class="creative-summary-grid"></div>
         <div class="table-scroll">
           <table class="creatives ops-table">
@@ -2716,8 +2717,8 @@
             <span class="ad-meta">${esc(r.캠페인명 || '')}</span>
           </td>
           <td class="col-ops-status">${statusChip}</td>
-          <td><span class="badge ${judgeMeta.cls}">${judgeMeta.icon} ${r.판정 || '-'}</span></td>
-          <td class="col-ops-asc-state"><span class="asc-chip ${ascMeta.cls}">${ascMeta.text}</span></td>
+          <td><span class="badge ${judgeMeta.cls}">${judgeMeta.icon} ${esc(r.판정 || '-')}</span></td>
+          <td class="col-ops-asc-state"><span class="asc-chip ${ascMeta.cls}">${safeChipText(ascMeta.text)}</span></td>
           <td class="num col-ops-asc-score">${ascScore == null ? '-' : fmtNum(ascScore)}</td>
           <td class="col-ops-asc-reason">${ascReason}</td>
           <td class="col-ops-asc-risk">${ascRisk}</td>
@@ -2765,7 +2766,7 @@
           <div><dt>노출</dt><dd>${fmtNum(sum.노출)}</dd></div>
           <div><dt>CTR</dt><dd>${fmtPct(sum.CTR, 2)}</dd></div>
           <div><dt>고유CTR (링크 클릭률)</dt><dd>${fmtPct(sum.고유CTR, 2)}</dd></div>
-          <div><dt>고유링크클릭</dt><dd>${fmtNum(sum.고유클릭)}</dd></div>
+          <div><dt>고유링크클릭</dt><dd>${fmtNum(sum.고유링크클릭수)}</dd></div>
           <div><dt>LPV</dt><dd>${fmtNum(sum.LPV)}</dd></div>
           <div><dt>노출당LPV</dt><dd>${fmtPct(sum.노출당LPV율, 2)}</dd></div>
           <div><dt>LPV당구매</dt><dd>${fmtPct(sum.LPV당구매율, 2)}</dd></div>
@@ -2775,9 +2776,9 @@
       <div class="creative-summary-card">
         <div class="sum-title">운영 기준</div>
         <dl>
-          <div><dt>카테고리</dt><dd>${category}</dd></div>
-          <div><dt>조회기간</dt><dd>${rangeLabel}</dd></div>
-          <div><dt>상태 필터</dt><dd>${statusLabelMap[statusFilter] || '전체'}</dd></div>
+          <div><dt>카테고리</dt><dd>${esc(category)}</dd></div>
+          <div><dt>조회기간</dt><dd>${esc(rangeLabel)}</dd></div>
+          <div><dt>상태 필터</dt><dd>${esc(statusLabelMap[statusFilter] || '전체')}</dd></div>
           <div><dt>위너 포함</dt><dd>${winnerTotal > 0 ? '있음' : '없음'}</dd></div>
           <div><dt>위너이력 포함</dt><dd>${winnerHistoryTotal > 0 ? '있음' : '없음'}</dd></div>
           <div><dt>ASC 합격/후보</dt><dd>${fmtNum(ascQualifiedTotal)}개</dd></div>
@@ -3021,7 +3022,7 @@
          ? `<span class="delta-up">▲ ${deltaPct.toFixed(1)}%</span>`
          : `<span class="delta-down">▼ ${Math.abs(deltaPct).toFixed(1)}%</span>`);
     host.innerHTML = `
-      <div><span class="big">${fmtKRW(curProfit)}</span> <small>(${cur.월} 순이익)</small></div>
+      <div><span class="big">${fmtKRW(curProfit)}</span> <small>(${esc(cur.월 || '-')} 순이익)</small></div>
       <div>당월 매출 ${fmtKRW(curRevenue)}${prev ? ` · 전월 ${fmtKRW(prevRevenue)}` : ''}</div>
       ${prev ? `<div>전월 대비 ${deltaEl} · 전월 ${fmtKRW(prevProfit)}</div>` : ''}`;
   }
@@ -3032,7 +3033,7 @@
     if (!body) return;
     body.innerHTML = sorted.map(r => `
       <tr>
-        <td>${r.월 || '-'}</td>
+        <td>${esc(r.월 || '-')}</td>
         <td class="num">${fmtKRW(r.매출 || r.구매전환값)}</td>
         <td class="num">${fmtKRW(r.광고지출)}</td>
         <td class="num">${fmtKRW(r.순이익)}</td>
@@ -4000,8 +4001,8 @@
       const matchRate = ga4d?.매칭률;
       const decision = evaluateOperatingRule(cat, mtd, ga4m);
       return `<div class="bridge-card">
-        <h3>${cat}<span class="bridge-chip">통합 보기</span></h3>
-        <div class="bridge-headline">${roiText}<small>최신 실결제 기준 실ROI${ga4m?.월 ? ` · ${ga4m.월}` : ''}</small></div>
+        <h3>${esc(cat)}<span class="bridge-chip">통합 보기</span></h3>
+        <div class="bridge-headline">${esc(roiText)}<small>최신 실결제 기준 실ROI${ga4m?.월 ? ` · ${esc(ga4m.월)}` : ''}</small></div>
         <dl class="bridge-dl">
           <div><dt>Meta MTD ROAS</dt><dd>${mtd ? fmtROAS(mtd.누적_ROAS) : '-'}</dd></div>
           <div><dt>Meta MTD 지출</dt><dd>${mtd ? fmtKRW(mtd.누적_지출) : '-'}</dd></div>
@@ -4010,8 +4011,8 @@
           <div><dt>GA4 월 광고비</dt><dd>${ga4m ? fmtKRW(ga4m.광고비) : '-'}</dd></div>
           <div><dt>최근 매칭률</dt><dd>${matchRate == null ? '-' : fmtPct(matchRate * 100, 1)}</dd></div>
         </dl>
-        <div class="bridge-note"><strong>운영 판단:</strong> ${decision.label} · ${decision.summary}</div>
-        <div class="bridge-note"><strong>액션플랜:</strong> ${decision.action}</div>
+        <div class="bridge-note"><strong>운영 판단:</strong> ${esc(decision.label)} · ${esc(decision.summary)}</div>
+        <div class="bridge-note"><strong>액션플랜:</strong> ${esc(decision.action)}</div>
         <div class="bridge-note"><strong>판단 우선순위:</strong> 월별 순이익은 방향 확인용, 최종 운영 판단은 GA4 실결제 기반 순이익을 우선합니다.</div>
       </div>`;
     }).join('');
@@ -4021,8 +4022,10 @@
   const fbHost = document.getElementById('fb-links');
   Object.entries(DATA.facebook_pages || {}).forEach(([name, url]) => {
     const a = document.createElement('a');
-    a.href = url; a.target = '_blank'; a.rel = 'noopener';
-    a.innerHTML = `📘 ${name} 페이지`;
+    const pageUrl = safeUrl(url);
+    if (!pageUrl) return;
+    a.href = pageUrl; a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = `📘 ${name} 페이지`;
     fbHost.appendChild(a);
   });
 })();
