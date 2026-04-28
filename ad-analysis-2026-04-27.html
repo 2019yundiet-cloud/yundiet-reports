@@ -1484,8 +1484,9 @@
     return n == null ? '-' : (n.toFixed(d) + '%');
   };
   const fmtPctSigned = (v, d = 1) => {
-    if (v == null || !isFinite(v)) return '-';
-    const pct = Number(v) * 100;
+    const n = parseNum(v);
+    if (n == null) return '-';
+    const pct = n * 100;
     const sign = pct >= 0 ? '+' : '';
     return `${sign}${pct.toFixed(d)}%`;
   };
@@ -1509,6 +1510,18 @@
     } catch {
       return '';
     }
+  };
+  const objectFromJson = (v) => {
+    if (v && typeof v === 'object' && !Array.isArray(v)) return v;
+    if (typeof v === 'string' && v.trim()) {
+      try {
+        const parsed = JSON.parse(v);
+        return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+      } catch {
+        return {};
+      }
+    }
+    return {};
   };
 
   /* ---------- Header ---------- */
@@ -1711,7 +1724,7 @@
         ? ga4Items.reduce((s, r) => s + (numOrNull(r.roi) ?? 0), 0) / ga4Items.length
         : null;
       return `<tr>
-        <td>${cat}</td>
+        <td>${esc(cat)}</td>
         <td class="num">${metaItems.length ? fmtKRW(avgMeta('spend')) : '-'}</td>
         <td class="num">${metaItems.length ? fmtKRW(avgMeta('revenue')) : '-'}</td>
         <td class="num">${metaItems.length ? fmtROAS(avgMeta('roas')) : '-'}</td>
@@ -1875,8 +1888,8 @@
     const bits = [];
     if (r.셋팅실행일) bits.push(esc(r.셋팅실행일));
     if (r.기존예산 != null || r.적용예산 != null) bits.push(`${fmtKRW(r.기존예산)} → ${fmtKRW(r.적용예산)}`);
-    const impact = r.카테고리예산영향 || r.setting_category_budget_impact || {};
-    if (impact && typeof impact === 'object' && Object.keys(impact).length) {
+    const impact = objectFromJson(r.카테고리예산영향 || r.setting_category_budget_impact || {});
+    if (Object.keys(impact).length) {
       const impactText = Object.entries(impact)
         .map(([cat, amount]) => `${esc(cat)} ${fmtKRW(amount)}`)
         .join(' / ');
@@ -2816,7 +2829,7 @@
     return `<div class="val-card">
       <div class="lbl">${lbl}</div>
       <div class="val">${item.value != null ? fmt(item.value) : '-'}</div>
-      <div class="src">${item.source || ''}</div>
+      <div class="src">${esc(item.source || '')}</div>
     </div>`;
   }).join('');
 
@@ -2826,7 +2839,7 @@
     const derivedAdCount = derivedCategoryAdCounts.get(cat);
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${cat}</td>
+      <td>${esc(cat)}</td>
       <td>${fmtKRW(c.지출)}</td>
       <td>${fmtKRW(c.매출)}</td>
       <td>${fmtROAS(c.ROAS)}</td>
@@ -2850,14 +2863,15 @@
     fi.innerHTML = '<p style="color:var(--muted)">오늘 기준 P0/P1 중요 인사이트 없음.</p>';
   } else {
     fi.innerHTML = insights.map(i => {
-      const targetHtml = i.ad_manager_url
-        ? `<a class="ad-link" href="${i.ad_manager_url}" target="_blank" rel="noopener">${i.target || '-'}</a>`
-        : (i.target || '-');
+      const insightUrl = safeUrl(i.ad_manager_url);
+      const targetHtml = insightUrl
+        ? `<a class="ad-link" href="${insightUrl}" target="_blank" rel="noopener">${esc(i.target || '-')}</a>`
+        : esc(i.target || '-');
       return `
       <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;">
-        <strong>${i.severity || '-'} · ${i.pattern || '-'}</strong> — ${i.tag || ''}<br>
+        <strong>${esc(i.severity || '-')} · ${esc(i.pattern || '-')}</strong> — ${esc(i.tag || '')}<br>
         <small style="color:var(--muted)">대상: ${targetHtml}</small>
-        <div style="margin-top:6px;">${i.action || ''}</div>
+        <div style="margin-top:6px;">${esc(i.action || '')}</div>
       </div>`;
     }).join('');
   }
@@ -3160,16 +3174,18 @@
   /* ---------- 섹션 1.5: GA4 실결제 순이익 (카테고리별 · 방안 C) ---------- */
   (function renderGA4Profit() {
     const fmtPctSigned = (v) => {
-      if (v == null || !isFinite(v)) return '-';
-      const pct = v * 100;
+      const n = parseNum(v);
+      if (n == null) return '-';
+      const pct = n * 100;
       const sign = pct >= 0 ? '+' : '';
       return `${sign}${pct.toFixed(1)}%`;
     };
     const profitClass = (v) => v == null ? '' : (v >= 0 ? 'profit-pos' : 'profit-neg');
     const pctCell = (v) => {
-      if (v == null || !isFinite(v)) return '<td class="num">-</td>';
-      const cls = v >= 0 ? 'profit-pos' : 'profit-neg';
-      return `<td class="num ${cls}">${fmtPctSigned(v)}</td>`;
+      const n = parseNum(v);
+      if (n == null) return '<td class="num">-</td>';
+      const cls = n >= 0 ? 'profit-pos' : 'profit-neg';
+      return `<td class="num ${cls}">${fmtPctSigned(n)}</td>`;
     };
     const periods = DATA.meta?.periods || {};
     const ga4Range = periods.ga4_profit?.label || '';
@@ -3284,10 +3300,10 @@
         const latestROI = latest.실ROI != null ? latest.실ROI
                         : (latest.광고비 ? latest.순이익 / latest.광고비 : null);
 
-        return `<div class="ga4-cat-card" data-cat="${cat}">
-          <div class="cat-title"><span class="cat-dot"></span>${cat}</div>
+        return `<div class="ga4-cat-card" data-cat="${esc(cat)}">
+          <div class="cat-title"><span class="cat-dot"></span>${esc(cat)}</div>
           <div class="mini-headline">${fmtKRW(latest.순이익)}
-            <small>(${latest.날짜} · 실ROI ${fmtPctSigned(latestROI)})</small>
+            <small>(${esc(latest.날짜 || '-')} · 실ROI ${fmtPctSigned(latestROI)})</small>
           </div>
           <div class="cat-sub">${catRows.length}일 합계 ${fmtKRW(sum.순이익)} · 평균 실ROI ${fmtPctSigned(roiAvg)}</div>
           <div class="cat-table-wrap">
@@ -3301,7 +3317,7 @@
                   const roi = r.실ROI != null ? r.실ROI
                             : (r.광고비 ? r.순이익 / r.광고비 : null);
                   return `<tr>
-                    <td>${r.날짜 || '-'}</td>
+                    <td>${esc(r.날짜 || '-')}</td>
                     <td class="num">${fmtKRW(r.매출)}</td>
                     <td class="num">${fmtKRW(r.광고비)}</td>
                     <td class="num ${profitClass(r.순이익)}">${fmtKRW(r.순이익)}</td>
@@ -3345,7 +3361,7 @@
         summaryHost.innerHTML = `<div class="ga4-total-card">
           <div class="ga4-total-title">월별 총합 순이익</div>
           <div class="ga4-total-headline">${fmtKRW(monthlyOverall.순이익)}
-            <small>(${monthlyOverall.월} · 실ROI ${fmtPctSigned(overallROI)})</small>
+            <small>(${esc(monthlyOverall.월 || '-')} · 실ROI ${fmtPctSigned(overallROI)})</small>
           </div>
           <div class="ga4-total-sub">총 매출 ${fmtKRW(monthlyOverall.매출)} · 총 광고비 ${fmtKRW(monthlyOverall.광고비)} · 주문수 ${fmtNum(monthlyOverall.주문수)}</div>
         </div>`;
@@ -3363,10 +3379,10 @@
               ? `<span style="color:var(--ok);font-weight:700;">▲ ${deltaPct.toFixed(1)}%</span>`
               : `<span style="color:var(--bad);font-weight:700;">▼ ${Math.abs(deltaPct).toFixed(1)}%</span>`);
 
-        return `<div class="ga4-cat-card" data-cat="${cat}">
-          <div class="cat-title"><span class="cat-dot"></span>${cat}</div>
+        return `<div class="ga4-cat-card" data-cat="${esc(cat)}">
+          <div class="cat-title"><span class="cat-dot"></span>${esc(cat)}</div>
           <div class="mini-headline">${fmtKRW(cur.순이익)}
-            <small>(${cur.월} · 실ROI ${fmtPctSigned(curROI)})</small>
+            <small>(${esc(cur.월 || '-')} · 실ROI ${fmtPctSigned(curROI)})</small>
           </div>
           <div class="cat-sub">${prev ? `전월 대비 ${deltaEl} · 전월 ${fmtKRW(prev.순이익)}` : '이전 월 데이터 없음'}</div>
           <div class="cat-table-wrap">
@@ -3380,7 +3396,7 @@
                   const roi = r.실ROI != null ? r.실ROI
                             : (r.광고비 ? r.순이익 / r.광고비 : null);
                   return `<tr>
-                    <td>${r.월 || '-'}</td>
+                    <td>${esc(r.월 || '-')}</td>
                     <td class="num">${fmtKRW(r.매출)}</td>
                     <td class="num">${fmtKRW(r.광고비)}</td>
                     <td class="num ${profitClass(r.순이익)}">${fmtKRW(r.순이익)}</td>
@@ -3402,7 +3418,7 @@
     const campaignWrap = document.getElementById('campaign-analysis');
 
     const ga4Attr = DATA.ga4_order_attribution || null;
-    const productEntry = DATA.product_entry_analysis || null;
+  const productEntry = DATA.product_entry_analysis || null;
     const summary = productEntry?.summary || null;
     const rules = productEntry?.rules || {};
     const orders = ga4Attr?.orders || [];
@@ -3410,7 +3426,7 @@
     const caption = document.getElementById('caption-entry-analysis');
     if (caption && rulesPath) {
       const file = rulesPath.split('/').pop();
-      caption.innerHTML = `광고 유입으로 판단된 주문만 집계합니다. order-level 신뢰값은 <b>payment_amount / net_profit</b> 기준 · SKU/제품군 분해값은 <b>derived</b> 배분값 · 분류 기준: <code>${file}</code>`;
+      caption.innerHTML = `광고 유입으로 판단된 주문만 집계합니다. order-level 신뢰값은 <b>payment_amount / net_profit</b> 기준 · SKU/제품군 분해값은 <b>derived</b> 배분값 · 분류 기준: <code>${esc(file)}</code>`;
     }
 
     const emptyMsg = `<div class="ga4-empty">데이터 없음 — product_entry / attribution 산출물 주입 대기 중</div>`;
@@ -3608,15 +3624,15 @@
               const family = row.entry_product_family || '기타';
               const top = topCrossForFamily(family);
               return `<tr>
-                <td>${family}${family === '기타' ? ' <span class="warning-badge">분류 필요</span>' : ''}</td>
+                <td>${esc(family)}${family === '기타' ? ' <span class="warning-badge">분류 필요</span>' : ''}</td>
                 <td class="num">${fmtNum(row.orders)}</td>
                 <td class="num">${fmtNum(row.matched_orders)}</td>
                 <td class="num">${fmtKRW(row.revenue)}</td>
                 <td class="num">${fmtKRW(row.ad_spend)}</td>
                 <td class="num ${Number(row.covered_net_profit) >= 0 ? 'profit-pos' : 'profit-neg'}">${fmtKRW(row.covered_net_profit)}</td>
-                <td>${top.same ? `${top.same.purchase_product_family} · ${fmtKRW(top.same.revenue_allocated)}` : '-'}</td>
-                <td>${top.cross ? `${top.cross.purchase_product_family} · ${fmtKRW(top.cross.revenue_allocated)}` : '-'}</td>
-                <td>${noteForFamily(family)}</td>
+                <td>${top.same ? `${esc(top.same.purchase_product_family)} · ${fmtKRW(top.same.revenue_allocated)}` : '-'}</td>
+                <td>${top.cross ? `${esc(top.cross.purchase_product_family)} · ${fmtKRW(top.cross.revenue_allocated)}` : '-'}</td>
+                <td>${esc(noteForFamily(family))}</td>
               </tr>`;
             }).join('')}
           </tbody>
@@ -3625,8 +3641,8 @@
 
     matrixBody.innerHTML = matrix.slice(0, 40).map(row => `
       <tr>
-        <td>${row.entry_product_family || '-'}</td>
-        <td>${row.purchase_product_family || '-'}</td>
+        <td>${esc(row.entry_product_family || '-')}</td>
+        <td>${esc(row.purchase_product_family || '-')}</td>
         <td class="num">${fmtNum(row.order_count)}</td>
         <td class="num">${fmtNum(row.qty)}</td>
         <td class="num">${fmtKRW(row.revenue_allocated)}</td>
@@ -3759,18 +3775,18 @@
                   .sort((a, b) => (b.revenue_allocated || 0) - (a.revenue_allocated || 0));
                 return `
                   <tr class="section-row">
-                    <td colspan="8">${family}</td>
+                    <td colspan="8">${esc(family)}</td>
                   </tr>
                   ${rows.map(row => `
                     <tr>
-                      <td>${family}</td>
-                      <td>${row.last_touch_campaign || '(미지정)'}</td>
-                      <td>${row.purchase_product_family || '-'}</td>
-                      <td>${row.sku || '-'}</td>
+                      <td>${esc(family)}</td>
+                      <td>${esc(row.last_touch_campaign || '(미지정)')}</td>
+                      <td>${esc(row.purchase_product_family || '-')}</td>
+                      <td>${esc(row.sku || '-')}</td>
                       <td class="num">${fmtNum(row.order_count)}</td>
                       <td class="num">${fmtKRW(row.revenue_allocated)}</td>
                       <td class="num ${Number(row.net_profit_allocated) >= 0 ? 'profit-pos' : 'profit-neg'}">${fmtKRW(row.net_profit_allocated)}</td>
-                      <td>${row.note || '-'}</td>
+                      <td>${esc(row.note || '-')}</td>
                     </tr>`).join('')}
                 `;
               }).join('')}
