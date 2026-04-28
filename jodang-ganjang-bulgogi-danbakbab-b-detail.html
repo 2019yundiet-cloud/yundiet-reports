@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>저당간장불고기 단백밥 — 닭가슴살 말고 불고기로 다이어트 | 윤식단 단백밥</title>
+<style>
+:root {
+  --brand: #E85D26;
+  --brand-light: #FF7A42;
+  --bg: #0f0f0f;
+  --bg2: #1a1a1a;
+  --bg3: #252525;
+  --border: #2a2a2a;
+  --text: #e8e8e8;
+  --text2: #aaa;
+  --text3: #666;
+  --white: #fff;
+  --card-bg: #1e1e1e;
+}
+[data-theme="light"] {
+  --bg: #f8f5f2;
+  --bg2: #fff;
+  --bg3: #f0ede8;
+  --border: #e0dbd4;
+  --text: #1a1a1a;
+  --text2: #555;
+  --text3: #999;
+  --card-bg: #fff;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { background:var(--bg); color:var(--text); font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif; line-height:1.6; transition:background .3s,color .3s; }
+img { max-width:100%; display:block; }
+a { color:inherit; text-decoration:none; }
+
+/* 테마 토글 */
+.theme-toggle { position:fixed; top:16px; right:16px; z-index:999; background:var(--bg2); border:1px solid var(--border); border-radius:50px; padding:6px 14px; font-size:12px; cursor:pointer; color:var(--text2); transition:.2s; }
+.theme-toggle:hover { color:var(--brand); border-color:var(--brand); }
+
+/* 공통 */
+section { padding:80px 24px; max-width:480px; margin:0 auto; }
+.section-label { font-size:11px; color:var(--brand); letter-spacing:.12em; font-weight:700; margin-bottom:16px; }
+.headline { font-size:28px; font-weight:800; line-height:1.3; margin-bottom:12px; word-break:keep-all; }
+.sub { font-size:15px; color:var(--text2); line-height:1.7; word-break:keep-all; }
+.divider { width:40px; height:3px; background:var(--brand); border-radius:2px; margin:20px 0; }
+
+/* 애니메이션 */
+.fade-up { opacity:0; transform:translateY(24px); transition:opacity .6s ease,transform .6s ease; }
+.fade-up.visible { opacity:1; transform:translateY(0); }
+
+/* S01 HERO */
+#s01-hero { padding:0; max-width:100%; background:var(--bg); }
+.hero-inner { max-width:480px; margin:0 auto; padding:60px 24px 48px; }
+.hero-img { width:100%; aspect-ratio:4/3; background:linear-gradient(135deg,#2a1a0a 0%,#3d2210 50%,#2a1a0a 100%); border-radius:16px; margin-bottom:32px; display:flex; align-items:center; justify-content:center; color:#E85D26; font-size:14px; letter-spacing:.05em; font-weight:600; position:relative; overflow:hidden; }
+.hero-img::after { content:'🥩'; font-size:64px; position:absolute; opacity:.15; }
+.hero-eyebrow { font-size:12px; color:var(--brand); letter-spacing:.15em; font-weight:700; margin-bottom:12px; }
+.hero-h1 { font-size:36px; font-weight:900; line-height:1.2; margin-bottom:16px; word-break:keep-all; }
+.hero-sub { font-size:14px; color:var(--text2); margin-bottom:28px; line-height:1.6; }
+.hero-pills { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:32px; }
+.pill { background:var(--bg3); border:1px solid var(--border); border-radius:20px; padding:6px 14px; font-size:12px; color:var(--text2); font-weight:600; }
+.pill.brand { background:rgba(232,93,38,.12); border-color:rgba(232,93,38,.3); color:var(--brand); }
+.btn-primary { display:block; width:100%; background:var(--brand); color:#fff; text-align:center; padding:16px; border-radius:12px; font-size:16px; font-weight:700; letter-spacing:.02em; border:none; cursor:pointer; transition:.2s; }
+.btn-primary:hover { background:var(--brand-light); }
+
+/* S02 HOOK */
+#s02-hook { background:var(--bg2); border-radius:20px; margin:0 16px; padding:48px 24px; max-width:448px; }
+.hook-headline { font-size:22px; font-weight:800; line-height:1.4; margin-bottom:16px; word-break:keep-all; }
+.hook-headline em { color:var(--brand); font-style:normal; }
+.hook-body { font-size:14px; color:var(--text2); line-height:1.8; word-break:keep-all; }
+
+/* S03 타겟 공감 */
+#s03-target-intro { }
+.target-intro-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:24px; }
+.target-intro-card { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:20px 16px; }
+.target-intro-card .emoji { font-size:24px; margin-bottom:8px; }
+.target-intro-card .name { font-size:13px; font-weight:700; margin-bottom:4px; }
+.target-intro-card .desc { font-size:12px; color:var(--text2); line-height:1.5; }
+
+/* S04 페인 카드 */
+#s04-pain { }
+.pain-cards { display:flex; flex-direction:column; gap:12px; margin-top:24px; }
+.pain-card { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; align-items:flex-start; gap:14px; }
+.pain-card .emoji { font-size:24px; flex-shrink:0; }
+.pain-card h4 { font-size:14px; font-weight:700; margin-bottom:4px; }
+.pain-card p { font-size:13px; color:var(--text2); line-height:1.6; word-break:keep-all; }
+
+/* S05 냉동 불신 */
+#s05-frozen { background:var(--bg2); border-radius:20px; margin:0 16px; padding:48px 24px; max-width:448px; text-align:center; }
+.frozen-quote { font-size:18px; font-weight:700; line-height:1.5; margin-bottom:12px; word-break:keep-all; }
+.frozen-sub { font-size:13px; color:var(--text2); }
+
+/* S06 RESOLVE — 클라이맥스 */
+#s06-resolve { background:var(--brand); border-radius:20px; margin:0 16px; padding:56px 24px; max-width:448px; text-align:center; }
+#s06-resolve .section-label { color:rgba(255,255,255,.7); }
+#s06-resolve .headline { color:#fff; font-size:26px; }
+#s06-resolve .resolve-body { color:rgba(255,255,255,.85); font-size:14px; line-height:1.8; margin-top:16px; word-break:keep-all; }
+
+/* S07 핵심 수치 */
+#s07-numbers { text-align:center; }
+.numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-top:32px; }
+.number-card { background:var(--bg2); border:1px solid var(--border); border-radius:16px; padding:24px 12px; }
+.number-card .num { font-size:36px; font-weight:900; color:var(--brand); line-height:1; }
+.number-card .unit { font-size:14px; color:var(--brand); font-weight:700; }
+.number-card .label { font-size:11px; color:var(--text3); margin-top:6px; letter-spacing:.03em; }
+
+/* S08 슬로건 */
+#s08-slogan { background:var(--bg2); border-radius:20px; margin:0 16px; padding:40px 24px; max-width:448px; text-align:center; }
+.slogan-text { font-size:22px; font-weight:900; margin-bottom:16px; }
+.slogan-pills { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; }
+
+/* S09 피처 */
+#s09-features { }
+.features-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:24px; }
+.feature-card { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:20px 16px; }
+.feature-card .icon { font-size:22px; margin-bottom:10px; }
+.feature-card h4 { font-size:13px; font-weight:700; margin-bottom:6px; }
+.feature-card p { font-size:12px; color:var(--text2); line-height:1.6; word-break:keep-all; }
+
+/* S10 조리법 */
+#s10-cook { }
+.cook-steps { display:flex; flex-direction:column; gap:0; margin-top:28px; }
+.cook-step { display:flex; align-items:flex-start; gap:16px; padding:20px 0; border-bottom:1px solid var(--border); }
+.cook-step:last-child { border-bottom:none; }
+.step-num { width:36px; height:36px; background:var(--brand); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:800; color:#fff; flex-shrink:0; }
+.step-text h4 { font-size:15px; font-weight:700; margin-bottom:4px; }
+.step-text p { font-size:13px; color:var(--text2); }
+.cook-tip { background:rgba(232,93,38,.08); border:1px solid rgba(232,93,38,.2); border-radius:12px; padding:16px; margin-top:20px; font-size:13px; color:var(--text2); line-height:1.6; }
+.cook-tip strong { color:var(--brand); }
+
+/* S11 영양성분 */
+#s11-nutrition { }
+.nutrition-table { width:100%; border-collapse:collapse; margin-top:24px; border-radius:12px; overflow:hidden; }
+.nutrition-table th { background:var(--bg3); padding:12px 16px; font-size:12px; color:var(--text3); text-align:left; font-weight:600; }
+.nutrition-table td { padding:12px 16px; font-size:14px; border-bottom:1px solid var(--border); }
+.nutrition-table tr:last-child td { border-bottom:none; }
+.nutrition-table .highlight td { font-weight:800; color:var(--brand); background:rgba(232,93,38,.05); }
+.nutrition-note { font-size:11px; color:var(--text3); margin-top:12px; }
+
+/* S12 비교 */
+#s12-compare { }
+.compare-wrap { margin-top:28px; border-radius:16px; overflow:hidden; border:1px solid var(--border); }
+.compare-header { display:grid; grid-template-columns:1fr 1fr; }
+.compare-header div { padding:14px; text-align:center; font-size:13px; font-weight:700; }
+.compare-header .ours { background:var(--brand); color:#fff; }
+.compare-header .theirs { background:var(--bg3); color:var(--text2); }
+.compare-row { display:grid; grid-template-columns:1fr 40px 1fr; border-top:1px solid var(--border); align-items:center; }
+.compare-row div { padding:14px 12px; text-align:center; font-size:13px; }
+.compare-row .mid { font-size:10px; color:var(--text3); text-align:center; background:var(--bg3); }
+.compare-row .win { font-weight:800; color:var(--brand); }
+.compare-row .lose { color:var(--text3); }
+
+/* S13 타겟 */
+#s13-target { }
+.target-cards { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:24px; }
+.target-card { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:18px 14px; }
+.target-card .emoji { font-size:22px; margin-bottom:8px; }
+.target-card h4 { font-size:13px; font-weight:700; margin-bottom:4px; }
+.target-card p { font-size:11px; color:var(--text2); line-height:1.5; word-break:keep-all; }
+
+/* S14 브랜드 스토리 */
+#s14-story { background:var(--bg2); border-radius:20px; margin:0 16px; padding:48px 24px; max-width:448px; }
+.story-body { font-size:14px; color:var(--text2); line-height:2; word-break:keep-all; }
+.story-body strong { color:var(--text); font-weight:700; }
+
+/* S15 후기 */
+#s15-reviews { }
+.review-cards { display:flex; flex-direction:column; gap:12px; margin-top:24px; }
+.review-card { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:20px; }
+.review-stars { color:#F59E0B; font-size:14px; margin-bottom:8px; }
+.review-text { font-size:14px; line-height:1.7; margin-bottom:10px; word-break:keep-all; }
+.review-text em { color:var(--brand); font-style:normal; font-weight:700; }
+.review-meta { font-size:11px; color:var(--text3); }
+
+/* S16 구성 */
+#s16-quantity { }
+.quantity-card { background:var(--bg2); border:1px solid var(--border); border-radius:16px; padding:28px 24px; margin-top:24px; }
+.quantity-row { display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid var(--border); }
+.quantity-row:last-child { border-bottom:none; }
+.quantity-row .label { font-size:14px; color:var(--text2); }
+.quantity-row .value { font-size:15px; font-weight:700; color:var(--brand); }
+
+/* S17 가격 납득 */
+#s17-price-rationale { background:var(--bg2); border-radius:20px; margin:0 16px; padding:40px 24px; max-width:448px; text-align:center; }
+.price-rationale-num { font-size:48px; font-weight:900; color:var(--brand); line-height:1; }
+.price-rationale-unit { font-size:18px; color:var(--brand); font-weight:700; }
+.price-compare-row { display:flex; gap:12px; margin-top:20px; justify-content:center; flex-wrap:wrap; }
+.price-compare-item { background:var(--bg3); border-radius:10px; padding:10px 16px; font-size:12px; color:var(--text2); text-align:center; }
+.price-compare-item .item-name { margin-bottom:2px; }
+.price-compare-item .item-price { font-weight:700; color:var(--text); }
+
+/* S18 패키지 */
+#s18-pricing { }
+.pricing-cards { display:flex; flex-direction:column; gap:12px; margin-top:24px; }
+.pricing-card { background:var(--bg2); border:1px solid var(--border); border-radius:16px; padding:22px; position:relative; }
+.pricing-card.popular { border-color:var(--brand); }
+.popular-badge { position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:var(--brand); color:#fff; font-size:11px; font-weight:700; padding:4px 14px; border-radius:20px; white-space:nowrap; }
+.pricing-card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
+.pricing-set { font-size:13px; color:var(--text3); }
+.pricing-count { font-size:22px; font-weight:900; }
+.pricing-per { font-size:12px; color:var(--text2); margin-top:4px; }
+.pricing-total { text-align:right; }
+.pricing-total .total-price { font-size:20px; font-weight:800; color:var(--brand); }
+
+/* S19 Final CTA */
+#s19-cta { text-align:center; }
+.cta-img { width:100%; aspect-ratio:1; background:linear-gradient(135deg,#2a1a0a,#3d2210); border-radius:20px; margin-bottom:32px; display:flex; align-items:center; justify-content:center; font-size:72px; }
+.cta-h2 { font-size:28px; font-weight:900; line-height:1.3; margin-bottom:12px; word-break:keep-all; }
+.cta-h2 em { color:var(--brand); font-style:normal; }
+.cta-sub { font-size:13px; color:var(--text2); margin-bottom:28px; line-height:1.7; }
+.cta-shipping { font-size:12px; color:var(--text3); margin-top:14px; }
+
+/* FAQ */
+#s-faq { }
+.faq-list { margin-top:24px; display:flex; flex-direction:column; gap:12px; }
+.faq-item { background:var(--bg2); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.faq-q { padding:16px 20px; font-size:14px; font-weight:700; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.faq-q::after { content:'＋'; color:var(--brand); flex-shrink:0; }
+.faq-q.open::after { content:'－'; }
+.faq-a { padding:0 20px; max-height:0; overflow:hidden; transition:max-height .3s ease, padding .3s ease; font-size:13px; color:var(--text2); line-height:1.7; }
+.faq-a.open { max-height:200px; padding:0 20px 16px; }
+
+/* 하단 여백 */
+.footer-spacer { height:60px; }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme==='dark'?'light':'dark'">☀️ 라이트 모드</button>
+
+<!-- S01 HERO -->
+<section id="s01-hero">
+<div class="hero-inner">
+  <div class="hero-img fade-up">이미지 교체 예정 — Hero (4:3)<br>저당간장불고기 단백밥 트레이</div>
+  <p class="hero-eyebrow fade-up">윤식단 단백밥</p>
+  <h1 class="hero-h1 fade-up">닭가슴살 말고<br>불고기로 다이어트</h1>
+  <p class="hero-sub fade-up">420g 든든한 한 끼 · 전자레인지 9분 · 당류 3.5g · 10팩 49,900원</p>
+  <div class="hero-pills fade-up">
+    <span class="pill">420g 대용량</span>
+    <span class="pill">전자레인지 9분</span>
+    <span class="pill brand">당류 3.5g</span>
+    <span class="pill">10팩 49,900원</span>
+  </div>
+  <button class="btn-primary fade-up">저당간장불고기 단백밥 구경하기</button>
+</div>
+</section>
+
+<!-- S02 HOOK -->
+<section id="s02-hook">
+  <div class="fade-up">
+    <p class="section-label">잠깐, 보세요</p>
+    <h2 class="hook-headline"><em>닭가슴살 도시락</em> 매일 먹다<br>지친 분들, 이거 보세요.</h2>
+    <p class="hook-body">다이어트 도시락 = 닭가슴살? 더 이상 아닙니다.<br><br>전자레인지 9분이면 간장불고기 한 끼가 완성됩니다. 420g이라 진짜 배부르고, 불고기 양념이 달지 않아서 죄책감도 없습니다.<br><br>냉동인데 이 정도면 대박이다 — 먹어본 사람들이 먼저 알아봤습니다.</p>
+  </div>
+</section>
+
+<!-- S03 타겟 공감 -->
+<section id="s03-target-intro">
+  <div class="fade-up">
+    <p class="section-label">이런 분들께</p>
+    <h2 class="headline">오늘도 뭐 먹지<br>고민 중이라면</h2>
+    <div class="target-intro-grid">
+      <div class="target-intro-card"><div class="emoji">🕐</div><div class="name">바쁜 직장인</div><div class="desc">배달 기다릴 시간 없고, 편의점은 질린</div></div>
+      <div class="target-intro-card"><div class="emoji">🏠</div><div class="name">자취생</div><div class="desc">전자레인지만 있는 방에서 든든한 한 끼</div></div>
+      <div class="target-intro-card"><div class="emoji">💪</div><div class="name">운동하는 분</div><div class="desc">닭가슴살 지겨운데 단백질은 챙겨야 하는</div></div>
+      <div class="target-intro-card"><div class="emoji">👨‍👩‍👧</div><div class="name">워킹맘</div><div class="desc">내 식단 따로 챙길 여유가 없는</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- S04 페인 카드 -->
+<section id="s04-pain">
+  <div class="fade-up">
+    <p class="section-label">솔직하게</p>
+    <h2 class="headline">다이어트 도시락<br>솔직히 이랬잖아요</h2>
+    <div class="pain-cards">
+      <div class="pain-card"><span class="emoji">😮</span><div><h4>또 닭가슴살...</h4><p>단백질 챙기려면 닭가슴살뿐. 매일 먹으니 입맛이 도망갑니다.</p></div></div>
+      <div class="pain-card"><span class="emoji">😩</span><div><h4>양이 아쉬운</h4><p>250g 도시락 하나 먹고 나면 한 시간도 안 돼서 배고파요.</p></div></div>
+      <div class="pain-card"><span class="emoji">🤔</span><div><h4>비싸기만 한</h4><p>프리미엄 도시락은 한 팩에 만원. 매일 먹기엔 부담이죠.</p></div></div>
+      <div class="pain-card"><span class="emoji">😤</span><div><h4>맛없는 건강식</h4><p>맛없는 다이어트 식품에 돈 낭비한 경험, 한두 번이 아니죠.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- S05 냉동 불신 -->
+<section id="s05-frozen">
+  <div class="fade-up" style="text-align:left">
+    <p class="section-label">맞아요, 저도 알아요</p>
+    <p class="frozen-quote" style="text-align:left">"냉동 도시락이<br>이렇게 촉촉할 줄 몰랐어요."</p>
+    <p class="frozen-sub" style="color:var(--text2);font-size:14px;margin-top:12px;line-height:1.7">먹어본 사람들의 첫 반응입니다.<br>직접 확인해보세요.</p>
+  </div>
+</section>
+
+<!-- S06 RESOLVE — 클라이맥스 -->
+<section id="s06-resolve">
+  <div class="fade-up">
+    <p class="section-label" style="color:rgba(255,255,255,.7)">반전</p>
+    <h2 class="headline" style="color:#fff;font-size:24px">불고기로 다이어트,<br>가능합니다.</h2>
+    <div class="divider" style="background:rgba(255,255,255,.4)"></div>
+    <p class="resolve-body">420g 가득 찬 트레이를 열면, 곤약현미밥 위에 촉촉한 간장불고기가 올라가 있습니다. 브로콜리와 파프리카로 색감도 영양도 챙겼습니다.<br><br>전자레인지 9분. 소스 뿌리면 끝. 설거지도 없습니다.<br><br>10팩 기준 팩당 4,990원 — 배달의 절반 가격으로, 매일 먹어도 질리지 않는 한 끼.</p>
+  </div>
+</section>
+
+<!-- S07 핵심 수치 -->
+<section id="s07-numbers">
+  <div class="fade-up">
+    <p class="section-label">수치로 확인</p>
+    <h2 class="headline">숫자가 증명합니다</h2>
+    <div class="numbers-grid">
+      <div class="number-card"><div class="num">420</div><div class="unit">g</div><div class="label">대용량</div></div>
+      <div class="number-card"><div class="num">9</div><div class="unit">분</div><div class="label">조리 완성</div></div>
+      <div class="number-card"><div class="num">4,990</div><div class="unit">원</div><div class="label">팩당(10팩)</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- S08 슬로건 -->
+<section id="s08-slogan">
+  <div class="fade-up">
+    <p class="slogan-text">맛있게 먹으면서 다이어트</p>
+    <div class="slogan-pills">
+      <span class="pill brand">저당간장불고기</span>
+      <span class="pill">420g 대용량</span>
+      <span class="pill">10팩 49,900원</span>
+    </div>
+  </div>
+</section>
+
+<!-- S09 피처 카드 -->
+<section id="s09-features">
+  <div class="fade-up">
+    <p class="section-label">특징</p>
+    <h2 class="headline">왜 저당간장불고기인가요</h2>
+    <div class="features-grid">
+      <div class="feature-card"><div class="icon">🥩</div><h4>불고기 130g</h4><p>닭가슴살 탈출. 촉촉한 돼지 앞다리살 간장불고기가 130g이나</p></div>
+      <div class="feature-card"><div class="icon">🍚</div><h4>420g 대용량</h4><p>배부릅니다. 한 팩이면 한 끼 해결. 간식 안 찾게 됩니다</p></div>
+      <div class="feature-card"><div class="icon">⏱️</div><h4>전자레인지 9분</h4><p>해동 없이 바로. 밥·토핑 분리 트레이로 설거지도 없음</p></div>
+      <div class="feature-card"><div class="icon">💰</div><h4>팩당 4,990원</h4><p>10팩 기준. 배달 불고기 12,000원의 절반도 안 되는 가격</p></div>
+      <div class="feature-card"><div class="icon">🥦</div><h4>채소도 같이</h4><p>브로콜리+파프리카+볶음양파. 영양 균형까지 한 팩에</p></div>
+      <div class="feature-card"><div class="icon">❄️</div><h4>냉동고에 비축</h4><p>10팩 넣어두면 2주 식단 걱정 끝. 바쁜 날 꺼내서 돌리면 됩니다</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- S10 조리법 -->
+<section id="s10-cook">
+  <div class="fade-up">
+    <p class="section-label">조리법</p>
+    <h2 class="headline">전자레인지<br>하나면 됩니다</h2>
+    <div class="cook-steps">
+      <div class="cook-step"><div class="step-num">1</div><div class="step-text"><h4>냉동 그대로 넣기</h4><p>해동 없이 트레이 째로 전자레인지에</p></div></div>
+      <div class="cook-step"><div class="step-num">2</div><div class="step-text"><h4>9분 기다리기</h4><p>그 사이 다른 거 하세요. 알아서 됩니다</p></div></div>
+      <div class="cook-step"><div class="step-num">3</div><div class="step-text"><h4>소스 뿌려서 바로</h4><p>별도 소스 패킷을 불고기 위에. 끝!</p></div></div>
+    </div>
+    <div class="cook-tip"><strong>💡 추천:</strong> 밥 위에 반숙 계란 올리면 단백질 40g+ 초호화 한 끼</div>
+  </div>
+</section>
+
+<!-- S11 영양성분 -->
+<section id="s11-nutrition">
+  <div class="fade-up">
+    <p class="section-label">영양성분</p>
+    <h2 class="headline">수치로 보면<br>더 확실합니다</h2>
+    <table class="nutrition-table">
+      <thead><tr><th>영양소</th><th>함량 (1팩 기준)</th></tr></thead>
+      <tbody>
+        <tr><td>칼로리</td><td>— kcal (확정 예정)</td></tr>
+        <tr class="highlight"><td>단백질</td><td>33g</td></tr>
+        <tr><td>탄수화물</td><td>— g (확정 예정)</td></tr>
+        <tr class="highlight"><td>당류</td><td>3.5g</td></tr>
+        <tr><td>지방</td><td>— g (확정 예정)</td></tr>
+        <tr><td>나트륨</td><td>— mg (확정 예정)</td></tr>
+      </tbody>
+    </table>
+    <p class="nutrition-note">※ 영양성분은 최종 확정 후 업데이트 예정. 단백질 33g · 당류 3.5g은 확정값.</p>
+  </div>
+</section>
+
+<!-- S12 비교 -->
+<section id="s12-compare">
+  <div class="fade-up">
+    <p class="section-label">비교</p>
+    <h2 class="headline">편의점 도시락과<br>비교해봤습니다</h2>
+    <div class="compare-wrap">
+      <div class="compare-header">
+        <div class="ours">저당간장불고기 🥩</div>
+        <div class="theirs">편의점 도시락</div>
+      </div>
+      <div class="compare-row"><div class="win">420g</div><div class="mid">중량</div><div class="lose">300g</div></div>
+      <div class="compare-row"><div class="win">33g</div><div class="mid">단백질</div><div class="lose">12~18g</div></div>
+      <div class="compare-row"><div class="win">3.5g</div><div class="mid">당류</div><div class="lose">10~25g</div></div>
+      <div class="compare-row"><div>4,990원</div><div class="mid">가격</div><div>4,500원</div></div>
+      <div class="compare-row"><div class="win">오래 지속</div><div class="mid">포만감</div><div class="lose">금방 배고파</div></div>
+    </div>
+    <p style="font-size:12px;color:var(--text3);margin-top:12px;text-align:center">비슷한 가격에 단백질은 2배, 양은 40% 더 많습니다.</p>
+  </div>
+</section>
+
+<!-- S13 타겟 시나리오 -->
+<section id="s13-target">
+  <div class="fade-up">
+    <p class="section-label">당신이라면</p>
+    <h2 class="headline">이런 분들이<br>찾고 있었습니다</h2>
+    <div class="target-cards">
+      <div class="target-card"><div class="emoji">🕐</div><h4>바쁜 직장인</h4><p>배달 기다릴 시간 없이 전자레인지 9분으로 든든한 점심 해결</p></div>
+      <div class="target-card"><div class="emoji">🏠</div><h4>자취생</h4><p>전자레인지만 있는 방에서 420g 한 끼로 배부르게</p></div>
+      <div class="target-card"><div class="emoji">💪</div><h4>운동하는 분</h4><p>닭가슴살 대신 불고기로 단백질 33g 챙기고 싶은</p></div>
+      <div class="target-card"><div class="emoji">👨‍👩‍👧</div><h4>워킹맘</h4><p>내 식단 따로 챙길 여유 없이 간편하게 한 끼 해결</p></div>
+      <div class="target-card"><div class="emoji">💰</div><h4>가성비 추구</h4><p>팩당 4,990원으로 매일 먹어도 부담 없는 다이어트</p></div>
+      <div class="target-card"><div class="emoji">🔄</div><h4>닭가슴살 지겨운</h4><p>매일 같은 단백질 루틴에서 벗어날 선택지가 필요했던</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- S14 브랜드 스토리 -->
+<section id="s14-story">
+  <div class="fade-up">
+    <p class="section-label">브랜드 이야기</p>
+    <h2 class="headline">매일 먹을 수 있는 다이어트</h2>
+    <div class="divider"></div>
+    <p class="story-body"><strong>다이어트 식단의 적은 '맛없음'이 아니라 '질림'입니다.</strong><br><br>닭가슴살은 3일이면 질리고, 프리미엄 도시락은 지갑이 먼저 지칩니다. 매일 먹을 수 있으려면 맛있고, 든든하고, 부담 없어야 합니다.<br><br>저당간장불고기 단백밥은 그 세 가지를 한 팩에 담았습니다. 420g으로 배부르게, 불고기 맛으로 맛있게, 팩당 4,990원으로 부담 없이.<br><br><strong>윤식단 단백밥</strong> — 매일 먹어도 질리지 않는 다이어트.</p>
+  </div>
+</section>
+
+<!-- S15 후기 -->
+<section id="s15-reviews">
+  <div class="fade-up">
+    <p class="section-label">실제 후기</p>
+    <h2 class="headline">먹어본 사람들이<br>먼저 알아봤습니다</h2>
+    <p class="sub" style="margin-bottom:24px">냉동인데 이 정도면 대박이다 싶었습니다</p>
+    <div class="review-cards">
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">진짜 맛있어서 놀랐어요. <em>냉동인데 이 정도면 대박이다</em> 싶었습니다. 매일 먹어도 안 질려요.</p>
+        <p class="review-meta">자취 직장인 · 28세 여성</p>
+      </div>
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text"><em>420g이라 진짜 배부릅니다.</em> 전자레인지 돌리고 설거지 없는 게 최고예요.</p>
+        <p class="review-meta">대학원생 · 24세 남성</p>
+      </div>
+      <div class="review-card">
+        <div class="review-stars">★★★★☆</div>
+        <p class="review-text">10팩 주문했는데 <em>2주 만에 재주문</em>했어요. 아이도 맛있다고 같이 먹어요.</p>
+        <p class="review-meta">워킹맘 · 37세</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- S16 구성 -->
+<section id="s16-quantity">
+  <div class="fade-up">
+    <p class="section-label">구성</p>
+    <h2 class="headline">1팩 구성<br>420g 한 끼</h2>
+    <div class="quantity-card">
+      <div class="quantity-row"><span class="label">총 중량</span><span class="value">420g</span></div>
+      <div class="quantity-row"><span class="label">불고기</span><span class="value">130g</span></div>
+      <div class="quantity-row"><span class="label">밥</span><span class="value">곤약현미밥 180g</span></div>
+      <div class="quantity-row"><span class="label">채소</span><span class="value">70g</span></div>
+      <div class="quantity-row"><span class="label">소스</span><span class="value">35g</span></div>
+      <div class="quantity-row"><span class="label">조리</span><span class="value">전자레인지 9분</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- S17 가격 납득 -->
+<section id="s17-price-rationale">
+  <div class="fade-up">
+    <p class="section-label" style="text-align:center">가성비</p>
+    <div class="price-rationale-num">4,990<span class="price-rationale-unit">원</span></div>
+    <p style="color:var(--text2);font-size:13px;margin-top:8px">10팩 기준 팩당 가격</p>
+    <div class="price-compare-row">
+      <div class="price-compare-item"><div class="item-name">배달 불고기</div><div class="item-price">12,000원~</div></div>
+      <div class="price-compare-item"><div class="item-name">프리미엄 도시락</div><div class="item-price">8,900원~</div></div>
+      <div class="price-compare-item"><div class="item-name">편의점 도시락</div><div class="item-price">4,500원~</div></div>
+      <div class="price-compare-item" style="border:1px solid var(--brand)"><div class="item-name" style="color:var(--brand)">저당간장불고기</div><div class="item-price" style="color:var(--brand)">4,990원</div></div>
+    </div>
+    <p style="font-size:11px;color:var(--text3);margin-top:14px">편의점 가격에 단백질 2배, 양 40% 더 많은 한 끼.</p>
+  </div>
+</section>
+
+<!-- S18 패키지 선택 -->
+<section id="s18-pricing">
+  <div class="fade-up">
+    <p class="section-label">구성 선택</p>
+    <h2 class="headline">세트로 살수록<br>한 끼가 저렴해집니다</h2>
+    <div class="pricing-cards">
+      <div class="pricing-card">
+        <div class="pricing-card-top">
+          <div><div class="pricing-set">5팩</div><div class="pricing-count">5개입</div><div class="pricing-per">팩당 5,500원</div></div>
+          <div class="pricing-total"><div class="pricing-total-price" style="font-size:18px;font-weight:800">27,500원</div></div>
+        </div>
+      </div>
+      <div class="pricing-card popular">
+        <div class="popular-badge">🔥 인기</div>
+        <div class="pricing-card-top">
+          <div><div class="pricing-set">10팩</div><div class="pricing-count">10개입</div><div class="pricing-per">팩당 4,990원</div></div>
+          <div class="pricing-total"><div class="total-price">49,900원</div></div>
+        </div>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-card-top">
+          <div><div class="pricing-set">20팩</div><div class="pricing-count">20개입</div><div class="pricing-per">팩당 4,745원</div></div>
+          <div class="pricing-total"><div class="pricing-total-price" style="font-size:18px;font-weight:800">94,900원</div></div>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--text3);text-align:center;margin-top:14px">39,900원 이상 무료배송</p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="s-faq">
+  <div class="fade-up">
+    <p class="section-label">자주 묻는 질문</p>
+    <h2 class="headline">궁금한 것들</h2>
+    <div class="faq-list">
+      <div class="faq-item"><div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">냉동인데 실제로 맛있나요?</div><div class="faq-a">촉촉한 간장불고기 특유의 식감이 냉동 후에도 유지됩니다. 전자레인지 9분 가열 후 소스를 뿌려서 바로 드시면 됩니다.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">한 팩으로 한 끼가 되나요?</div><div class="faq-a">420g 트레이에 곤약현미밥, 불고기, 채소가 모두 들어 있어 별도 추가 없이 한 끼가 됩니다. 단백질 33g으로 포만감도 오래 갑니다.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">당류 3.5g이 진짜인가요?</div><div class="faq-a">저당 소스를 별도로 개발해 단맛은 살리되 당류를 3.5g으로 잡았습니다. 영양성분표에서 직접 확인할 수 있습니다.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">전자레인지 외 다른 조리법도 되나요?</div><div class="faq-a">전자레인지 9분이 가장 간편하지만, 프라이팬에 볶거나 에어프라이어로도 조리 가능합니다.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">10팩이면 며칠 분량인가요?</div><div class="faq-a">주 5일 점심 기준 2주 분량입니다. 냉동 보관으로 언제든 꺼내 드세요.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 법적 고지 (식품표시광고법 필수 표기) -->
+<section id="s-legal" style="padding:40px 24px;max-width:480px;margin:0 auto;">
+  <div class="fade-up">
+    <p class="section-label">표시 정보</p>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;font-size:12px;color:var(--text3);line-height:1.9;">
+      <p><strong style="color:var(--text2)">원산지</strong> 돼지고기: 국내산 (최종 확정 후 업데이트)</p>
+      <p style="margin-top:8px"><strong style="color:var(--text2)">알레르기 유발물질</strong> 돼지고기, 밀(소맥), 대두(콩) 함유 (최종 확정 후 업데이트)</p>
+      <p style="margin-top:8px"><strong style="color:var(--text2)">소비기한</strong> 냉동 보관 시 제조일로부터 12개월 (포장지 표기 기준)</p>
+      <p style="margin-top:8px"><strong style="color:var(--text2)">보관 방법</strong> 냉동 보관 (-18℃ 이하)</p>
+      <p style="margin-top:8px"><strong style="color:var(--text2)">제조사</strong> 윤식단 (최종 확정 후 업데이트)</p>
+      <p style="margin-top:12px;color:var(--text3);font-size:11px">※ 상기 영양성분 및 알레르기 정보는 최종 제품 기준으로 업데이트됩니다. 개인차에 따라 알레르기 반응이 있을 수 있으니 성분을 확인하신 후 섭취하시기 바랍니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- S19 Final CTA -->
+<section id="s19-cta">
+  <div class="fade-up">
+    <div class="cta-img">🥩</div>
+    <h2 class="cta-h2">오늘 점심,<br><em>불고기 어때요?</em></h2>
+    <p class="cta-sub">420g 든든한 한 끼 · 전자레인지 9분<br>10팩 49,900원 · 무료배송</p>
+    <button class="btn-primary">저당간장불고기 단백밥 주문하기</button>
+    <p class="cta-shipping">39,900원 이상 무료배송 | 윤식단 단백밥</p>
+  </div>
+</section>
+
+<div class="footer-spacer"></div>
+
+<script>
+// 스크롤 애니메이션
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+// 테마 토글 버튼 텍스트 업데이트
+const toggleBtn = document.querySelector('.theme-toggle');
+toggleBtn.addEventListener('click', () => {
+  const isDark = document.documentElement.dataset.theme === 'dark';
+  toggleBtn.textContent = isDark ? '☀️ 라이트 모드' : '🌙 다크 모드';
+});
+</script>
+</body>
+</html>
