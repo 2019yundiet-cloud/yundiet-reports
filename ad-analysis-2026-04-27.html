@@ -1577,10 +1577,12 @@
     if (diffMin < 60*24) return `${Math.round(diffMin/60)}시간 전`;
     return `${Math.round(diffMin/(60*24))}일 전`;
   }
-  regenAge.textContent = computeAge(DATA.meta.generated_at);
-  regenBtn.addEventListener('click', () => {
-    alert('터미널에서 다음 명령을 실행하세요:\n\n/yundiet-ad-analysis\n\n생성 완료 후 페이지를 새로고침하면 최신 데이터가 반영됩니다.');
-  });
+  if (regenAge) regenAge.textContent = computeAge(DATA.meta.generated_at);
+  if (regenBtn) {
+    regenBtn.addEventListener('click', () => {
+      alert('터미널에서 다음 명령을 실행하세요:\n\n/yundiet-ad-analysis\n\n생성 완료 후 페이지를 새로고침하면 최신 데이터가 반영됩니다.');
+    });
+  }
 
   /* ---------- 섹션별 조회 기간 배지 ---------- */
   const P = (DATA.meta && DATA.meta.periods) || {};
@@ -1640,21 +1642,23 @@
 
   // 드롭다운은 2일치 이상일 때만 표시
   if (availableDates.length > 1) {
-    dateSelect.style.display = '';
+    if (dateSelect) dateSelect.style.display = '';
     availableDates.forEach(d => {
       const opt = document.createElement('option');
       opt.value = d; opt.textContent = d;
       if (d === DATA.meta.date) opt.selected = true;
-      dateSelect.appendChild(opt);
+      if (dateSelect) dateSelect.appendChild(opt);
     });
-    dateHelp.textContent = `· ${availableDates.length}일치 리포트 보관`;
+    if (dateHelp) dateHelp.textContent = `· ${availableDates.length}일치 리포트 보관`;
   } else {
-    dateSelect.style.display = 'none';
-    dateHelp.textContent = `· 오늘 1일치만 보관`;
+    if (dateSelect) dateSelect.style.display = 'none';
+    if (dateHelp) dateHelp.textContent = `· 오늘 1일치만 보관`;
   }
-  dateInput.value = DATA.meta.date;
-  dateInput.max = DATA.meta.date;
-  dateInput.min = availableDates[availableDates.length - 1] || DATA.meta.date;
+  if (dateInput) {
+    dateInput.value = DATA.meta.date;
+    dateInput.max = DATA.meta.date;
+    dateInput.min = availableDates[availableDates.length - 1] || DATA.meta.date;
+  }
 
   function navigateToDate(d) {
     if (!d) return;
@@ -1674,16 +1678,17 @@
     const target = filePattern.replace('{date}', d);
     location.href = current + target;
   }
-  dateSelect.addEventListener('change', (e) => navigateToDate(e.target.value));
-  dateGo.addEventListener('click', () => navigateToDate(dateInput.value));
-  dateInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') navigateToDate(dateInput.value); });
+  if (dateSelect) dateSelect.addEventListener('change', (e) => navigateToDate(e.target.value));
+  if (dateGo) dateGo.addEventListener('click', () => navigateToDate(dateInput?.value));
+  if (dateInput) dateInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') navigateToDate(dateInput.value); });
 
   function renderArchiveRange(start, end) {
+    if (!archiveRangeMeta || !archiveGrid || !archiveCategoryBody) return;
     if (!archiveRows.length) {
-      archiveRangeMeta.innerHTML = `<strong>데이터 조회기간:</strong> ${fmtPeriod(P.mtd || P.ga4_profit || P.monthly_profit, '-')}`;
+      archiveRangeMeta.innerHTML = `<strong>데이터 조회기간:</strong> ${esc(fmtPeriod(P.mtd || P.ga4_profit || P.monthly_profit, '-'))}`;
       archiveGrid.innerHTML = `<div class="archive-empty">과거 일간 스냅샷이 아직 쌓이지 않았습니다. 일별 HTML 저장이 누적되면 이 영역에서 평균치를 볼 수 있습니다.</div>`;
       archiveCategoryBody.innerHTML = `<tr><td colspan="8">데이터 없음</td></tr>`;
-      rangeHelp.textContent = '· 아카이브 대기 중';
+      if (rangeHelp) rangeHelp.textContent = '· 아카이브 대기 중';
       return;
     }
     const rows = archiveRows
@@ -1693,10 +1698,10 @@
       .filter(r => (!start || r.date >= start) && (!end || r.date <= end))
       .sort((a, b) => String(a.date).localeCompare(String(b.date)));
     if (!rows.length) {
-      archiveRangeMeta.innerHTML = `<strong>데이터 조회기간:</strong> ${fmtPeriod(P.mtd || P.ga4_profit || P.monthly_profit, '-')}`;
+      archiveRangeMeta.innerHTML = `<strong>데이터 조회기간:</strong> ${esc(fmtPeriod(P.mtd || P.ga4_profit || P.monthly_profit, '-'))}`;
       archiveGrid.innerHTML = `<div class="archive-empty">선택한 기간에 저장된 리포트가 없습니다.</div>`;
       archiveCategoryBody.innerHTML = `<tr><td colspan="8">데이터 없음</td></tr>`;
-      rangeHelp.textContent = '· 선택 기간 데이터 없음';
+      if (rangeHelp) rangeHelp.textContent = '· 선택 기간 데이터 없음';
       return;
     }
     const avg = (key) => avgValid(rows, r => numOrNull(r[key]));
@@ -1704,12 +1709,12 @@
     const avgGa4 = (key) => avgValid(ga4Rows, r => key.toLowerCase().includes('roi') ? ratio(r[key]) : numOrNull(r[key]));
     const latestGa4 = ga4Rows.length ? ga4Rows[ga4Rows.length - 1] : null;
     archiveRangeMeta.innerHTML = `
-      <strong>데이터 조회기간:</strong> ${fmtPeriod(P.mtd || P.ga4_profit || P.monthly_profit, '-')}
+      <strong>데이터 조회기간:</strong> ${esc(fmtPeriod(P.mtd || P.ga4_profit || P.monthly_profit, '-'))}
       <span style="opacity:.55;margin:0 8px;">·</span>
       <strong>포함 일수:</strong> Meta ${rows.length}일 / GA4 ${ga4Rows.length}일
     `;
     const cards = [
-      { label: '선택 일수', value: `${rows.length}일`, sub: `${rows[0].date} ~ ${latest.date}` },
+      { label: '선택 일수', value: `${rows.length}일`, sub: `${esc(rows[0].date)} ~ ${esc(latest.date)}` },
       { label: '평균 Meta 지출', value: avg('total_spend') == null ? '-' : fmtKRW(avg('total_spend')), sub: `최신 ${fmtKRW(latest.total_spend)}` },
       { label: '평균 Meta 매출', value: avg('total_revenue') == null ? '-' : fmtKRW(avg('total_revenue')), sub: `최신 ${fmtKRW(latest.total_revenue)}` },
       { label: '평균 blended ROAS', value: avg('blended_roas') == null ? '-' : fmtROAS(avg('blended_roas')), sub: `최신 ${fmtROAS(latest.blended_roas)}` },
@@ -1723,8 +1728,8 @@
     ];
     archiveGrid.innerHTML = cards.map(card => `
       <div class="archive-card">
-        <div class="label">${card.label}</div>
-        <div class="value">${card.value}</div>
+        <div class="label">${esc(card.label)}</div>
+        <div class="value">${esc(card.value)}</div>
         <div class="subvalue">${card.sub}</div>
       </div>
     `).join('');
@@ -1768,11 +1773,11 @@
         <td class="num">${Math.max(metaItems.length, ga4Items.length)}일</td>
       </tr>`;
     }).join('');
-    rangeHelp.textContent = `· Meta ${rows.length}일 스냅샷 평균 / GA4 ${ga4Rows.length}일 기준일 최신 재산출`;
+    if (rangeHelp) rangeHelp.textContent = `· Meta ${rows.length}일 스냅샷 평균 / GA4 ${ga4Rows.length}일 기준일 최신 재산출`;
   }
 
   function setRangePreset(days) {
-    if (!availableDates.length) return;
+    if (!availableDates.length || !rangeStart || !rangeEnd) return;
     const end = availableDates[0];
     const start = availableDates[Math.min(days - 1, availableDates.length - 1)];
     rangeStart.value = start;
@@ -1780,23 +1785,29 @@
     renderArchiveRange(start, end);
   }
 
-  rangeStart.min = availableDates[availableDates.length - 1] || DATA.meta.date;
-  rangeStart.max = availableDates[0] || DATA.meta.date;
-  rangeEnd.min = availableDates[availableDates.length - 1] || DATA.meta.date;
-  rangeEnd.max = availableDates[0] || DATA.meta.date;
+  if (rangeStart) {
+    rangeStart.min = availableDates[availableDates.length - 1] || DATA.meta.date;
+    rangeStart.max = availableDates[0] || DATA.meta.date;
+  }
+  if (rangeEnd) {
+    rangeEnd.min = availableDates[availableDates.length - 1] || DATA.meta.date;
+    rangeEnd.max = availableDates[0] || DATA.meta.date;
+  }
   const monthWindowDates = availableDates
     .filter(d => d >= defaultMonthStart && d <= (DATA.meta.date || d))
     .sort();
-  rangeStart.value = monthWindowDates[0] || availableDates[Math.min(6, availableDates.length - 1)] || DATA.meta.date;
-  rangeEnd.value = DATA.meta.date;
-  document.getElementById('range-7').addEventListener('click', () => setRangePreset(7));
-  document.getElementById('range-30').addEventListener('click', () => setRangePreset(30));
-  document.getElementById('range-all').addEventListener('click', () => {
+  if (rangeStart) rangeStart.value = monthWindowDates[0] || availableDates[Math.min(6, availableDates.length - 1)] || DATA.meta.date;
+  if (rangeEnd) rangeEnd.value = DATA.meta.date;
+  document.getElementById('range-7')?.addEventListener('click', () => setRangePreset(7));
+  document.getElementById('range-30')?.addEventListener('click', () => setRangePreset(30));
+  document.getElementById('range-all')?.addEventListener('click', () => {
+    if (!rangeStart || !rangeEnd) return;
     rangeStart.value = availableDates[availableDates.length - 1] || DATA.meta.date;
     rangeEnd.value = availableDates[0] || DATA.meta.date;
     renderArchiveRange(rangeStart.value, rangeEnd.value);
   });
-  document.getElementById('range-apply').addEventListener('click', () => {
+  document.getElementById('range-apply')?.addEventListener('click', () => {
+    if (!rangeStart || !rangeEnd) return;
     const start = rangeStart.value;
     const end = rangeEnd.value;
     if (start && end && start > end) {
@@ -1805,7 +1816,7 @@
     }
     renderArchiveRange(start, end);
   });
-  renderArchiveRange(rangeStart.value, rangeEnd.value);
+  if (rangeStart && rangeEnd) renderArchiveRange(rangeStart.value, rangeEnd.value);
 
   /* ---------- 섹션 0: MTD 카드 ---------- */
   const mtdGrid = document.getElementById('mtd-grid');
@@ -1897,7 +1908,11 @@
 
   function targetKpiHtml(r) {
     const status = String(r.목표달성여부 || '').trim();
-    if (!status || status === '-' || status === '없음') return '<span class="target-chip">목표 없음</span>';
+    const hasGoalFields = Boolean(r.목표판단일 || r.목표_ROAS != null || r.목표_CPA != null || r.목표_구매수 != null);
+    const actionType = String(r.액션유형 || '').trim();
+    if (!status || status === '-' || status === '없음' || (!hasGoalFields && (!actionType || actionType === '없음'))) {
+      return '<span class="target-chip">목표 없음</span>';
+    }
     const clsMap = {
       '달성': 'target-hit',
       '부분달성': 'target-partial',
@@ -1910,7 +1925,7 @@
     if (r.목표_ROAS != null) goalBits.push(`ROAS ${fmtROAS(r.목표_ROAS)}`);
     if (r.목표_CPA != null) goalBits.push(`CPA ${fmtKRW(r.목표_CPA)}`);
     if (r.목표_구매수 != null) goalBits.push(`구매 ${fmtNum(r.목표_구매수)}건`);
-    const action = r.액션유형 && r.액션유형 !== '없음' ? `${r.액션유형} · ` : '';
+    const action = actionType && actionType !== '없음' ? `${actionType} · ` : '';
     const reason = r.목표달성이유 ? `<span class="target-kpi">${esc(r.목표달성이유)}</span>` : '';
     return `<span class="target-chip ${clsMap[status] || ''}">${esc(action)}${esc(status)}</span><span class="target-kpi">${esc(goalBits.join(' · ') || '-')}</span>${reason}`;
   }
@@ -1932,14 +1947,14 @@
     if (r.동일카테고리상쇄액 != null || r.setting_same_category_offset_amount != null) {
       bits.push(`동일상쇄 ${fmtKRW(r.동일카테고리상쇄액 ?? r.setting_same_category_offset_amount)}`);
     }
-    const crossApproved = r.교차카테고리이동승인 ?? r.setting_cross_category_transfer_approved;
+    const crossApproved = boolish(r.교차카테고리이동승인 ?? r.setting_cross_category_transfer_approved);
     if (crossApproved === false) bits.push('교차이동 미승인');
     if (crossApproved === true) bits.push('교차이동 승인');
     if (r.실행광고ID) bits.push(`실행 ${esc(r.실행광고ID)}`);
     if (r.원본광고ID && r.원본광고ID !== r.소재ID) bits.push(`원본 ${esc(r.원본광고ID)}`);
-    const preserved = r.보존이벤트여부 ? ' · 보존' : '';
+    const preserved = boolish(r.보존이벤트여부) ? ' · 보존' : '';
     const correction = r.예산회계정정노트 || r.setting_correction_note;
-    const corrected = r.예산회계정정여부 || r.setting_budget_accounting_corrected;
+    const corrected = boolish(r.예산회계정정여부 ?? r.setting_budget_accounting_corrected);
     const reasonText = correction || r.셋팅판단근거 || '';
     const reason = reasonText ? `<span class="target-kpi">${corrected ? '정정됨 · ' : ''}${esc(reasonText)}</span>` : '';
     return `<span class="target-chip target-watch">${esc(group || action)}${preserved}</span><span class="target-kpi">${bits.join(' · ') || esc(action)}</span>${reason}`;
@@ -1962,7 +1977,15 @@
     const k = judgeKey(r);
     return (JUDGE_RANK[k] ?? 99);
   };
-  const truthyFlag = (value) => value === true || value === 1 || ['true', 'yes', 'y', '1', '후보', 'candidate'].includes(String(value || '').trim().toLowerCase());
+  const boolish = (value) => {
+    if (value === true || value === 1) return true;
+    if (value === false || value === 0) return false;
+    const normalized = String(value ?? '').trim().toLowerCase();
+    if (['true', 'yes', 'y', '1', '예', '네', '승인', '후보', 'candidate'].includes(normalized)) return true;
+    if (['false', 'no', 'n', '0', '아니오', '아님', '미승인', '없음'].includes(normalized)) return false;
+    return null;
+  };
+  const truthyFlag = (value) => boolish(value) === true;
   const ascCandidateMeta = (r) => {
     const raw = String(
       r.ASC판정
@@ -1994,6 +2017,13 @@
   const promotionStatusMeta = (r) => {
     const type = r.캠페인유형 || '메인';
     const asc = ascCandidateMeta(r);
+    if (boolish(r.셋팅전용행)) {
+      const actionType = String(r.액션유형 || r.셋팅액션유형 || '').trim();
+      if (/복증|bokjeung|promote/i.test(actionType)) return { cls: 'asc-hold', text: '복증 관찰중' };
+      if (/ASC/i.test(actionType)) return { cls: 'asc-candidate', text: 'ASC 반영 추적' };
+      if (/OFF|pause|보존/i.test(actionType) || boolish(r.보존이벤트여부)) return { cls: 'asc-drop', text: 'OFF 보존' };
+      return { cls: 'asc-hold', text: '셋팅 추적' };
+    }
     if (type === '테스트') {
       if (isOffJudgment(r)) return { cls: 'asc-drop', text: '테스트 OFF' };
       if (isTestWinner(r)) return { cls: 'asc-candidate', text: '메인 승격' };
@@ -2280,6 +2310,7 @@
   };
   const creativeTypeLabel = (r) => {
     const type = r.캠페인유형 || '메인';
+    if (boolish(r.셋팅전용행) || type === '셋팅추적') return { text: '셋팅추적', cls: 'type-main' };
     if (type === '테스트') return { text: '테스트', cls: 'type-test' };
     if (type === 'ASC') return { text: 'ASC', cls: 'type-asc' };
     return { text: '메인', cls: 'type-main' };
@@ -3201,7 +3232,7 @@
 
   Object.keys(CHART_MAP).forEach(p => {
     const sel = document.getElementById(CHART_MAP[p].select);
-    sel.addEventListener('change', () => renderChart(p));
+    if (sel) sel.addEventListener('change', () => renderChart(p));
     renderChart(p);
   });
 
