@@ -1452,19 +1452,33 @@
 <script>
 (function () {
   const dataEl = document.getElementById('dashboard-data');
-  const raw = dataEl.textContent.trim();
-  const DATA = raw && !raw.startsWith('/*') ? JSON.parse(raw) : {
+  const fallbackData = {
     meta: { date: '-', generated_at: '-' },
     mtd_kpis: [], creatives: [], monthly_profit: {},
     facebook_pages: {},
     ga4_order_attribution: null,
     product_entry_analysis: null
   };
+  const raw = dataEl?.textContent?.trim() || '';
+  let DATA = fallbackData;
+  if (raw && !raw.startsWith('/*')) {
+    try {
+      DATA = JSON.parse(raw);
+    } catch (err) {
+      console.error('dashboard-data JSON parse failed', err);
+    }
+  }
+  DATA.meta = DATA.meta || fallbackData.meta;
+  DATA.mtd_kpis = Array.isArray(DATA.mtd_kpis) ? DATA.mtd_kpis : [];
+  DATA.creatives = Array.isArray(DATA.creatives) ? DATA.creatives : [];
+  DATA.monthly_profit = DATA.monthly_profit && typeof DATA.monthly_profit === 'object' ? DATA.monthly_profit : {};
+  DATA.facebook_pages = DATA.facebook_pages && typeof DATA.facebook_pages === 'object' ? DATA.facebook_pages : {};
   window.DATA = DATA;
 
   /* ---------- Formatters ---------- */
   const parseNum = (v) => {
     if (v == null || v === '') return null;
+    if (typeof v === 'number') return Number.isFinite(v) ? v : null;
     const text = String(v).trim();
     const negativeByParens = /^\(.*\)$/.test(text);
     const match = text.replace(/,/g, '').match(/[+-]?(?:\d+\.?\d*|\.\d+)/);
@@ -1479,7 +1493,8 @@
   };
   const fmtNum = (v, d = 0) => {
     const n = parseNum(v);
-    return n == null ? '-' : n.toLocaleString('ko-KR', { maximumFractionDigits: d });
+    const digits = Number.isFinite(d) ? Math.max(0, Math.min(6, Number(d))) : 0;
+    return n == null ? '-' : n.toLocaleString('ko-KR', { maximumFractionDigits: digits });
   };
   const fmtInt = (v) => {
     const n = parseNum(v);
@@ -1487,14 +1502,16 @@
   };
   const fmtPct = (v, d = 2) => {
     const n = parseNum(v);
-    return n == null ? '-' : (n.toFixed(d) + '%');
+    const digits = Number.isFinite(d) ? Math.max(0, Math.min(6, Number(d))) : 2;
+    return n == null ? '-' : (n.toFixed(digits) + '%');
   };
   const fmtPctSigned = (v, d = 1) => {
     const n = ratio(v);
     if (n == null) return '-';
     const pct = n * 100;
     const sign = pct >= 0 ? '+' : '';
-    return `${sign}${pct.toFixed(d)}%`;
+    const digits = Number.isFinite(d) ? Math.max(0, Math.min(6, Number(d))) : 1;
+    return `${sign}${pct.toFixed(digits)}%`;
   };
   const fmtROAS = (v) => {
     const n = parseNum(v);
@@ -1995,7 +2012,7 @@
     '위너': 8, '위너승격': 8,
     '관찰': 9,
   };
-  const judgeKey = (r) => (r.판정 || '').replace(/\s/g, '');
+  const judgeKey = (r) => String(r.판정 || '').replace(/[^\p{L}\p{N}-]/gu, '').replace(/\s/g, '');
   const judgeRank = (r) => {
     const k = judgeKey(r);
     return (JUDGE_RANK[k] ?? 99);
@@ -2533,7 +2550,7 @@
           </td>`;
         }
         if (col.key === '__judge') {
-          const key = (r.판정 || '').replace(/\s/g, '');
+          const key = judgeKey(r);
           const meta = JUDGE_BADGE[key] || { cls: 'off', icon: '❔' };
           return `<td><span class="badge ${meta.cls}">${meta.icon} ${esc(r.판정 || '-')}</span></td>`;
         }
@@ -2790,7 +2807,7 @@
         const statusChip = RUNNING_STATUSES.has(statusOf(r))
           ? '<span class="type-chip type-asc">진행중</span>'
           : '<span class="type-chip type-winner-history">OFF</span>';
-        const judgeMeta = JUDGE_BADGE[(r.판정 || '').replace(/\s/g, '')] || { cls: 'off', icon: '❔' };
+        const judgeMeta = JUDGE_BADGE[judgeKey(r)] || { cls: 'off', icon: '❔' };
 	        const ascMeta = promotionStatusMeta(r);
         const opsPlanHtml = buildActionPlanHtml(directActionPlan(r));
         const ascScore = numOrNull(r.ASC점수);
@@ -3325,6 +3342,7 @@
       for (const row of rows) {
         for (const cat of targetCats) {
 	          const share = rate(shares[cat]) ?? 0;
+          if (share <= 0) continue;
           const next = { ...row, 카테고리: cat };
           numericKeys.forEach(k => {
             const v = numOrNull(row[k]);
@@ -3971,6 +3989,7 @@
       for (const row of rows) {
         for (const cat of targetCats) {
 	          const share = rate(shares[cat]) ?? 0;
+          if (share <= 0) continue;
           const next = { ...row, 카테고리: cat };
           numericKeys.forEach(k => {
             const v = numOrNull(row[k]);
