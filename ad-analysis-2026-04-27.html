@@ -1540,6 +1540,25 @@
     }
     return parseNum(v);
   };
+  const rate = (v) => {
+    const n = ratio(v);
+    if (n == null) return null;
+    return Math.abs(n) > 1 ? n / 100 : n;
+  };
+  const avgValid = (items, getter) => {
+    const values = (items || []).map(getter).filter(v => v != null && Number.isFinite(v));
+    return values.length ? values.reduce((sum, v) => sum + v, 0) / values.length : null;
+  };
+  const normalizeShareMap = (shares) => {
+    if (!shares || typeof shares !== 'object') return null;
+    const entries = Object.entries(shares)
+      .map(([key, value]) => [key, rate(value)])
+      .filter(([, value]) => value != null && value > 0);
+    if (!entries.length) return null;
+    const total = entries.reduce((sum, [, value]) => sum + value, 0);
+    if (!total) return null;
+    return Object.fromEntries(entries.map(([key, value]) => [key, value / total]));
+  };
 
   /* ---------- Header ---------- */
   document.getElementById('hdr-date').textContent = `📅 ${DATA.meta.date || '-'}`;
@@ -1680,9 +1699,9 @@
       rangeHelp.textContent = '· 선택 기간 데이터 없음';
       return;
     }
-    const avg = (key) => rows.reduce((s, r) => s + (numOrNull(r[key]) ?? 0), 0) / rows.length;
+    const avg = (key) => avgValid(rows, r => numOrNull(r[key]));
     const latest = rows[rows.length - 1];
-    const avgGa4 = (key) => ga4Rows.length ? ga4Rows.reduce((s, r) => s + (numOrNull(r[key]) ?? 0), 0) / ga4Rows.length : null;
+    const avgGa4 = (key) => avgValid(ga4Rows, r => key.toLowerCase().includes('roi') ? ratio(r[key]) : numOrNull(r[key]));
     const latestGa4 = ga4Rows.length ? ga4Rows[ga4Rows.length - 1] : null;
     archiveRangeMeta.innerHTML = `
       <strong>데이터 조회기간:</strong> ${fmtPeriod(P.mtd || P.ga4_profit || P.monthly_profit, '-')}
@@ -1691,12 +1710,12 @@
     `;
     const cards = [
       { label: '선택 일수', value: `${rows.length}일`, sub: `${rows[0].date} ~ ${latest.date}` },
-      { label: '평균 Meta 지출', value: fmtKRW(avg('total_spend')), sub: `최신 ${fmtKRW(latest.total_spend)}` },
-      { label: '평균 Meta 매출', value: fmtKRW(avg('total_revenue')), sub: `최신 ${fmtKRW(latest.total_revenue)}` },
-      { label: '평균 blended ROAS', value: fmtROAS(avg('blended_roas')), sub: `최신 ${fmtROAS(latest.blended_roas)}` },
+      { label: '평균 Meta 지출', value: avg('total_spend') == null ? '-' : fmtKRW(avg('total_spend')), sub: `최신 ${fmtKRW(latest.total_spend)}` },
+      { label: '평균 Meta 매출', value: avg('total_revenue') == null ? '-' : fmtKRW(avg('total_revenue')), sub: `최신 ${fmtKRW(latest.total_revenue)}` },
+      { label: '평균 blended ROAS', value: avg('blended_roas') == null ? '-' : fmtROAS(avg('blended_roas')), sub: `최신 ${fmtROAS(latest.blended_roas)}` },
       {
         label: '평균 GA4 순이익',
-        value: fmtKRW(avgGa4('total_profit')),
+        value: avgGa4('total_profit') == null ? '-' : fmtKRW(avgGa4('total_profit')),
         sub: latestGa4
           ? `기준일 최신 재산출 · ${latestGa4.date} ${fmtKRW(latestGa4.total_profit)} / 평균 실ROI ${fmtPctSigned(avgGa4('total_roi'))}`
           : 'GA4 기준일 데이터 없음',
@@ -1735,18 +1754,16 @@
     archiveCategoryBody.innerHTML = orderedCats.map(cat => {
       const metaItems = metaCatMap.get(cat) || [];
       const ga4Items = ga4CatMap.get(cat) || [];
-      const avgMeta = (key) => metaItems.reduce((s, r) => s + (numOrNull(r[key]) ?? 0), 0) / (metaItems.length || 1);
-      const avgGa4Cat = (key) => ga4Items.reduce((s, r) => s + (numOrNull(r[key]) ?? 0), 0) / (ga4Items.length || 1);
-      const avgGa4Roi = ga4Items.length
-        ? ga4Items.reduce((s, r) => s + (numOrNull(r.roi) ?? 0), 0) / ga4Items.length
-        : null;
+      const avgMeta = (key) => avgValid(metaItems, r => numOrNull(r[key]));
+      const avgGa4Cat = (key) => avgValid(ga4Items, r => numOrNull(r[key]));
+      const avgGa4Roi = avgValid(ga4Items, r => ratio(r.roi));
       return `<tr>
         <td>${esc(cat)}</td>
         <td class="num">${metaItems.length ? fmtKRW(avgMeta('spend')) : '-'}</td>
         <td class="num">${metaItems.length ? fmtKRW(avgMeta('revenue')) : '-'}</td>
         <td class="num">${metaItems.length ? fmtROAS(avgMeta('roas')) : '-'}</td>
         <td class="num">${metaItems.length ? fmtInt(avgMeta('ad_count')) : '-'}</td>
-        <td class="num ${(avgGa4Cat('profit') ?? 0) >= 0 ? 'profit-pos' : 'profit-neg'}">${ga4Items.length ? fmtKRW(avgGa4Cat('profit')) : '-'}</td>
+        <td class="num ${(avgGa4Cat('profit') ?? 0) >= 0 ? 'profit-pos' : 'profit-neg'}">${avgGa4Cat('profit') != null ? fmtKRW(avgGa4Cat('profit')) : '-'}</td>
         <td class="num ${(avgGa4Roi ?? 0) >= 0 ? 'profit-pos' : 'profit-neg'}">${ga4Items.length ? fmtPctSigned(avgGa4Roi) : '-'}</td>
         <td class="num">${Math.max(metaItems.length, ga4Items.length)}일</td>
       </tr>`;
@@ -2967,7 +2984,7 @@
       const monthlyRevenue = numOrNull(row.매출) ?? numOrNull(row.구매전환값) ?? numOrNull(row.revenue);
       const mtdRevenue = numOrNull(mtd.누적_매출) ?? numOrNull(mtd.revenue);
       const mtdSpend = numOrNull(mtd.누적_지출) ?? numOrNull(mtd.spend);
-      const cogsRate = numOrNull(row.원가율) ?? numOrNull(row.cogs_rate) ?? (product === '순수단백' ? 0.77 : 0.65);
+      const cogsRate = rate(row.원가율 ?? row.cogs_rate) ?? (product === '순수단백' ? 0.77 : 0.65);
       if (monthlyRevenue == null || mtdRevenue == null || mtdSpend == null || monthlyRevenue <= 0) return row;
 
       const gapRatio = Math.abs(monthlyRevenue - mtdRevenue) / monthlyRevenue;
@@ -2979,7 +2996,7 @@
       const grossProfit = revenue - cogsAmount;
       const netProfit = grossProfit - mtdSpend;
       const netMargin = revenue ? (netProfit / revenue) * 100 : null;
-      const roas = mtd.누적_ROAS ?? mtd.roas ?? (mtdSpend ? (revenue / mtdSpend) * 100 : null);
+      const roas = numOrNull(mtd.누적_ROAS) ?? numOrNull(mtd.roas) ?? (mtdSpend ? (revenue / mtdSpend) * 100 : null);
 
       return {
         ...row,
@@ -3209,9 +3226,10 @@
     document.getElementById('badge-ga4-profit').textContent = ga4Range || '-';
 
     const CAT_ORDER = ['단백밥', '단백밥 ASC', '밸런시', '순수단백', '기타'];
-    const buildGa4SplitShares = () => {
-      const explicit = DATA.meta?.ga4_category_split?.shares;
-      if (explicit && Object.keys(explicit).length) return explicit;
+	    const buildGa4SplitShares = () => {
+	      const explicit = DATA.meta?.ga4_category_split?.shares;
+	      const explicitShares = normalizeShareMap(explicit);
+	      if (explicitShares) return explicitShares;
       const spend = { '단백밥': 0, '단백밥 ASC': 0, '밸런시': 0, '순수단백': 0, '기타': 0 };
       (DATA.mtd_kpis || []).forEach(r => {
         const cat = r.카테고리 || r.category;
@@ -3222,9 +3240,9 @@
         else if (cat === '순수단백') spend['순수단백'] += s;
         else spend['기타'] += s;
       });
-      const total = Object.values(spend).reduce((a, b) => a + b, 0);
-      if (!total) return null;
-      return Object.fromEntries(Object.entries(spend).map(([k, v]) => [k, v / total]));
+	      const total = Object.values(spend).reduce((a, b) => a + b, 0);
+	      if (!total) return null;
+	      return Object.fromEntries(Object.entries(spend).map(([k, v]) => [k, v / total]));
     };
     const splitGa4RowsIfNeeded = (arr, kind) => {
       const rows = (arr || []).slice();
@@ -3240,15 +3258,15 @@
       const splitRows = [];
       for (const row of rows) {
         for (const cat of targetCats) {
-          const share = shares[cat] ?? 0;
+	          const share = rate(shares[cat]) ?? 0;
           const next = { ...row, 카테고리: cat };
           numericKeys.forEach(k => {
             const v = numOrNull(row[k]);
             next[k] = v == null ? row[k] : Math.round(v * share);
           });
-          const adCost = numOrNull(next.광고비);
-          const profit = numOrNull(next.순이익);
-          next.실ROI = adCost ? profit / adCost : null;
+	          const adCost = money(next.광고비);
+	          const profit = money(next.순이익);
+	          next.실ROI = adCost ? profit / adCost : null;
           splitRows.push(next);
         }
       }
@@ -3848,9 +3866,10 @@
         : [];
       return archiveRows.length > currentRows.length ? archiveRows : currentRows;
     };
-    const buildGa4SplitShares = () => {
-      const explicit = DATA.meta?.ga4_category_split?.shares;
-      if (explicit && Object.keys(explicit).length) return explicit;
+	    const buildGa4SplitShares = () => {
+	      const explicit = DATA.meta?.ga4_category_split?.shares;
+	      const explicitShares = normalizeShareMap(explicit);
+	      if (explicitShares) return explicitShares;
       const spend = { '단백밥': 0, '단백밥 ASC': 0, '밸런시': 0, '순수단백': 0, '기타': 0 };
       (DATA.mtd_kpis || []).forEach(r => {
         const cat = r.카테고리 || r.category;
@@ -3879,15 +3898,15 @@
       const splitRows = [];
       for (const row of rows) {
         for (const cat of targetCats) {
-          const share = shares[cat] ?? 0;
+	          const share = rate(shares[cat]) ?? 0;
           const next = { ...row, 카테고리: cat };
           numericKeys.forEach(k => {
             const v = numOrNull(row[k]);
             next[k] = v == null ? row[k] : Math.round(v * share);
           });
-          const adCost = numOrNull(next.광고비);
-          const profit = numOrNull(next.순이익);
-          next.실ROI = adCost ? profit / adCost : null;
+	          const adCost = money(next.광고비);
+	          const profit = money(next.순이익);
+	          next.실ROI = adCost ? profit / adCost : null;
           splitRows.push(next);
         }
       }
