@@ -1467,8 +1467,7 @@
     if (v == null || v === '') return null;
     const text = String(v).trim();
     const negativeByParens = /^\(.*\)$/.test(text);
-    const cleaned = text.replace(/,/g, '').replace(/[^0-9.+-]/g, '');
-    const match = cleaned.match(/[+-]?(?:\d+\.?\d*|\.\d+)/);
+    const match = text.replace(/,/g, '').match(/[+-]?(?:\d+\.?\d*|\.\d+)/);
     if (!match) return null;
     const n = Number(match[0]);
     const signed = negativeByParens && n > 0 ? -n : n;
@@ -1561,8 +1560,10 @@
   };
 
   /* ---------- Header ---------- */
-  document.getElementById('hdr-date').textContent = `📅 ${DATA.meta.date || '-'}`;
-  document.getElementById('hdr-generated').textContent = `생성: ${DATA.meta.generated_at || '-'}`;
+  const hdrDate = document.getElementById('hdr-date');
+  const hdrGenerated = document.getElementById('hdr-generated');
+  if (hdrDate) hdrDate.textContent = `📅 ${DATA.meta.date || '-'}`;
+  if (hdrGenerated) hdrGenerated.textContent = `생성: ${DATA.meta.generated_at || '-'}`;
 
   /* ---------- 재생성 버튼 & 생성 후 경과 시간 ---------- */
   const regenBtn = document.getElementById('btn-regen');
@@ -1821,7 +1822,7 @@
   /* ---------- 섹션 0: MTD 카드 ---------- */
   const mtdGrid = document.getElementById('mtd-grid');
   const CAT_ORDER = ['단백밥', '단백밥 ASC', '밸런시', '순수단백'];
-  CAT_ORDER.forEach(cat => {
+  if (mtdGrid) CAT_ORDER.forEach(cat => {
     const row = (DATA.mtd_kpis || []).find(r => r.카테고리 === cat) || {};
     const runningStatuses = new Set(['ACTIVE', 'WITH_ISSUES']);
     const activeByImpression = (DATA.creatives || [])
@@ -1981,8 +1982,8 @@
     if (value === true || value === 1) return true;
     if (value === false || value === 0) return false;
     const normalized = String(value ?? '').trim().toLowerCase();
-    if (['true', 'yes', 'y', '1', '예', '네', '승인', '후보', 'candidate'].includes(normalized)) return true;
-    if (['false', 'no', 'n', '0', '아니오', '아님', '미승인', '없음'].includes(normalized)) return false;
+    if (['true', 't', 'yes', 'y', '1', 'on', 'active', 'enabled', '예', '네', '승인', '후보', 'candidate'].includes(normalized)) return true;
+    if (['false', 'f', 'no', 'n', '0', 'off', 'paused', 'disabled', '아니오', '아니요', '아님', '미승인', '없음'].includes(normalized)) return false;
     return null;
   };
   const truthyFlag = (value) => boolish(value) === true;
@@ -2012,7 +2013,7 @@
     const judge = String(r.판정 || '');
     const roas = numOrNull(r.누적_ROAS) ?? numOrNull(r.ROAS) ?? 0;
     const purchases = numOrNull(r.구매수) ?? 0;
-    return r.위너여부 || /위너|메인\s*승격|1차\s*통과/.test(judge) || (roas >= 400 && purchases >= 30);
+    return truthyFlag(r.위너여부) || /위너|메인\s*승격|1차\s*통과/.test(judge) || (roas >= 400 && purchases >= 30);
   };
   const promotionStatusMeta = (r) => {
     const type = r.캠페인유형 || '메인';
@@ -2067,7 +2068,8 @@
   const shouldDisplayCreative = (c) => {
     const status = statusOf(c);
     if (RUNNING_STATUSES.has(status)) return true;
-    if (c.위너이력 || c.위너여부) return true;
+    if (truthyFlag(c.위너이력) || truthyFlag(c.위너여부)) return true;
+    if (boolish(c.셋팅전용행)) return true;
     if (!RUNNING_STATUSES.has(status) && (numOrNull(c.노출) ?? 0) >= 1) return true;
     return false;
   };
@@ -2085,6 +2087,12 @@
   function routeBucket(c) {
     const prod = c.상품 || '기타';
     const type = c.캠페인유형 || '메인';
+    if (type === '셋팅추적') {
+      const text = `${c.캠페인명 || ''} ${c.소재명 || ''} ${c.셋팅대상명 || ''}`;
+      if (/밸런시/.test(text)) return '밸런시-메인';
+      if (/순수단백/.test(text)) return '순수단백-메인';
+      return '단백밥-메인';
+    }
     return `${prod}-${type}`;
   }
 
@@ -2427,7 +2435,7 @@
         return acc;
       }, {});
       const winnerCounts = rows.reduce((acc, r) => {
-        const key = r.위너여부 ? '위너' : (r.위너이력 ? '위너이력' : '일반');
+        const key = truthyFlag(r.위너여부) ? '위너' : (truthyFlag(r.위너이력) ? '위너이력' : '일반');
         acc[key] = (acc[key] || 0) + 1;
         return acc;
       }, {});
@@ -2453,7 +2461,7 @@
       const sectionEl = document.createElement('div');
       sectionEl.className = 'creative-section';
       const periodLabel = selected === 'all' ? dataPeriod : `${dataPeriod} · ${filterLabel}`;
-      const criteriaLabel = rows.some(r => r.위너여부 || r.위너이력)
+      const criteriaLabel = rows.some(r => truthyFlag(r.위너여부) || truthyFlag(r.위너이력))
         ? '신규/위너 혼합 · 실제 캠페인 위치 기준'
         : '신규 소재 기준';
       sectionEl.innerHTML = `
@@ -2474,9 +2482,9 @@
         tr.innerHTML = COLS.map(col => {
         if (col.key === '__type') {
           const typeMeta = creativeTypeLabel(r);
-          const winnerChip = r.위너여부
+          const winnerChip = truthyFlag(r.위너여부)
             ? '<span class="type-chip type-winner">위너</span>'
-            : (r.위너이력 ? '<span class="type-chip type-winner-history">위너이력</span>' : '<span class="type-chip type-normal">일반</span>');
+            : (truthyFlag(r.위너이력) ? '<span class="type-chip type-winner-history">위너이력</span>' : '<span class="type-chip type-normal">일반</span>');
           const videoChip = isVideoCreative(r)
             ? '<span class="type-chip type-video">영상</span>'
             : '';
@@ -2494,7 +2502,7 @@
           const nameEl = url
             ? `<a class="ad-link" href="${url}" target="_blank" rel="noopener" title="Meta 광고 관리자에서 열기: ${title}">${name}</a>`
             : `<span class="ad-name" title="${title}">${name}</span>`;
-          const exWinner = r.위너이력 && !r.위너여부
+          const exWinner = truthyFlag(r.위너이력) && !truthyFlag(r.위너여부)
             ? '<span class="ex-winner-pill" title="과거 위너 이력이 있는 소재">🏆 위너이력</span>'
             : '';
           return `<td class="col-name">
@@ -2632,8 +2640,8 @@
     const selected = getOpsStatusFilter();
     const running = RUNNING_STATUSES.has(statusOf(r));
     if (selected === 'running') return running;
-    if (selected === 'winner') return !!r.위너여부;
-    if (selected === 'winner_history') return !!r.위너여부 || !!r.위너이력;
+    if (selected === 'winner') return truthyFlag(r.위너여부);
+    if (selected === 'winner_history') return truthyFlag(r.위너여부) || truthyFlag(r.위너이력);
     if (selected === 'off') return !running;
     return true;
   };
@@ -2699,7 +2707,7 @@
         return acc;
       }, {});
       const winnerCounts = rows.reduce((acc, r) => {
-        const key = r.위너여부 ? '위너' : (r.위너이력 ? '위너이력' : '일반');
+        const key = truthyFlag(r.위너여부) ? '위너' : (truthyFlag(r.위너이력) ? '위너이력' : '일반');
         acc[key] = (acc[key] || 0) + 1;
         return acc;
       }, {});
@@ -2754,9 +2762,9 @@
       const tbody = sectionEl.querySelector('tbody');
       rows.forEach(r => {
         const typeMeta = creativeTypeLabel(r);
-        const winnerChip = r.위너여부
+        const winnerChip = truthyFlag(r.위너여부)
           ? '<span class="type-chip type-winner">위너</span>'
-          : (r.위너이력 ? '<span class="type-chip type-winner-history">위너이력</span>' : '<span class="type-chip type-normal">일반</span>');
+          : (truthyFlag(r.위너이력) ? '<span class="type-chip type-winner-history">위너이력</span>' : '<span class="type-chip type-normal">일반</span>');
         const statusChip = RUNNING_STATUSES.has(statusOf(r))
           ? '<span class="type-chip type-asc">진행중</span>'
           : '<span class="type-chip type-winner-history">OFF</span>';
@@ -2797,8 +2805,8 @@
         tbody.appendChild(tr);
       });
       const sum = computeSummary(rows);
-      const winnerTotal = rows.filter(r => r.위너여부).length;
-      const winnerHistoryTotal = rows.filter(r => r.위너이력 && !r.위너여부).length;
+      const winnerTotal = rows.filter(r => truthyFlag(r.위너여부)).length;
+      const winnerHistoryTotal = rows.filter(r => truthyFlag(r.위너이력) && !truthyFlag(r.위너여부)).length;
       const ascQualifiedTotal = rows.filter(r => ['ASC합격', 'ASC후보'].includes(String(r.ASC판정 || ''))).length;
       const ascFailedTotal = rows.filter(r => String(r.ASC판정 || '') === 'ASC탈락').length;
       summaryGrid.innerHTML = `
@@ -2889,17 +2897,19 @@
     { k: 'active_ads', lbl: 'ACTIVE 광고 수', fmt: fmtNum },
     { k: 'off_ads', lbl: 'OFF 광고 수', fmt: fmtNum },
   ];
-  valKpi.innerHTML = KPI_ORDER.map(({k, lbl, fmt}) => {
-    const item = valDisplay[k] || {};
-    return `<div class="val-card">
-      <div class="lbl">${lbl}</div>
-      <div class="val">${item.value != null ? fmt(item.value) : '-'}</div>
-      <div class="src">${esc(item.source || '')}</div>
-    </div>`;
-  }).join('');
+  if (valKpi) {
+    valKpi.innerHTML = KPI_ORDER.map(({k, lbl, fmt}) => {
+      const item = valDisplay[k] || {};
+      return `<div class="val-card">
+        <div class="lbl">${lbl}</div>
+        <div class="val">${item.value != null ? fmt(item.value) : '-'}</div>
+        <div class="src">${esc(item.source || '')}</div>
+      </div>`;
+    }).join('');
+  }
 
   const valTbody = document.querySelector('#val-table tbody');
-  (val.by_category || []).forEach(c => {
+  if (valTbody) (val.by_category || []).forEach(c => {
     const cat = c.카테고리 || '-';
     const derivedAdCount = derivedCategoryAdCounts.get(cat);
     const tr = document.createElement('tr');
@@ -2911,7 +2921,8 @@
       <td>${fmtNum(derivedAdCount != null ? derivedAdCount : c.광고수)}</td>`;
     valTbody.appendChild(tr);
   });
-  if (val.notes) document.getElementById('val-notes').textContent = '💡 ' + val.notes;
+  const valNotes = document.getElementById('val-notes');
+  if (val.notes && valNotes) valNotes.textContent = '💡 ' + val.notes;
 
   /* ---------- 섹션 3: 퍼널 인사이트 진단 ---------- */
   const fi = document.getElementById('funnel-insights');
@@ -2925,9 +2936,9 @@
       : `P0 ${p0} · P1 ${p1} · 전체 ${insights.length}건`;
   }
   if (!insights.length) {
-    fi.innerHTML = '<p style="color:var(--muted)">오늘 기준 P0/P1 중요 인사이트 없음.</p>';
+    if (fi) fi.innerHTML = '<p style="color:var(--muted)">오늘 기준 P0/P1 중요 인사이트 없음.</p>';
   } else {
-    fi.innerHTML = insights.map(i => {
+    if (fi) fi.innerHTML = insights.map(i => {
       const insightUrl = safeUrl(i.ad_manager_url);
       const targetHtml = insightUrl
         ? `<a class="ad-link" href="${insightUrl}" target="_blank" rel="noopener">${esc(i.target || '-')}</a>`
@@ -3108,10 +3119,11 @@
 
   function renderChart(product) {
     const cfg = CHART_MAP[product];
+    if (!cfg) return;
     const sel = document.getElementById(cfg.select);
     const rows = filterProfitRows(normalizeMonthlyProfitRows(product));
-    const sorted = sortRows(rows, sel.value);
-    const labels = sorted.map(r => r.월);
+    const sorted = sortRows(rows, sel?.value || 'month-desc');
+    const labels = sorted.map(r => r.월 || r.month || '-');
     const revenue = sorted.map(r => money(r.매출 ?? r.구매전환값));
     const cogs = sorted.map(r => money(r.원가액));
     const adspend = sorted.map(r => money(r.광고지출));
@@ -3254,7 +3266,8 @@
     };
     const periods = DATA.meta?.periods || {};
     const ga4Range = periods.ga4_profit?.label || '';
-    document.getElementById('badge-ga4-profit').textContent = ga4Range || '-';
+    const ga4ProfitBadgeEl = document.getElementById('badge-ga4-profit');
+    if (ga4ProfitBadgeEl) ga4ProfitBadgeEl.textContent = ga4Range || '-';
 
     const CAT_ORDER = ['단백밥', '단백밥 ASC', '밸런시', '순수단백', '기타'];
 	    const buildGa4SplitShares = () => {
@@ -3343,6 +3356,7 @@
     // ---- 일별 카테고리 카드 ----
     (function renderDailyCats() {
       const host = document.getElementById('ga4-daily-cats');
+      if (!host) return;
       const byCat = groupByCategory(splitGa4RowsIfNeeded(getEffectiveGa4DailyRows(), 'daily'));
       const cats = orderedCats(byCat);
       if (cats.length === 0) {
@@ -3410,6 +3424,7 @@
     (function renderMonthlyCats() {
       const summaryHost = document.getElementById('ga4-monthly-total-summary');
       const host = document.getElementById('ga4-monthly-cats');
+      if (!host) return;
       const monthlyRows = splitGa4RowsIfNeeded(DATA.ga4_profit_monthly, 'monthly');
       const byCat = groupByCategory(monthlyRows);
       const cats = orderedCats(byCat);
@@ -3502,6 +3517,7 @@
     }
 
     const emptyMsg = `<div class="ga4-empty">데이터 없음 — product_entry / attribution 산출물 주입 대기 중</div>`;
+    if (!entryWrap || !matrixBody || !campaignWrap) return;
     if (!summary && !orders.length) {
       entryWrap.innerHTML = emptyMsg;
       matrixBody.innerHTML = `<tr><td colspan="6">데이터 없음</td></tr>`;
@@ -3822,7 +3838,10 @@
       if (!campaignRowsByFamily.has(key)) campaignRowsByFamily.set(key, []);
       campaignRowsByFamily.get(key).push(row);
     });
-    const familyOrder = ['단백밥', '밸런시', '순수단백', '기타'];
+    const familyOrder = [
+      ...['단백밥', '밸런시', '순수단백', '기타'].filter(family => campaignRowsByFamily.has(family)),
+      ...[...campaignRowsByFamily.keys()].filter(family => !['단백밥', '밸런시', '순수단백', '기타'].includes(family)),
+    ];
     campaignWrap.innerHTML = campaignRows.length ? `
       <div class="analysis-table-wrap">
         <table class="analysis-table">
@@ -3840,7 +3859,6 @@
           </thead>
           <tbody>
             ${familyOrder
-              .filter(family => campaignRowsByFamily.has(family))
               .map(family => {
                 const rows = campaignRowsByFamily.get(family)
                   .slice()
@@ -3873,6 +3891,7 @@
   /* ---------- 섹션 1.7: 광고 효율 vs 실결제 수익 브리지 ---------- */
   (function renderBridge() {
     const host = document.getElementById('bridge-grid');
+    if (!host) return;
     const CAT_ORDER = ['단백밥', '단백밥 ASC', '밸런시', '순수단백', '기타'];
     const mtdMap = new Map((DATA.mtd_kpis || []).map(r => [r.카테고리 || r.category, r]));
     const getEffectiveGa4DailyRowsForBridge = () => {
@@ -4102,7 +4121,7 @@
     if (!pageUrl) return;
     a.href = pageUrl; a.target = '_blank'; a.rel = 'noopener';
     a.textContent = `📘 ${name} 페이지`;
-    fbHost.appendChild(a);
+    if (fbHost) fbHost.appendChild(a);
   });
 })();
 </script>
