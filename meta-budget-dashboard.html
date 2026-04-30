@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>메타 예산관리 대시보드</title>
+  <style>
+    :root {
+      --bg: #f5f6f8;
+      --panel: #ffffff;
+      --ink: #17202a;
+      --muted: #667085;
+      --line: #dde3ea;
+      --brand: #1769aa;
+      --good: #177245;
+      --warn: #a15c00;
+      --bad: #b42318;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    .page { max-width: 1500px; margin: 0 auto; padding: 24px; }
+    header { display: flex; justify-content: space-between; gap: 18px; align-items: flex-end; margin-bottom: 18px; }
+    h1 { margin: 0; font-size: 28px; letter-spacing: 0; }
+    .sub { margin-top: 8px; color: var(--muted); font-size: 14px; }
+    .toolbar, .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+    .toolbar { padding: 14px; display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 14px; }
+    label { display: grid; gap: 5px; color: var(--muted); font-size: 12px; }
+    input, select, button {
+      height: 38px; border: 1px solid var(--line); border-radius: 6px; background: #fff; padding: 0 10px; font: inherit;
+    }
+    button { background: var(--brand); color: #fff; border-color: var(--brand); font-weight: 700; cursor: pointer; }
+    .grid { display: grid; gap: 12px; }
+    .kpis { grid-template-columns: repeat(6, minmax(0, 1fr)); margin-bottom: 14px; }
+    .kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; min-height: 108px; }
+    .kpi span { display: block; color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+    .kpi strong { font-size: 22px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+    .kpi small { display: block; margin-top: 8px; color: var(--muted); line-height: 1.4; }
+    .panel { padding: 16px; margin-bottom: 14px; }
+    .panel-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; margin-bottom: 12px; }
+    h2 { margin: 0; font-size: 18px; }
+    .note { color: var(--muted); font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid var(--line); padding: 9px 8px; text-align: left; font-size: 13px; vertical-align: top; }
+    th { color: #344054; background: #f8fafc; font-weight: 800; position: sticky; top: 0; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .scroll { overflow: auto; max-height: 520px; border: 1px solid var(--line); border-radius: 8px; }
+    .good { color: var(--good); font-weight: 800; }
+    .warn { color: var(--warn); font-weight: 800; }
+    .bad { color: var(--bad); font-weight: 800; }
+    .bars { display: grid; gap: 7px; }
+    .bar-row { display: grid; grid-template-columns: 96px 1fr 96px; gap: 10px; align-items: center; font-size: 12px; }
+    .bar-track { height: 16px; background: #edf1f5; border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--brand); min-width: 1px; }
+    @media (max-width: 1050px) {
+      header { display: block; }
+      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .bar-row { grid-template-columns: 82px 1fr 80px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div>
+        <h1>메타 예산관리 대시보드</h1>
+        <div class="sub">Supabase에 적재된 Meta API spend와 GA4/EZ 광고 순이익을 날짜 범위로 비교합니다.</div>
+      </div>
+      <div class="note">identity: META_BUDGET_MANAGEMENT · generated: 2026-04-30</div>
+    </header>
+
+    <section class="toolbar">
+      <label>시작일 <input id="startDate" type="date"></label>
+      <label>종료일 <input id="endDate" type="date"></label>
+      <label>보기
+        <select id="mode">
+          <option value="daily">일별</option>
+          <option value="weekly">주간</option>
+          <option value="monthly">월간</option>
+        </select>
+      </label>
+      <button id="applyBtn">적용</button>
+      <button id="latestBtn">전체 기간</button>
+    </section>
+
+    <section class="grid kpis" id="kpis"></section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>기간별 현황</h2>
+        <div class="note" id="rangeNote"></div>
+      </div>
+      <div class="scroll"><table id="statusTable"></table></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>일별 광고비 흐름</h2>
+        <div class="note">선택 기간 내 Meta API spend 기준</div>
+      </div>
+      <div class="bars" id="bars"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>상위 예산 소진 객체</h2>
+        <div class="note">campaign/adset 월별 snapshot</div>
+      </div>
+      <div class="scroll"><table id="entityTable"></table></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>예산 전략 스냅샷</h2>
+        <div class="note">실행 승인 전 검토 상태</div>
+      </div>
+      <div class="scroll"><table id="strategyTable"></table></div>
+    </section>
+  </div>
+
+  <script id="dashboard-data" type="application/json">{"identity": "META_BUDGET_MANAGEMENT", "generated_at": "2026-04-30", "daily": [{"report_date": "2026-04-01", "meta_api_spend": 305468, "impressions": 27934, "clicks": 502, "meta_purchases": 81.0, "meta_purchase_value": 5580288.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 305468}, {"report_date": "2026-04-02", "meta_api_spend": 280395, "impressions": 25731, "clicks": 516, "meta_purchases": 69.0, "meta_purchase_value": 5000187.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 280395}, {"report_date": "2026-04-03", "meta_api_spend": 224779, "impressions": 22349, "clicks": 414, "meta_purchases": 42.0, "meta_purchase_value": 3109038.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 224779}, {"report_date": "2026-04-04", "meta_api_spend": 230063, "impressions": 25902, "clicks": 401, "meta_purchases": 45.0, "meta_purchase_value": 2522274.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 230063}, {"report_date": "2026-04-05", "meta_api_spend": 284456, "impressions": 29038, "clicks": 545, "meta_purchases": 84.0, "meta_purchase_value": 5823381.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 284456}, {"report_date": "2026-04-06", "meta_api_spend": 500256, "impressions": 42176, "clicks": 802, "meta_purchases": 144.0, "meta_purchase_value": 9650772.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 500256}, {"report_date": "2026-04-07", "meta_api_spend": 581645, "impressions": 46300, "clicks": 824, "meta_purchases": 99.0, "meta_purchase_value": 7056249.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 581645}, {"report_date": "2026-04-08", "meta_api_spend": 511450, "impressions": 40426, "clicks": 749, "meta_purchases": 108.0, "meta_purchase_value": 7972128.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 511450}, {"report_date": "2026-04-09", "meta_api_spend": 488646, "impressions": 42026, "clicks": 796, "meta_purchases": 93.0, "meta_purchase_value": 6369306.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 488646}, {"report_date": "2026-04-10", "meta_api_spend": 426351, "impressions": 40053, "clicks": 652, "meta_purchases": 54.0, "meta_purchase_value": 4788078.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 426351}, {"report_date": "2026-04-11", "meta_api_spend": 416594, "impressions": 41954, "clicks": 717, "meta_purchases": 48.0, "meta_purchase_value": 3486003.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 416594}, {"report_date": "2026-04-12", "meta_api_spend": 456898, "impressions": 44710, "clicks": 794, "meta_purchases": 78.0, "meta_purchase_value": 5727831.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 456898}, {"report_date": "2026-04-13", "meta_api_spend": 524090, "impressions": 46669, "clicks": 737, "meta_purchases": 147.0, "meta_purchase_value": 10869579.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 524090}, {"report_date": "2026-04-14", "meta_api_spend": 526453, "impressions": 47061, "clicks": 841, "meta_purchases": 114.0, "meta_purchase_value": 7371930.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 526453}, {"report_date": "2026-04-15", "meta_api_spend": 536425, "impressions": 46210, "clicks": 804, "meta_purchases": 84.0, "meta_purchase_value": 6681024.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 536425}, {"report_date": "2026-04-16", "meta_api_spend": 502040, "impressions": 43534, "clicks": 753, "meta_purchases": 72.0, "meta_purchase_value": 5033166.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 502040}, {"report_date": "2026-04-17", "meta_api_spend": 483791, "impressions": 40924, "clicks": 737, "meta_purchases": 96.0, "meta_purchase_value": 6734664.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 483791}, {"report_date": "2026-04-18", "meta_api_spend": 426732, "impressions": 37323, "clicks": 697, "meta_purchases": 78.0, "meta_purchase_value": 6366567.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 426732}, {"report_date": "2026-04-19", "meta_api_spend": 508666, "impressions": 43427, "clicks": 786, "meta_purchases": 96.0, "meta_purchase_value": 7389540.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 508666}, {"report_date": "2026-04-20", "meta_api_spend": 610421, "impressions": 49127, "clicks": 996, "meta_purchases": 132.0, "meta_purchase_value": 10218927.0, "profit_ad_spend": 610421, "ga4_revenue": 410830, "cogs": 215798, "channel_fee": 16433, "delivery_fee": 33000, "net_profit": 100458, "order_count": 6, "matched_order_count": 6, "real_roi_on_meta_spend": 0.16457166447419078, "real_roi_on_profit_spend": 0.16457166447419078, "has_profit_data": true, "spend_delta": 0}, {"report_date": "2026-04-21", "meta_api_spend": 563313, "impressions": 45095, "clicks": 853, "meta_purchases": 129.0, "meta_purchase_value": 5158173.0, "profit_ad_spend": 563313, "ga4_revenue": 532360, "cogs": 261142, "channel_fee": 21294, "delivery_fee": 49500, "net_profit": 115657, "order_count": 9, "matched_order_count": 9, "real_roi_on_meta_spend": 0.2053156948268547, "real_roi_on_profit_spend": 0.2053156948268547, "has_profit_data": true, "spend_delta": 0}, {"report_date": "2026-04-22", "meta_api_spend": 485146, "impressions": 39952, "clicks": 761, "meta_purchases": 186.0, "meta_purchase_value": 6742110.0, "profit_ad_spend": 485146, "ga4_revenue": 673390, "cogs": 325230, "channel_fee": 26935, "delivery_fee": 55000, "net_profit": 177044, "order_count": 10, "matched_order_count": 10, "real_roi_on_meta_spend": 0.3649293202458641, "real_roi_on_profit_spend": 0.3649293202458641, "has_profit_data": true, "spend_delta": 0}, {"report_date": "2026-04-23", "meta_api_spend": 427984, "impressions": 32978, "clicks": 641, "meta_purchases": 147.0, "meta_purchase_value": 5550192.0, "profit_ad_spend": 427984, "ga4_revenue": 495890, "cogs": 242236, "channel_fee": 19836, "delivery_fee": 44000, "net_profit": 119557, "order_count": 8, "matched_order_count": 8, "real_roi_on_meta_spend": 0.2793492280085237, "real_roi_on_profit_spend": 0.2793492280085237, "has_profit_data": true, "spend_delta": 0}, {"report_date": "2026-04-24", "meta_api_spend": 475506, "impressions": 39219, "clicks": 698, "meta_purchases": 105.0, "meta_purchase_value": 3413148.0, "profit_ad_spend": 475506, "ga4_revenue": 139370, "cogs": 76717, "channel_fee": 5575, "delivery_fee": 16500, "net_profit": 4599, "order_count": 3, "matched_order_count": 3, "real_roi_on_meta_spend": 0.009671802248552068, "real_roi_on_profit_spend": 0.009671802248552068, "has_profit_data": true, "spend_delta": 0}, {"report_date": "2026-04-25", "meta_api_spend": 469334, "impressions": 41773, "clicks": 741, "meta_purchases": 108.0, "meta_purchase_value": 4024803.0, "profit_ad_spend": 469334, "ga4_revenue": 207440, "cogs": 114710, "channel_fee": 8298, "delivery_fee": 22000, "net_profit": 16868, "order_count": 4, "matched_order_count": 4, "real_roi_on_meta_spend": 0.035940289857542815, "real_roi_on_profit_spend": 0.035940289857542815, "has_profit_data": true, "spend_delta": 0}, {"report_date": "2026-04-26", "meta_api_spend": 516864, "impressions": 42988, "clicks": 850, "meta_purchases": 144.0, "meta_purchase_value": 5439756.0, "profit_ad_spend": 516864, "ga4_revenue": 768030, "cogs": 328018, "channel_fee": 30722, "delivery_fee": 55000, "net_profit": 203794, "order_count": 10, "matched_order_count": 10, "real_roi_on_meta_spend": 0.39428940688459635, "real_roi_on_profit_spend": 0.39428940688459635, "has_profit_data": true, "spend_delta": 0}, {"report_date": "2026-04-27", "meta_api_spend": 608071, "impressions": 47160, "clicks": 944, "meta_purchases": 213.0, "meta_purchase_value": 9655788.0, "profit_ad_spend": 608068, "ga4_revenue": 1067020, "cogs": 561287, "channel_fee": 42681, "delivery_fee": 60500, "net_profit": 286425, "order_count": 11, "matched_order_count": 11, "real_roi_on_meta_spend": 0.47103874383090133, "real_roi_on_profit_spend": 0.4710410677753146, "has_profit_data": true, "spend_delta": 3}, {"report_date": "2026-04-28", "meta_api_spend": 612372, "impressions": 47781, "clicks": 823, "meta_purchases": 240.0, "meta_purchase_value": 10703985.0, "profit_ad_spend": 612347, "ga4_revenue": 506292, "cogs": 268311, "channel_fee": 20252, "delivery_fee": 38500, "net_profit": 126893, "order_count": 7, "matched_order_count": 7, "real_roi_on_meta_spend": 0.20721554871875264, "real_roi_on_profit_spend": 0.20722400860949755, "has_profit_data": true, "spend_delta": 25}, {"report_date": "2026-04-29", "meta_api_spend": 572900, "impressions": 42223, "clicks": 787, "meta_purchases": 261.0, "meta_purchase_value": 9180270.0, "profit_ad_spend": 572854, "ga4_revenue": 565710, "cogs": 271546, "channel_fee": 22629, "delivery_fee": 33000, "net_profit": 165959, "order_count": 6, "matched_order_count": 6, "real_roi_on_meta_spend": 0.28968231803107, "real_roi_on_profit_spend": 0.2897055794321066, "has_profit_data": true, "spend_delta": 46}, {"report_date": "2026-04-30", "meta_api_spend": 185690, "impressions": 14352, "clicks": 271, "meta_purchases": 36.0, "meta_purchase_value": 1119450.0, "profit_ad_spend": 0, "ga4_revenue": 0, "cogs": 0, "channel_fee": 0, "delivery_fee": 0, "net_profit": 0, "order_count": 0, "matched_order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "has_profit_data": false, "spend_delta": 185690}], "weekly": [{"week_start": "2026-03-30", "period_since": "2026-04-01", "period_until": "2026-04-05", "day_count": 5, "profit_day_count": 0, "meta_api_spend": 1325161, "profit_ad_spend": 0, "ga4_revenue": 0, "net_profit": 0, "order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "profit_spend_coverage_rate": 0.0}, {"week_start": "2026-04-06", "period_since": "2026-04-06", "period_until": "2026-04-12", "day_count": 7, "profit_day_count": 0, "meta_api_spend": 3381840, "profit_ad_spend": 0, "ga4_revenue": 0, "net_profit": 0, "order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "profit_spend_coverage_rate": 0.0}, {"week_start": "2026-04-13", "period_since": "2026-04-13", "period_until": "2026-04-19", "day_count": 7, "profit_day_count": 0, "meta_api_spend": 3508197, "profit_ad_spend": 0, "ga4_revenue": 0, "net_profit": 0, "order_count": 0, "real_roi_on_meta_spend": 0.0, "real_roi_on_profit_spend": 0.0, "profit_spend_coverage_rate": 0.0}, {"week_start": "2026-04-20", "period_since": "2026-04-20", "period_until": "2026-04-26", "day_count": 7, "profit_day_count": 7, "meta_api_spend": 3548568, "profit_ad_spend": 3548568, "ga4_revenue": 3227310, "net_profit": 737977, "order_count": 50, "real_roi_on_meta_spend": 0.20796473394338222, "real_roi_on_profit_spend": 0.20796473394338222, "profit_spend_coverage_rate": 1.0}, {"week_start": "2026-04-27", "period_since": "2026-04-27", "period_until": "2026-04-30", "day_count": 4, "profit_day_count": 3, "meta_api_spend": 1979033, "profit_ad_spend": 1793269, "ga4_revenue": 2139022, "net_profit": 579277, "order_count": 24, "real_roi_on_meta_spend": 0.292707094828636, "real_roi_on_profit_spend": 0.32302850269535693, "profit_spend_coverage_rate": 0.9061339553206036}], "monthly": [{"month_start": "2026-04-01", "period_since": "2026-04-01", "period_until": "2026-04-30", "day_count": 30, "profit_day_count": 10, "meta_api_spend": 13742799, "profit_ad_spend": 5341837, "ga4_revenue": 5366332, "net_profit": 1317254, "order_count": 74, "real_roi_on_meta_spend": 0.09585048868138142, "real_roi_on_profit_spend": 0.24659194954844185, "profit_spend_coverage_rate": 0.38870080250755323}], "strategies": [{"snapshot_date": "2026-04-30", "period_since": "2026-04-01", "period_until": "2026-04-30", "ad_account_id": "act_313374542193702", "spend_total": 13742799, "profit_covered_spend": 5341837, "profit_coverage_rate": 0.3887, "revenue": 5366332, "net_profit": 1317254, "real_roi": 0.2466, "recommended_daily_increase": 26345, "recommended_monthly_impact": 790350, "execution_status": "budget_review_required", "blockers": [{"code": "LOW_PROFIT_COVERAGE", "message": "Profit coverage is below 70%; do not execute budget increases without backfill or explicit override.", "profit_coverage_rate": 0.3887}]}], "entities": [{"month_start": "2026-04-01", "level": "adset", "entity_id": "120242235647720784", "campaign_name": "윤식단 ASC_260420", "adset_name": "단백밥 ASC_260420", "ad_name": "", "spend": 845643, "purchases": 204.0, "purchase_value": 8608680.0, "roas": 10.18}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241050842300784", "campaign_name": "단백밥 소재 테스트_250730", "adset_name": "이거뭐에요?(904)_릴스_260331", "ad_name": "", "spend": 593394, "purchases": 216.0, "purchase_value": 9597816.0, "roas": 16.1744}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120235616758020784", "campaign_name": "단백밥 소재 테스트_250730", "adset_name": "[프로모션]단백밥2주년생일파티_251208", "ad_name": "", "spend": 588898, "purchases": 198.0, "purchase_value": 11368893.0, "roas": 19.3054}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120240270539090784", "campaign_name": "단백밥 소재 테스트_250730", "adset_name": "자정지나면가격인상4800_260318(전환값)", "ad_name": "", "spend": 585660, "purchases": 177.0, "purchase_value": 10955691.0, "roas": 18.7066}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120238400095420784", "campaign_name": "단백밥 소재 테스트_250730", "adset_name": "직장인점심한달10만원끝(영상)_260211", "ad_name": "", "spend": 585480, "purchases": 135.0, "purchase_value": 8268801.0, "roas": 14.1231}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120239817231830784", "campaign_name": "전환광고 (수동셋팅)_단백밥", "adset_name": "(복증)식비아끼고 7분이면 끝(영상)메인_260309", "ad_name": "", "spend": 583646, "purchases": 150.0, "purchase_value": 10094235.0, "roas": 17.2951}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120237226640940784", "campaign_name": "단백밥 소재 테스트_250730", "adset_name": "식비아끼고 7분이면 끝(영상)메인_260113", "ad_name": "", "spend": 583299, "purchases": 165.0, "purchase_value": 8856051.0, "roas": 15.1827}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120240613978760784", "campaign_name": "단백밥 소재 테스트_250730", "adset_name": "오빠단톡방비밀링크4800(릴스)_260324", "ad_name": "", "spend": 557704, "purchases": 198.0, "purchase_value": 11868009.0, "roas": 21.2801}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120240036421850784", "campaign_name": "밸런시 테스트 캠페인_260316", "adset_name": "이렇게맛있어도되나ad_260316", "ad_name": "", "spend": 516069, "purchases": 120.0, "purchase_value": 7028652.0, "roas": 13.6196}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120239263750880784", "campaign_name": "단백밥 소재 테스트_250730", "adset_name": "괴물단백질(단일)_260226(전환값)", "ad_name": "", "spend": 470107, "purchases": 96.0, "purchase_value": 5712714.0, "roas": 12.1519}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120239977172680784", "campaign_name": "전환광고 (수동셋팅)_단백밥", "adset_name": "(복증)괴물단백질(단일)_260312(전환값)", "ad_name": "", "spend": 469440, "purchases": 111.0, "purchase_value": 7705593.0, "roas": 16.4144}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241284828820784", "campaign_name": "순수단백 소재 테스트_260105", "adset_name": "[제육]진짜남자의소울푸드(남성타겟)_260406", "ad_name": "", "spend": 460381, "purchases": 102.0, "purchase_value": 5180646.0, "roas": 11.253}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120236980814140784", "campaign_name": "순수단백 메인 캠페인_260108 (전환수동)", "adset_name": "[함박]닭을이겼습니다(슬라이드)_260108(복증)", "ad_name": "", "spend": 444039, "purchases": 144.0, "purchase_value": 8527749.0, "roas": 19.205}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120239871696970784", "campaign_name": "순수단백 소재 테스트_260105", "adset_name": "[함박]식후나른함육즙파티_260310", "ad_name": "", "spend": 439165, "purchases": 75.0, "purchase_value": 5233596.0, "roas": 11.9172}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241471968840784", "campaign_name": "단백밥 소재 테스트_250730", "adset_name": "직장인점심한달10만원끝(영상)_260406 - 용량변경", "ad_name": "", "spend": 421051, "purchases": 72.0, "purchase_value": 4112649.0, "roas": 9.7676}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120228620423860784", "campaign_name": "전환광고 (수동셋팅)_단백밥", "adset_name": "직장인식비10만원실화(영상)_250811", "ad_name": "", "spend": 409973, "purchases": 93.0, "purchase_value": 4822470.0, "roas": 11.7629}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241576486850784", "campaign_name": "밸런시 메인 캠페인_260316", "adset_name": "(복증)풀만뜯다폭식차라리밥ad_260408", "ad_name": "", "spend": 409380, "purchases": 120.0, "purchase_value": 6042849.0, "roas": 14.761}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241634578900784", "campaign_name": "밸런시 테스트 캠페인_260316", "adset_name": "가격이게되네main_promotion_260409(전환값)", "ad_name": "", "spend": 402729, "purchases": 90.0, "purchase_value": 5867478.0, "roas": 14.5693}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120240035785130784", "campaign_name": "밸런시 테스트 캠페인_260316", "adset_name": "마라탕생각에무너졌나요ad_260316", "ad_name": "", "spend": 385797, "purchases": 63.0, "purchase_value": 4390353.0, "roas": 11.38}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120240036552750784", "campaign_name": "밸런시 테스트 캠페인_260316", "adset_name": "2995원일때쟁여두세요main_promotion_260316", "ad_name": "", "spend": 369960, "purchases": 96.0, "purchase_value": 5546358.0, "roas": 14.9918}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241471151010784", "campaign_name": "단백밥 소재 테스트_250730", "adset_name": "괴물단백질(단일)_260406(전환값) - 용량변경", "ad_name": "", "spend": 356785, "purchases": 75.0, "purchase_value": 4059171.0, "roas": 11.3771}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241471552850784", "campaign_name": "전환광고 (수동셋팅)_단백밥", "adset_name": "직장인식비10만원실화(영상)_260406- 용량변경", "ad_name": "", "spend": 294267, "purchases": 78.0, "purchase_value": 5340006.0, "roas": 18.1468}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120227818627320784", "campaign_name": "전환광고 (수동셋팅)_단백밥", "adset_name": "슈퍼얼리버드_최저4,800원(영상)_250729", "ad_name": "", "spend": 268623, "purchases": 42.0, "purchase_value": 2444541.0, "roas": 9.1003}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120240032571850784", "campaign_name": "전환광고 (수동셋팅)_단백밥", "adset_name": "(복증)자정지나면가격인상4800_260313(전환값)", "ad_name": "", "spend": 267924, "purchases": 36.0, "purchase_value": 2755059.0, "roas": 10.283}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241833721360784", "campaign_name": "전환광고 (수동셋팅)_단백밥", "adset_name": "(복증)오빠단톡방비밀링크4800(릴스)_260413", "ad_name": "", "spend": 251784, "purchases": 48.0, "purchase_value": 3197121.0, "roas": 12.6979}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241829236000784", "campaign_name": "밸런시 테스트 캠페인_260316", "adset_name": "편의점도시락맛은있는데1186_260413", "ad_name": "", "spend": 243401, "purchases": 75.0, "purchase_value": 4086738.0, "roas": 16.7901}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120240036201160784", "campaign_name": "밸런시 테스트 캠페인_260316", "adset_name": "풀만뜯다폭식차라리밥ad_260316", "ad_name": "", "spend": 191683, "purchases": 33.0, "purchase_value": 1951239.0, "roas": 10.1795}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241898098050784", "campaign_name": "밸런시 메인 캠페인_260316", "adset_name": "(복증)가격이게되네main_promotion_260414(전환값)", "ad_name": "", "spend": 163127, "purchases": 42.0, "purchase_value": 2195085.0, "roas": 13.4563}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120242009148610784", "campaign_name": "밸런시 메인 캠페인_260316", "adset_name": "가격이게되네main_promotion_260416(전환값)", "ad_name": "", "spend": 127580, "purchases": 15.0, "purchase_value": 955776.0, "roas": 7.4916}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120240036958700784", "campaign_name": "밸런시 테스트 캠페인_260316", "adset_name": "편의점도시락보다싸다main_promotion_260316", "ad_name": "", "spend": 105287, "purchases": 12.0, "purchase_value": 1037400.0, "roas": 9.8531}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120242503400630784", "campaign_name": "단백밥 소재 테스트_250730", "adset_name": "이거 얼마같아요?(릴스)672_260423", "ad_name": "", "spend": 90684, "purchases": 27.0, "purchase_value": 1273065.0, "roas": 14.0385}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120242509955370784", "campaign_name": "순수단백 소재 테스트_260105", "adset_name": "[제육]짜잔!출시못할뻔(릴스)1125_260423", "ad_name": "", "spend": 86194, "purchases": 12.0, "purchase_value": 439500.0, "roas": 5.099}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120240036764140784", "campaign_name": "밸런시 테스트 캠페인_260316", "adset_name": "가격이게되네main_promotion_260316", "ad_name": "", "spend": 83280, "purchases": 15.0, "purchase_value": 945699.0, "roas": 11.3557}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120242502712790784", "campaign_name": "밸런시 메인 캠페인_260316", "adset_name": "(복증)2995원일때쟁여두세요main_promotion_260423", "ad_name": "", "spend": 74999, "purchases": 27.0, "purchase_value": 913110.0, "roas": 12.175}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241834538820784", "campaign_name": "단백밥 소재 테스트_250730", "adset_name": "비밀특가4800원88(단일)_260413", "ad_name": "", "spend": 74336, "purchases": 9.0, "purchase_value": 461700.0, "roas": 6.211}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120236780059400784", "campaign_name": "단백밥 소재 테스트_250730", "adset_name": "새해다짐50한그릇에담았습니다(메인)_260105", "ad_name": "", "spend": 73830, "purchases": 6.0, "purchase_value": 212400.0, "roas": 2.8769}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241635457320784", "campaign_name": "밸런시 테스트 캠페인_260316", "adset_name": "하나에얼마에요삼츠넌ad_260409", "ad_name": "", "spend": 71312, "purchases": 6.0, "purchase_value": 412200.0, "roas": 5.7802}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120240036921730784", "campaign_name": "밸런시 테스트 캠페인_260316", "adset_name": "커피한잔보다싸다main_promotion_260316", "ad_name": "", "spend": 64618, "purchases": 9.0, "purchase_value": 636153.0, "roas": 9.8448}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241692504840784", "campaign_name": "밸런시 테스트 캠페인_260316", "adset_name": "4분이면완성되는1188(영상)_260413", "ad_name": "", "spend": 63222, "purchases": 6.0, "purchase_value": 431460.0, "roas": 6.8245}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120242584398830784", "campaign_name": "밸런시 테스트 캠페인_260316", "adset_name": "2995원일때쟁여두세요1186_260427(전환값)", "ad_name": "", "spend": 56863, "purchases": 24.0, "purchase_value": 955032.0, "roas": 16.7953}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241829665670784", "campaign_name": "밸런시 테스트 캠페인_260316", "adset_name": "오직슈퍼곡물로만1186_260413", "ad_name": "", "spend": 55027, "purchases": 6.0, "purchase_value": 473517.0, "roas": 8.6052}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120242584506030784", "campaign_name": "밸런시 테스트 캠페인_260316", "adset_name": "마라탕칼로리1500(릴스)1186_260427", "ad_name": "", "spend": 54445, "purchases": 27.0, "purchase_value": 916458.0, "roas": 16.8327}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120236722432400784", "campaign_name": "순수단백 소재 테스트_260105", "adset_name": "[함박]요즘헬창은이거먹는다_260105", "ad_name": "", "spend": 53354, "purchases": 3.0, "purchase_value": 83100.0, "roas": 1.5575}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120242235299080784", "campaign_name": "밸런시 메인 캠페인_260316", "adset_name": "(복증)편의점도시락맛은있는데1186_260420", "ad_name": "", "spend": 51237, "purchases": 12.0, "purchase_value": 334098.0, "roas": 6.5206}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241283046060784", "campaign_name": "순수단백 소재 테스트_260105", "adset_name": "[제육]설탕범벅제육그만_260406", "ad_name": "", "spend": 42910, "purchases": 3.0, "purchase_value": 162900.0, "roas": 3.7963}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120242890123030784", "campaign_name": "전환광고 (수동셋팅)_단백밥", "adset_name": "(복증검토)[프로모션]단백밥2주년생일파티_260428", "ad_name": "", "spend": 41629, "purchases": 6.0, "purchase_value": 329400.0, "roas": 7.9128}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120242881556960784", "campaign_name": "전환광고 (수동셋팅)_단백밥", "adset_name": "(복증검토)이거뭐에요?(904)_릴스_260428", "ad_name": "", "spend": 41478, "purchases": 12.0, "purchase_value": 200610.0, "roas": 4.8365}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241576486860784", "campaign_name": "밸런시 메인 캠페인_260316", "adset_name": "(복증)마라탕생각에무너졌나요ad_260408", "ad_name": "", "spend": 39590, "purchases": 0.0, "purchase_value": 0.0, "roas": 0.0}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241576486830784", "campaign_name": "밸런시 메인 캠페인_260316", "adset_name": "(복증)이렇게맛있어도되나ad_260408", "ad_name": "", "spend": 37941, "purchases": 3.0, "purchase_value": 160200.0, "roas": 4.2223}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120242877882410784", "campaign_name": "밸런시 메인 캠페인_260316", "adset_name": "(복증)2995원일때쟁여두세요main_promotion_260428(전환값)", "ad_name": "", "spend": 33574, "purchases": 0.0, "purchase_value": 0.0, "roas": 0.0}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120242878294180784", "campaign_name": "순수단백 소재 테스트_260105", "adset_name": "[제육]진짜남자의소울푸드(남성타겟)_260428(전환값)", "ad_name": "", "spend": 32792, "purchases": 18.0, "purchase_value": 717780.0, "roas": 21.8889}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120238495144210784", "campaign_name": "순수단백 소재 테스트_260105", "adset_name": "[함박]요즘헬창은이거먹는다2_260218", "ad_name": "", "spend": 31336, "purchases": 6.0, "purchase_value": 145080.0, "roas": 4.6298}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120242877912230784", "campaign_name": "밸런시 메인 캠페인_260316", "adset_name": "(복증)편의점도시락맛은있는데1186_260428(전환값)", "ad_name": "", "spend": 29866, "purchases": 9.0, "purchase_value": 360726.0, "roas": 12.0781}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120240729512550784", "campaign_name": "단백밥 소재 테스트_250730", "adset_name": "오빠단톡방비밀링크4800(릴스)_260326 _스토리만", "ad_name": "", "spend": 24968, "purchases": 6.0, "purchase_value": 363000.0, "roas": 14.5386}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241634197180784", "campaign_name": "밸런시 테스트 캠페인_260316", "adset_name": "풀만뜯다폭식차라리밥ad_260409(전환값)", "ad_name": "", "spend": 22335, "purchases": 0.0, "purchase_value": 0.0, "roas": 0.0}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120235620749330784", "campaign_name": "단백밥 소재 테스트_250730", "adset_name": "[프로모션]2주년누적50만팩_251208", "ad_name": "", "spend": 11749, "purchases": 0.0, "purchase_value": 0.0, "roas": 0.0}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241292992540784", "campaign_name": "순수단백 소재 테스트_260105", "adset_name": "[제육]제육으로득근하라(남성타겟)_260406", "ad_name": "", "spend": 6954, "purchases": 0.0, "purchase_value": 0.0, "roas": 0.0}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120241006304800784", "campaign_name": "전환 광고 (수동) - 단백밥 리타겟팅", "adset_name": "[리타겟]이거뭐에요?(904)_릴스_260330", "ad_name": "", "spend": 0, "purchases": 0.0, "purchase_value": 0.0, "roas": null}, {"month_start": "2026-04-01", "level": "adset", "entity_id": "120240679357030784", "campaign_name": "단백밥 소재 테스트_250730", "adset_name": "내몸무게만큼단백질(릴스)88_260325", "ad_name": "", "spend": 0, "purchases": 0.0, "purchase_value": 0.0, "roas": null}, {"month_start": "2026-04-01", "level": "campaign", "entity_id": "120227878278780784", "campaign_name": "단백밥 소재 테스트_250730", "adset_name": "", "ad_name": "", "spend": 5017945, "purchases": 1380.0, "purchase_value": 77109960.0, "roas": 15.3668}, {"month_start": "2026-04-01", "level": "campaign", "entity_id": "120239928108990784", "campaign_name": "밸런시 테스트 캠페인_260316", "adset_name": "", "ad_name": "", "spend": 2686028, "purchases": 582.0, "purchase_value": 34678737.0, "roas": 12.9108}, {"month_start": "2026-04-01", "level": "campaign", "entity_id": "120224155733270784", "campaign_name": "전환광고 (수동셋팅)_단백밥", "adset_name": "", "ad_name": "", "spend": 2628764, "purchases": 576.0, "purchase_value": 36889035.0, "roas": 14.0328}, {"month_start": "2026-04-01", "level": "campaign", "entity_id": "120236720012180784", "campaign_name": "순수단백 소재 테스트_260105", "adset_name": "", "ad_name": "", "spend": 1153086, "purchases": 219.0, "purchase_value": 11962602.0, "roas": 10.3744}, {"month_start": "2026-04-01", "level": "campaign", "entity_id": "120239928053630784", "campaign_name": "밸런시 메인 캠페인_260316", "adset_name": "", "ad_name": "", "spend": 967294, "purchases": 228.0, "purchase_value": 10961844.0, "roas": 11.3325}, {"month_start": "2026-04-01", "level": "campaign", "entity_id": "120242235647710784", "campaign_name": "윤식단 ASC_260420", "adset_name": "", "ad_name": "", "spend": 845643, "purchases": 204.0, "purchase_value": 8608680.0, "roas": 10.18}, {"month_start": "2026-04-01", "level": "campaign", "entity_id": "120236980769100784", "campaign_name": "순수단백 메인 캠페인_260108 (전환수동)", "adset_name": "", "ad_name": "", "spend": 444039, "purchases": 144.0, "purchase_value": 8527749.0, "roas": 19.205}, {"month_start": "2026-04-01", "level": "campaign", "entity_id": "120208561506150784", "campaign_name": "전환 광고 (수동) - 단백밥 리타겟팅", "adset_name": "", "ad_name": "", "spend": 0, "purchases": 0.0, "purchase_value": 0.0, "roas": null}]}</script>
+  <script>
+    const data = JSON.parse(document.getElementById('dashboard-data').textContent);
+    const daily = data.daily || [];
+    const weekly = data.weekly || [];
+    const monthly = data.monthly || [];
+    const fmtWon = (v) => `${Math.round(Number(v || 0)).toLocaleString('ko-KR')}원`;
+    const fmtNum = (v) => Math.round(Number(v || 0)).toLocaleString('ko-KR');
+    const fmtPct = (v) => `${(Number(v || 0) * 100).toFixed(1)}%`;
+    const byId = (id) => document.getElementById(id);
+    const dateKey = (row, mode) => mode === 'weekly' ? row.period_since : mode === 'monthly' ? row.period_since : row.report_date;
+    const dateEnd = (row, mode) => mode === 'daily' ? row.report_date : row.period_until;
+
+    function inRange(row, mode, start, end) {
+      const s = dateKey(row, mode);
+      const e = dateEnd(row, mode);
+      return (!start || e >= start) && (!end || s <= end);
+    }
+    function sum(rows, key) { return rows.reduce((acc, row) => acc + Number(row[key] || 0), 0); }
+    function cls(value) { return Number(value || 0) > 0 ? 'good' : Number(value || 0) < 0 ? 'bad' : ''; }
+    function renderKpis(rows) {
+      const spend = sum(rows, 'meta_api_spend');
+      const profitSpend = sum(rows, 'profit_ad_spend');
+      const revenue = sum(rows, 'ga4_revenue');
+      const profit = sum(rows, 'net_profit');
+      const orders = sum(rows, 'order_count');
+      const profitDays = rows.filter((row) => row.has_profit_data || Number(row.profit_day_count || 0) > 0).length;
+      const coverage = spend ? profitSpend / spend : 0;
+      const roi = profitSpend ? profit / profitSpend : 0;
+      const cards = [
+        ['Meta 광고비', fmtWon(spend), `${rows.length}개 기간`],
+        ['순이익 커버 광고비', fmtWon(profitSpend), fmtPct(coverage)],
+        ['GA4 매출', fmtWon(revenue), 'DB 검증 rows 기준'],
+        ['순이익', fmtWon(profit), `ROI ${fmtPct(roi)}`],
+        ['주문수', fmtNum(orders), '광고 귀속 주문'],
+        ['순이익 데이터 기간', fmtNum(profitDays), coverage < 0.7 ? '커버리지 보완 필요' : '커버리지 양호'],
+      ];
+      byId('kpis').innerHTML = cards.map(([label, value, note]) => `
+        <div class="kpi"><span>${label}</span><strong>${value}</strong><small>${note}</small></div>
+      `).join('');
+    }
+    function renderStatus(rows, mode) {
+      const headers = mode === 'daily'
+        ? ['날짜', 'Meta 광고비', '순이익 광고비', 'GA4 매출', '순이익', 'ROI', '커버']
+        : ['기간', '일수', '순이익일수', 'Meta 광고비', '순이익 광고비', 'GA4 매출', '순이익', 'ROI', '커버율'];
+      const body = rows.map((row) => {
+        const roi = Number(row.real_roi_on_profit_spend || 0);
+        if (mode === 'daily') {
+          return `<tr>
+            <td>${row.report_date}</td>
+            <td class="num">${fmtWon(row.meta_api_spend)}</td>
+            <td class="num">${fmtWon(row.profit_ad_spend)}</td>
+            <td class="num">${fmtWon(row.ga4_revenue)}</td>
+            <td class="num ${cls(row.net_profit)}">${fmtWon(row.net_profit)}</td>
+            <td class="num ${cls(roi)}">${fmtPct(roi)}</td>
+            <td>${row.has_profit_data ? '있음' : '미적재'}</td>
+          </tr>`;
+        }
+        return `<tr>
+          <td>${row.period_since} ~ ${row.period_until}</td>
+          <td class="num">${fmtNum(row.day_count)}</td>
+          <td class="num">${fmtNum(row.profit_day_count)}</td>
+          <td class="num">${fmtWon(row.meta_api_spend)}</td>
+          <td class="num">${fmtWon(row.profit_ad_spend)}</td>
+          <td class="num">${fmtWon(row.ga4_revenue)}</td>
+          <td class="num ${cls(row.net_profit)}">${fmtWon(row.net_profit)}</td>
+          <td class="num ${cls(roi)}">${fmtPct(roi)}</td>
+          <td class="num">${fmtPct(row.profit_spend_coverage_rate)}</td>
+        </tr>`;
+      }).join('');
+      byId('statusTable').innerHTML = `<thead><tr>${headers.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody>${body}</tbody>`;
+    }
+    function renderBars(rows) {
+      const selectedDaily = daily.filter((row) => rows.some((r) => row.report_date >= dateKey(r, byId('mode').value) && row.report_date <= dateEnd(r, byId('mode').value)));
+      const maxSpend = Math.max(...selectedDaily.map((row) => Number(row.meta_api_spend || 0)), 1);
+      byId('bars').innerHTML = selectedDaily.map((row) => `
+        <div class="bar-row">
+          <div>${row.report_date}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.max(2, Number(row.meta_api_spend || 0) / maxSpend * 100)}%"></div></div>
+          <div class="num">${fmtWon(row.meta_api_spend)}</div>
+        </div>
+      `).join('');
+    }
+    function renderEntities(start, end) {
+      const monthSet = new Set(daily.filter((row) => (!start || row.report_date >= start) && (!end || row.report_date <= end)).map((row) => row.source_month || row.report_date.slice(0, 7) + '-01'));
+      const rows = (data.entities || []).filter((row) => !monthSet.size || monthSet.has(row.month_start)).slice(0, 50);
+      byId('entityTable').innerHTML = `<thead><tr><th>월</th><th>레벨</th><th>이름</th><th class="num">광고비</th><th class="num">구매</th><th class="num">Meta ROAS</th></tr></thead><tbody>` +
+        rows.map((row) => `<tr>
+          <td>${row.month_start}</td><td>${row.level}</td>
+          <td>${row.adset_name || row.campaign_name || row.ad_name || row.entity_id}</td>
+          <td class="num">${fmtWon(row.spend)}</td>
+          <td class="num">${fmtNum(row.purchases)}</td>
+          <td class="num">${fmtPct(row.roas)}</td>
+        </tr>`).join('') + `</tbody>`;
+    }
+    function renderStrategies() {
+      byId('strategyTable').innerHTML = `<thead><tr><th>스냅샷</th><th>기간</th><th class="num">광고비</th><th class="num">커버율</th><th class="num">순이익</th><th class="num">권장 일증액</th><th>상태</th><th>블로커</th></tr></thead><tbody>` +
+        (data.strategies || []).map((row) => `<tr>
+          <td>${row.snapshot_date}</td><td>${row.period_since} ~ ${row.period_until}</td>
+          <td class="num">${fmtWon(row.spend_total)}</td>
+          <td class="num">${fmtPct(row.profit_coverage_rate)}</td>
+          <td class="num ${cls(row.net_profit)}">${fmtWon(row.net_profit)}</td>
+          <td class="num">${fmtWon(row.recommended_daily_increase)}</td>
+          <td>${row.execution_status}</td>
+          <td>${Array.isArray(row.blockers) ? row.blockers.map((b) => b.code).join(', ') : ''}</td>
+        </tr>`).join('') + `</tbody>`;
+    }
+    function apply() {
+      const mode = byId('mode').value;
+      const start = byId('startDate').value;
+      const end = byId('endDate').value;
+      const source = mode === 'weekly' ? weekly : mode === 'monthly' ? monthly : daily;
+      const rows = source.filter((row) => inRange(row, mode, start, end));
+      byId('rangeNote').textContent = `${start || '처음'} ~ ${end || '마지막'} · ${mode} · ${rows.length} rows`;
+      renderKpis(rows);
+      renderStatus(rows, mode);
+      renderBars(rows);
+      renderEntities(start, end);
+      renderStrategies();
+    }
+    function init() {
+      if (daily.length) {
+        byId('startDate').value = daily[0].report_date;
+        byId('endDate').value = daily[daily.length - 1].report_date;
+      }
+      byId('applyBtn').addEventListener('click', apply);
+      byId('latestBtn').addEventListener('click', () => {
+        byId('startDate').value = daily[0]?.report_date || '';
+        byId('endDate').value = daily[daily.length - 1]?.report_date || '';
+        apply();
+      });
+      byId('mode').addEventListener('change', apply);
+      apply();
+    }
+    init();
+  </script>
+</body>
+</html>
