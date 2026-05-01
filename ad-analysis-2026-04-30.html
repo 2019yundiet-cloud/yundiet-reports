@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>윤식단 광고분석 · 2026-04-30</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #111a2e;
+      --panel2: #0f182b;
+      --text: #e9eefc;
+      --muted: rgba(233,238,252,0.72);
+      --muted2: rgba(233,238,252,0.5);
+      --brand: #9ad4ff;
+      --accent: #54ffbd;
+      --warn: #ffcc66;
+      --bad: #ff6b88;
+      --good: #6cff86;
+      --chip: rgba(154,212,255,0.14);
+      --line: rgba(233,238,252,0.14);
+      --shadow: 0 18px 42px rgba(0,0,0,0.34);
+      --radius: 16px;
+      --radius2: 12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", Arial;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(1200px 600px at 10% -10%, rgba(84,255,189,0.14), transparent 62%),
+                  radial-gradient(900px 500px at 110% 10%, rgba(154,212,255,0.18), transparent 55%),
+                  linear-gradient(180deg, #0a1020, #08101d 60%, #060d18);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.35;
+    }
+
+    a { color: var(--brand); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .wrap {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 26px 18px 80px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: start;
+      margin-bottom: 18px;
+    }
+
+    .title {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: -0.3px;
+    }
+
+    .subtitle {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      background: var(--chip);
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: rgba(17,26,46,0.6);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 13px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+      transition: transform 0.12s ease, background 0.12s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      background: rgba(17,26,46,0.9);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(17,26,46,0.86), rgba(15,24,43,0.86));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 14px 16px 0;
+    }
+
+    .panel-header h2 {
+      margin: 0;
+      font-size: 17px;
+      letter-spacing: -0.2px;
+    }
+
+    .panel-header p {
+      margin: 6px 0 12px;
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+
+    .panel-body {
+      padding: 0 16px 16px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .kpi {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius2);
+      background: rgba(10,16,32,0.52);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi .label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .kpi .value {
+      margin-top: 6px;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+    }
+
+    .kpi .meta {
+      margin-top: 4px;
+      color: var(--muted2);
+      font-size: 12px;
+    }
+
+    .kpi .bar {
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 3px;
+      background: linear-gradient(90deg, rgba(154,212,255,0.8), rgba(84,255,189,0.85));
+      opacity: 0.7;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .col-6 { grid-column: span 6; }
+    .col-4 { grid-column: span 4; }
+    .col-8 { grid-column: span 8; }
+    .col-12 { grid-column: span 12; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 12px;
+      overflow: hidden;
+      border-radius: var(--radius2);
+      border: 1px solid var(--line);
+    }
+
+    th, td {
+      border-bottom: 1px solid rgba(233,238,252,0.08);
+      padding: 9px 8px;
+      vertical-align: top;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: rgba(17,26,46,0.92);
+      color: rgba(233,238,252,0.9);
+      font-weight: 700;
+      letter-spacing: -0.1px;
+    }
+
+    tr:hover td {
+      background: rgba(154,212,255,0.06);
+    }
+
+    td.mono { font-family: var(--mono); font-size: 11px; color: rgba(233,238,252,0.85); }
+    td.small { font-size: 11px; color: var(--muted); }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(233,238,252,0.14);
+      background: rgba(154,212,255,0.12);
+      color: rgba(233,238,252,0.85);
+      font-size: 11px;
+      gap: 6px;
+      max-width: 100%;
+    }
+
+    .pill.good { background: rgba(108,255,134,0.12); border-color: rgba(108,255,134,0.22); }
+    .pill.bad { background: rgba(255,107,136,0.12); border-color: rgba(255,107,136,0.22); }
+    .pill.warn { background: rgba(255,204,102,0.12); border-color: rgba(255,204,102,0.22); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 6px;
+      border-radius: 6px;
+      background: rgba(233,238,252,0.08);
+      border: 1px solid rgba(233,238,252,0.16);
+      color: rgba(233,238,252,0.8);
+      font-size: 11px;
+      margin-right: 6px;
+    }
+
+    .muted { color: var(--muted); }
+    .muted2 { color: var(--muted2); }
+
+    .flex {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: 10px 0 10px;
+    }
+
+    select, input[type="search"] {
+      background: rgba(10,16,32,0.6);
+      color: var(--text);
+      border: 1px solid rgba(233,238,252,0.18);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 13px;
+      outline: none;
+      min-width: 180px;
+    }
+
+    input[type="search"] { min-width: 240px; }
+
+    .note {
+      padding: 10px 12px;
+      border-radius: var(--radius2);
+      border: 1px dashed rgba(233,238,252,0.18);
+      background: rgba(10,16,32,0.42);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .mini {
+      border: 1px solid rgba(233,238,252,0.14);
+      background: rgba(10,16,32,0.52);
+      border-radius: var(--radius2);
+      padding: 12px;
+    }
+
+    .mini h3 {
+      margin: 0;
+      font-size: 13px;
+    }
+
+    .mini p {
+      margin: 6px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .section {
+      padding: 12px 16px 16px;
+      border-top: 1px solid rgba(233,238,252,0.08);
+    }
+
+    .section h3 {
+      margin: 0 0 6px;
+      font-size: 14px;
+      letter-spacing: -0.2px;
+    }
+
+    .section .desc {
+      margin: 0 0 12px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .footer {
+      margin-top: 18px;
+      color: var(--muted2);
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 1000px) {
+      header {
+        grid-template-columns: 1fr;
+      }
+      .actions { justify-content: flex-start; }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .row { grid-template-columns: repeat(6, 1fr); }
+      .col-6 { grid-column: span 6; }
+      .col-4 { grid-column: span 6; }
+      .col-8 { grid-column: span 6; }
+    }
+
+    @media (max-width: 620px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+      .split { grid-template-columns: 1fr; }
+      input[type="search"] { min-width: 100%; }
+      select { min-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>윤식단 광고분석 <span class="muted2">·</span> <span id="report-date">-</span></h1>
+        <div class="subtitle">
+          <span class="chip">📊 Meta Creative Analysis</span>
+          <span class="chip" id="period-chip">기간 -</span>
+          <span class="chip" id="generated-chip">생성 -</span>
+          <span class="chip" id="account-chip">계정 -</span>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="btn-prev">◀ 이전</button>
+        <button class="btn" id="btn-next">다음 ▶</button>
+        <button class="btn" id="btn-open-ads">Ads Manager 열기</button>
+        <button class="btn" id="btn-export-json">JSON 추출</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>1) 이번 달 MTD KPI (카테고리별)</h2>
+          <p class="muted">MTD 누적 성과 + 운영 상태(활성/OFF) 요약. (원천: Meta Ads / 내부 집계)</p>
+        </div>
+        <div class="panel-body">
+          <div class="kpi-grid" id="mtd-kpis"></div>
+          <div class="note" id="mtd-note" style="margin-top: 10px;"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>2) 광고 효율 vs 실결제 수익 브리지</h2>
+          <p class="muted">Meta CTR/CVR만으로 판단하지 않고, GA4 실결제 매출/순이익 흐름을 함께 본다.</p>
+        </div>
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-6">
+              <table id="ga4-daily">
+                <thead>
+                  <tr>
+                    <th style="width: 120px">일자</th>
+                    <th>GA4 매출</th>
+                    <th>광고 지출</th>
+                    <th>GA4 ROAS</th>
+                    <th>순이익(추정)</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="col-6">
+              <table id="ga4-monthly">
+                <thead>
+                  <tr>
+                    <th style="width: 120px">월</th>
+                    <th>GA4 매출</th>
+                    <th>광고 지출</th>
+                    <th>GA4 ROAS</th>
+                    <th>순이익(추정)</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="split">
+            <div class="mini">
+              <h3>브리지 해석 가이드</h3>
+              <p>광고 KPI가 좋아도 GA4 실결제가 따라오지 않으면 랜딩/상품/가격/후킹 구간을 우선 점검한다. 반대로 CTR/CVR이 다소 약해도 GA4 실결제가 유지되면 소재 개선보다 운영 안정성을 우선한다.</p>
+            </div>
+            <div class="mini">
+              <h3>연휴/이벤트 구간 보정</h3>
+              <p>연휴, 급식/휴무, 급격한 유입 변동 구간은 단기 ROAS/CPA로 OFF를 확정하지 않는다. 이 구간은 평시 대비로 따로 비교하고, 관찰/판단일 연장을 우선한다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>3) 소재 승격 파이프라인</h2>
+          <p class="muted">테스트 → 메인 → ASC 승격 구조가 건강하게 돌아가는지 점검한다.</p>
+        </div>
+        <div class="panel-body" id="pipeline"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="flex">
+            <div>
+              <h2>4) 신규 소재판정 + 액션플랜 + 퍼널진단</h2>
+              <p class="muted">소재 단위 판정 화면. (살릴까/끌까/개선할까/메인 승격할까/ASC 후보로 볼까)</p>
+            </div>
+            <div class="filters">
+              <input type="search" id="search" placeholder="소재명/상품/캠페인 검색" />
+              <select id="filter-product"><option value="">상품 전체</option></select>
+              <select id="filter-campaign-type"><option value="">캠페인유형 전체</option></select>
+              <select id="filter-judgment"><option value="">판정 전체</option></select>
+              <select id="filter-asc"><option value="">ASC 전체</option></select>
+              <select id="filter-status"><option value="">상태 전체</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <table id="creative-table">
+            <thead>
+              <tr>
+                <th style="width: 44px">#</th>
+                <th style="width: 260px">소재명</th>
+                <th style="width: 98px">상품</th>
+                <th style="width: 70px">유형</th>
+                <th style="width: 110px">승격/ASC 상태</th>
+                <th style="width: 90px">판정</th>
+                <th style="width: 90px">ASC판정</th>
+                <th style="width: 120px">액션유형</th>
+                <th style="width: 110px">목표판단일</th>
+                <th style="width: 110px">목표달성여부</th>
+                <th style="width: 90px">현재상태</th>
+                <th>판정이유</th>
+                <th>액션플랜</th>
+                <th style="width: 110px">누적 지출</th>
+                <th style="width: 110px">누적 매출</th>
+                <th style="width: 90px">누적 ROAS</th>
+                <th style="width: 70px">CTR</th>
+                <th style="width: 70px">CVR</th>
+                <th style="width: 70px">빈도</th>
+                <th style="width: 80px">구매수</th>
+                <th style="width: 80px">CPA</th>
+                <th style="width: 70px">DN</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div class="footer" id="creative-count"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>5) 운영 현황 대시보드</h2>
+          <p class="muted">운영 구조 화면. 각 소재가 테스트/메인/ASC 어디에 있고, 승격 구조가 건강한지 확인.</p>
+        </div>
+        <div class="panel-body">
+          <table id="ops-table">
+            <thead>
+              <tr>
+                <th style="width: 44px">#</th>
+                <th style="width: 280px">소재명</th>
+                <th style="width: 98px">상품</th>
+                <th style="width: 70px">유형</th>
+                <th style="width: 110px">승격/ASC 상태</th>
+                <th style="width: 90px">현재상태</th>
+                <th style="width: 100px">일예산</th>
+                <th style="width: 110px">누적 지출</th>
+                <th style="width: 90px">누적 ROAS</th>
+                <th style="width: 70px">CTR</th>
+                <th style="width: 70px">CVR</th>
+                <th style="width: 70px">빈도</th>
+                <th style="width: 80px">구매수</th>
+                <th style="width: 260px">캠페인명</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div class="footer" id="ops-count"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer">
+      <div id="footer-meta"></div>
+      <div style="margin-top: 4px;">※ 본 대시보드는 Meta creative analysis 전용입니다. 채널별 광고 수익분석 대시보드와 혼용하지 않습니다.</div>
+    </div>
+  </div>
+
+  <script id="dashboard-data" type="application/json">{"meta": {"date": "2026-04-30", "generated_at": "2026-04-30T10:52:00.391243", "available_dates": ["2026-04-28", "2026-04-27", "2026-04-26", "2026-04-25", "2026-04-24", "2026-04-23", "2026-04-22", "2026-04-21", "/Users/junho/yundiet-os/ad-analysis/2026-04-27.before-target-kpi.html", "/Users/junho/yundiet-os/ad-analysis/2026-04-21-demo-cat.html"], "file_basename_pattern": "{date}.html", "period_rule": "MTD", "last_regen_hint": "수동 재실행: /yundiet-ad-analysis", "ad_account_id": "313374542193702", "periods": {"mtd": {"since": "2026-04-01", "until": "2026-04-30", "label": "2026-04-01~2026-04-30 (MTD · 30일차)"}, "creatives": {"since": "2026-04-01", "until": "2026-04-30", "label": "2026-04-01~2026-04-30 (이번 달 (MTD))"}, "creatives_d2": {"relative": "소재 생성일 +0d ~ +2d", "label": "D+2 시점 누적 스냅샷"}, "creatives_d4": {"relative": "소재 생성일 +0d ~ +4d", "label": "D+4 시점 누적 스냅샷"}, "monthly_profit": {"since": "2025-01-01", "until": "2026-04-30", "label": "2025-01-01~2026-04-30 (월별 집계)"}, "funnel": {"since": "2026-04-01", "until": "2026-04-30", "label": "2026-04-01~2026-04-30 (MTD)"}, "validation": {"since": "2026-04-01", "until": "2026-04-30", "label": "2026-04-01~2026-04-30 (MTD)"}, "previous_week": {"since": "2026-04-20", "until": "2026-04-23", "label": "2026.04.20~2026.04.23 (전주 비교)"}}}, "mtd_kpis": [{"카테고리": "단백밥", "title": "단백밥 · 2026-04", "월": "2026-04-01", "일예산_LIVE": 243000, "누적_지출": 5462582.0, "누적_매출": 27945850.0, "누적_ROAS": 511.59283004119543, "고유CTR": 2.48, "고유링크CVR": 6.28, "노출당LPV율": 1.14, "LPV당구매율": 6.92, "AOV": 69864.0, "활성광고수": 19.0, "OFF광고수": 9.0}, {"카테고리": "단백밥 ASC", "title": "단백밥 ASC · 2026-04", "월": "2026-04-01", "일예산_LIVE": 15000, "누적_지출": 844025.0, "누적_매출": 1852100.0, "누적_ROAS": 219.43564540330876, "고유CTR": 2.14, "고유링크CVR": 5.96, "노출당LPV율": 1.23, "LPV당구매율": 4.84, "AOV": 78045.83333333333, "활성광고수": 4.0, "OFF광고수": 3.0}, {"카테고리": "밸런시", "title": "밸런시 · 2026-04", "월": "2026-04-01", "일예산_LIVE": 100000, "누적_지출": 3710849.0, "누적_매출": 17157220.0, "누적_ROAS": 462.32357093926575, "고유CTR": 2.14, "고유링크CVR": 4.28, "노출당LPV율": 1.1, "LPV당구매율": 3.89, "AOV": 72839.23404255319, "활성광고수": 14.0, "OFF광고수": 8.0}, {"카테고리": "순수단백", "title": "순수단백 · 2026-04", "월": "2026-04-01", "일예산_LIVE": 100000, "누적_지출": 1522830.0, "누적_매출": 7563600.0, "누적_ROAS": 496.51319572351883, "고유CTR": 1.81, "고유링크CVR": 4.92, "노출당LPV율": 0.97, "LPV당구매율": 5.07, "AOV": 69069.72413793103, "활성광고수": 13.0, "OFF광고수": 4.0}], "creatives": [{"소재명": "단백밥 ASC │ 24.11.09_새우프렌치_26초", "소재ID": "120229831315360525", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120229831315360525", "상품": "단백밥", "캠페인유형": "ASC", "캠페인명": "ASC_단백밥_구매", "DN_일수": 173, "판정": "📌 참고 소재", "판정이유": "이미 운영중인 ASC 소재. 구조/예산/빈도만 점검.", "액션플랜": "빈도 상승 시 썸네일/첫 3초 후킹 변형 소재 준비", "ASC판정": "ASC제외", "ASC이유": "ASC 내부 운영중 소재. 후보/합격 판정은 메인 검증 소재에만 적용.", "ASC리스크": "빈도 상승 시 효율 하락 가능", "현재상태": "ACTIVE", "일예산": 15000.0, "누적_지출": 312065.0, "누적_매출": 725700.0, "누적_ROAS": 232.54666354589205, "노출": 16559.0, "도달": 11318.0, "빈도": 1.46262661176745, "고유링크클릭수": 257.0, "고유CTR": 2.27, "LPView": 208.0, "노출당LPV율": 1.26, "구매수": 8.0, "구매전환값": 725700.0, "평균구매전환값": 90712.5, "고유링크CVR": 3.11, "LPV당구매율": 3.85, "CTR": 1.85, "CVR": 3.45, "CPM": 18848.81, "CPA": 39008.12, "노출1천회당전환수": 0.48, "구매_Rate": 0.05, "ATC": 23.0, "ATC_Rate": 0.14, "객단가": 85950.0, "영상조회": 3148.0, "영상조회율": 19.01, "인게이지먼트": 384.0, "인사이트태그": "전환/평균 | 후킹/전환 안정", "인사이트패턴": "ASC 안정 운영", "소재_라이프사이클": "운영", "위너여부": false, "위너이력": "", "개선시도_횟수": 0}, {"소재명": "단백밥 │ 25.03.26_제육볶음_7초", "소재ID": "120228990693550525", "ad_manager_url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=313374542193702&selected_ad_ids=120228990693550525", "상품": "단백밥", "캠페인유형": "메인", "캠페인명": "MAIN_단백밥_구매", "DN_일수": 35, "판정": "🏆 위너 + 🚀 복증", "판정이유": "메인 캠페인 위너. ROAS/CPA 안정 + 구매수 유지. 다른 썸네일/후킹 변형으로 복증해도 됨.", "액션플랜": "후킹 변형 1개(썸네일/첫 2초) 복증 소재 제작 후 메인 동일 구조로 복증 테스트", "ASC판정": "✅ ASC 후보", "ASC이유": "메인에서 구매수/ROAS 안정. ASC 확장 후보.", "ASC리스크": "빈도 상승 시 개선 필요", "현재상태": "ACTIVE", "일예산": 150000.0, "누적_지출": 270948.0, "누적_매출": 1576200.0, "누적_ROAS": 581.7447138464482, "노출": 18852.0, "도달": 14908.0, "빈도": 1.264422861554333,
+... (content truncated in this preview) ...
