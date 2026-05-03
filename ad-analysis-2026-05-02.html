@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>윤식단 광고 소재 성과 분석 · 2026-05-02</title>
+<style>
+:root {
+  --bg: #0f172a;
+  --panel: rgba(15, 23, 42, 0.85);
+  --panel2: rgba(2, 6, 23, 0.75);
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --accent: #22c55e;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --info: #38bdf8;
+  --border: rgba(148, 163, 184, 0.18);
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  --radius: 16px;
+  --radiusSm: 12px;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", "Apple SD Gothic Neo", Arial, sans-serif;
+  background: radial-gradient(1200px 800px at 20% 10%, rgba(34, 197, 94, 0.18), rgba(15, 23, 42, 0.0) 50%),
+              radial-gradient(1000px 900px at 80% 20%, rgba(56, 189, 248, 0.14), rgba(15, 23, 42, 0.0) 50%),
+              linear-gradient(180deg, #0b1022 0%, #020617 100%);
+  color: var(--text);
+}
+a { color: inherit; text-decoration: none; }
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 28px 18px 42px;
+}
+.header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: start;
+}
+.header h1 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+}
+.header .subtitle {
+  color: var(--muted);
+  margin-top: 6px;
+  font-size: 13px;
+}
+.chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.chip {
+  border: 1px solid var(--border);
+  background: rgba(2, 6, 23, 0.35);
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.chip strong { color: var(--text); font-weight: 600; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 14px;
+  margin-top: 18px;
+}
+.card {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.82), rgba(2, 6, 23, 0.78));
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.card h2 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+.card h3 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.card small { color: var(--muted); }
+.kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.kpi {
+  border-radius: var(--radiusSm);
+  border: 1px solid var(--border);
+  background: rgba(2, 6, 23, 0.35);
+  padding: 12px;
+}
+.kpi .label { font-size: 12px; color: var(--muted); }
+.kpi .value { margin-top: 6px; font-size: 18px; font-weight: 700; }
+.kpi .meta { margin-top: 4px; font-size: 12px; color: var(--muted); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.table-wrap { overflow: auto; border-radius: var(--radiusSm); border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th, td { padding: 10px 10px; border-bottom: 1px solid rgba(148, 163, 184, 0.14); vertical-align: top; }
+th { position: sticky; top: 0; z-index: 2; background: rgba(2, 6, 23, 0.8); text-align: left; font-weight: 600; color: #cbd5e1; }
+tr:hover td { background: rgba(56, 189, 248, 0.07); }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(2, 6, 23, 0.35);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+.badge.good { color: #bbf7d0; border-color: rgba(34, 197, 94, 0.35); background: rgba(34, 197, 94, 0.13); }
+.badge.warn { color: #fde68a; border-color: rgba(245, 158, 11, 0.35); background: rgba(245, 158, 11, 0.12); }
+.badge.bad { color: #fecaca; border-color: rgba(239, 68, 68, 0.35); background: rgba(239, 68, 68, 0.12); }
+.badge.info { color: #bae6fd; border-color: rgba(56, 189, 248, 0.35); background: rgba(56, 189, 248, 0.12); }
+.mono { font-family: var(--mono); }
+.note { color: var(--muted); font-size: 12px; line-height: 1.6; }
+hr.sep { border: none; border-top: 1px solid rgba(148, 163, 184, 0.16); margin: 12px 0; }
+.footer { margin-top: 24px; color: var(--muted); font-size: 12px; }
+.footer code { font-family: var(--mono); font-size: 12px; }
+section { grid-column: span 12; }
+.span-3 { grid-column: span 3; }
+.span-4 { grid-column: span 4; }
+.span-5 { grid-column: span 5; }
+.span-6 { grid-column: span 6; }
+.span-7 { grid-column: span 7; }
+.span-8 { grid-column: span 8; }
+.span-9 { grid-column: span 9; }
+@media (max-width: 1080px) {
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .two-col { grid-template-columns: 1fr; }
+  .chips { justify-content: flex-start; }
+}
+@media (max-width: 720px) {
+  .kpi-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>윤식단 광고 소재 성과 분석</h1>
+      <div class="subtitle">Meta · 소재 판정 + ASC/승격 상태 + 운영 현황 · 리포트 기준일 <span class="mono" id="reportDate">-</span></div>
+    </div>
+    <div class="chips" id="metaChips"></div>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <h2>MTD KPI (Meta)</h2>
+      <div class="kpi-row" id="mtdKpis"></div>
+      <div class="note" id="mtdNote" style="margin-top:10px"></div>
+    </section>
+
+    <section class="card">
+      <h2>소재 승격 파이프라인</h2>
+      <div class="note" id="pipelineNote"></div>
+      <hr class="sep" />
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="min-width:260px">소재명</th>
+              <th style="min-width:170px">상품</th>
+              <th style="min-width:130px">판정</th>
+              <th style="min-width:140px">승격/ASC 상태</th>
+              <th style="min-width:140px">ASC판정</th>
+              <th style="min-width:120px">지출</th>
+              <th style="min-width:90px">구매수</th>
+              <th style="min-width:90px">ROAS</th>
+              <th style="min-width:90px">CPA</th>
+              <th style="min-width:220px">메모</th>
+            </tr>
+          </thead>
+          <tbody id="pipelineRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>신규 소재판정 + 액션플랜 + 퍼널진단</h2>
+      <div class="note" id="creativeNote"></div>
+      <hr class="sep" />
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="min-width:260px">소재명</th>
+              <th style="min-width:170px">상품</th>
+              <th style="min-width:150px">캠페인</th>
+              <th style="min-width:150px">광고세트</th>
+              <th style="min-width:110px">판정</th>
+              <th style="min-width:140px">승격/ASC 상태</th>
+              <th style="min-width:130px">ASC판정</th>
+              <th style="min-width:120px">지출</th>
+              <th style="min-width:90px">구매수</th>
+              <th style="min-width:90px">ROAS</th>
+              <th style="min-width:90px">CPA</th>
+              <th style="min-width:160px">퍼널 진단</th>
+            </tr>
+          </thead>
+          <tbody id="creativeRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>운영 현황 대시보드</h2>
+      <div class="note" id="opsNote"></div>
+      <hr class="sep" />
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="min-width:200px">캠페인</th>
+              <th style="min-width:200px">광고세트</th>
+              <th style="min-width:110px">운영 상태</th>
+              <th style="min-width:140px">승격/ASC 상태</th>
+              <th style="min-width:120px">지출</th>
+              <th style="min-width:90px">구매수</th>
+              <th style="min-width:90px">ROAS</th>
+              <th style="min-width:90px">CPA</th>
+              <th style="min-width:220px">메모</th>
+            </tr>
+          </thead>
+          <tbody id="opsRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Funnel Insights</h2>
+      <div class="two-col">
+        <div>
+          <h3>Meta Funnel</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>구분</th>
+                  <th>값</th>
+                  <th>메모</th>
+                </tr>
+              </thead>
+              <tbody id="funnelRows"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h3>Validation</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>지표</th>
+                  <th>값</th>
+                  <th>메모</th>
+                </tr>
+              </thead>
+              <tbody id="validationRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>GA4 Profit Daily</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="min-width:120px">날짜</th>
+              <th style="min-width:120px">카테고리</th>
+              <th style="min-width:120px">매출</th>
+              <th style="min-width:120px">광고비</th>
+              <th style="min-width:120px">순이익</th>
+              <th style="min-width:90px">실ROI</th>
+              <th style="min-width:90px">주문수</th>
+              <th style="min-width:90px">소재수</th>
+            </tr>
+          </thead>
+          <tbody id="ga4DailyRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>GA4 Profit Monthly</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="min-width:120px">월</th>
+              <th style="min-width:120px">카테고리</th>
+              <th style="min-width:120px">매출</th>
+              <th style="min-width:120px">광고지출</th>
+              <th style="min-width:120px">순이익</th>
+              <th style="min-width:90px">순이익률</th>
+              <th style="min-width:90px">ROAS</th>
+            </tr>
+          </thead>
+          <tbody id="ga4MonthlyRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Monthly Profit</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="min-width:120px">월</th>
+              <th style="min-width:120px">상품</th>
+              <th style="min-width:120px">구매전환값</th>
+              <th style="min-width:120px">매출총이익</th>
+              <th style="min-width:120px">광고지출</th>
+              <th style="min-width:120px">순이익</th>
+              <th style="min-width:90px">순이익률</th>
+              <th style="min-width:90px">ROAS</th>
+            </tr>
+          </thead>
+          <tbody id="monthlyProfitRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="footer">
+      <div>Generated at <code id="generatedAt">-</code>. Period rule: <code id="periodRule">-</code>. Account: <code id="accountId">-</code>.</div>
+      <div class="note" style="margin-top:8px">이 페이지는 Meta 광고 소재 분석(광고분석/메타 광고분석) 전용입니다. 채널별 광고 수익분석 대시보드가 아닙니다.</div>
+    </div>
+  </div>
+</div>
+
+<script id="dashboard-data" type="application/json">{"meta":{"date":"2026-05-02","periods":{"mtd":{"label":"2026.04.03~2026-05-02 (최근 30일 · 30일차)","since":"2026-04-03","until":"2026-05-02"},"bridge":{"label":"2026.04.03~2026-05-02 (DB 기준)","since":"2026-04-03","until":"2026-05-02"},"funnel":{"label":"2026.04.03~2026-05-02 (최근 30일 · 30일차)","since":"2026-04-03","until":"2026-05-02"},"creatives":{"label":"2026.04.03~2026-05-02 (최근 30일 · 30일차)","since":"2026-04-03","until":"2026-05-02"},"validation":{"label":"2026.04.03~2026-05-02 (최근 30일 · 30일차)","since":"2026-04-03","until":"2026-05-02"},"creatives_d2":{"label":"D+2 시점 누적 스냅샷","relative":"소재 생성일 +0d ~ +2d"},"creatives_d4":{"label":"D+4 시점 누적 스냅샷","relative":"소재 생성일 +0d ~ +4d"},"previous_week":{"label":"2026.04.22~2026.04.25 (전주 비교)","since":"2026-04-22","until":"2026-04-25"},"monthly_profit":{"label":"2025.01.01~2026-05-02 (월별 집계)","since":"2025-01-01","until":"2026-05-02"}},"period_rule":"LAST_30D","generated_at":"2026-05-02T10:50:45.752034","ad_account_id":"313374542193702","last_regen_hint":"python3 /Users/junho/yundiet-os/scripts/ad_analysis/rebuild_dashboard_archive.py"},"mtd_kpis":[{"카테고리":"단백밥","기준월":"2026-05","누적_지출":6260729,"누적_매출":24722571,"누적_ROAS":394.9,"OFF광고수":9,"활성광고수":18},{"카테고리":"밸런시","기준월":"2026-05","누적_지출":2690573,"누적_매출":8579806,"누적_ROAS":318.9,"OFF광고수":5,"활성광고수":11},{"카테고리":"순수단백","기준월":"2026-05","누적_지출":1222021,"누적_매출":5104334,"누적_ROAS":417.7,"OFF광고수":3,"활성광고수":4},{"카테고리":"기타","기준월":"2026-05","누적_지출":235848,"누적_매출":84360,"누적_ROAS":35.8,"OFF광고수":1,"활성광고수":3}],"validation":{"total_spend":{"value":1766560,"note":"최근 30일 중 D-1 하루"},"total_revenue":{"value":7118894,"note":"최근 30일 중 D-1 하루"},"blended_roas":{"value":402.99,"note":"최근 30일 중 D-1 하루"},"daily_budget_live":{"value":393000,"note":"활성 adset 일예산 합"},"active_ads":{"value":24,"note":"최근 30일 중 지출>0 소재"},"off_ads":{"value":17,"note":"최근 30일 중 지출=0 소재"},"notes":["Meta raw snapshot 기반: 2026-04-03 ~ 2026-05-02","연휴 성과 구간 (2026-04-30~2026-05-05) 포함: 단기 ROAS/CPA softness만으로 OFF/실패 확정하지 않음"]},"funnel_insights":[{"label":"총 지출","value":"₩1,766,560","note":"D-1"},{"label":"총 매출","value":"₩7,118,894","note":"D-1"},{"label":"ROAS","value":"403.0%","note":"D-1"},{"label":"구매수","value":"87","note":"D-1"},{"label":"CPA","value":"₩20,306","note":"D-1"},{"label":"CTR","value":"2.03%","note":"D-1"},{"label":"CVR","value":"7.19%","note":"D-1"},{"label":"ATC","value":"276","note":"D-1"},{"label":"ATC Rate","value":"22.79%","note":"D-1"},{"label":"LPView","value":"1,211","note":"D-1"},{"label":"LPV→구매율","value":"7.18%","note":"D-1"}],"creatives":[{"소재ID":"120217894025260311","소재명":"슈퍼얼리버드_최저4,800원(영상)_250729","상품":"단백밥","캠페인":"(테스트)단백밥_270803","광고세트":"(테스트)단백밥_270803_ADSET","광고":"슈퍼얼리버드_최저4,800원(영상)_250729","effective_status":"PAUSED","지출":249271,"구매전환값":4866300,"구매수":13,"ROAS":1951.8,"CPA":19175,"CTR":1.79,"CVR":6.05,"CPM":30067,"고유CTR":1.42,"ATC":49,"ATC_Rate":22.79,"LPView":202,"노출":8289,"도달":7438,"빈도":1.11,"영상조회":0,"영상조회율":0,"고유링크클릭수":118,"고유링크CVR":6.36,"노출당LPV율":2.44,"노출1천회당전환수":1.57,"구매_Rate":6.05,"LPV당구매율":6.44,"객단가":374331,"DN_일수":277,"누적_지출":249271,"누적_매출":4866300,"누적_ROAS":1951.8,"소재_라이프사이클":"테스트","판정":"❌ OFF","위너여부":false,"위너이력":[],"개선시도_횟수":0,"승격/ASC 상태":"테스트→OFF","ASC판정":"⏳ ASC 관찰","ASC이유":"테스트캠 소재는 ASC 후보로 바로 올리지 않음 (메인 승격 후 재평가)","ASC리스크":"테스트 레이어 고ROAS는 메인캠 안정성 검증 필요","ad_manager_url":"https://business.facebook.com/adsmanager/manage/ads?act=313374542193702&selected_ad_ids=120217894025260311"},{"소재ID":"120219106814280311","소재명":"슈퍼얼리버드_최저4,800원(영상)_250804","상품":"단백밥","캠페인":"(테스트)단백밥_270803","광고세트":"(테스트)단백밥_270803_ADSET","광고":"슈퍼얼리버드_최저4,800원(영상)_250804","effective_status":"ACTIVE","지출":233353,"구매전환값":4306200,"구매수":12,"ROAS":1845.5,"CPA":19446,"CTR":1.85,"CVR":6.02,"CPM":30907,"고유CTR":1.53,"ATC":46,"ATC_Rate":23.08,"LPView":195,"노출":7552,"도달":6810,"빈도":1.11,"영상조회":0,"영상조회율":0,"고유링크클릭수":116,"고유링크CVR":6.9,"노출당LPV율":2.58,"노출1천회당전환수":1.59,"구매_Rate":6.02,"LPV당구매율":6.15,"객단가":358850,"DN_일수":202,"누적_지출":233353,"누적_매출":4306200,"누적_ROAS":1845.5,"소재_라이프사이클":"테스트","판정":"✅ 1차 통과","위너여부":true,"위너이력":[{"date":"2026-05-02","note":"테스트캠 고ROAS 소재"}],"개선시도_횟수":0,"승격/ASC 상태":"테스트→메인 승격 검토","ASC판정":"ASC제외","ASC이유":"테스트캠 소재는 ASC 후보로 바로 올리지 않음 (메인 승격 후 재평가)","ASC리스크":"-","ad_manager_url":"https://business.facebook.com/adsmanager/manage/ads?act=313374542193702&selected_ad_ids=120219106814280311"},{"소재ID":"120219107615180311","소재명":"슈퍼얼리버드_최저4,800원(영상)_250804_B","상품":"단백밥","캠페인":"(테스트)단백밥_270803","광고세트":"(테스트)단백밥_270803_ADSET","광고":"슈퍼얼리버드_최저4,800원(영상)_250804_B","effective_status":"ACTIVE","지출":231761,"구매전환값":4376100,"구매수":12,"ROAS":1887.9,"CPA":19313,"CTR":1.83,"CVR":5.85,"CPM":30956,"고유CTR":1.47,"ATC":46,"ATC_Rate":23.11,"LPView":199,"노출":7487,"도달":6767,"빈도":1.11,"영상조회":0,"영상조회율":0,"고유링크클릭수":117,"고유링크CVR":6.84,"노출당LPV율":2.66,"노출1천회당전환수":1.6,"구매_Rate":5.85,"LPV당구매율":6.03,"객단가":364675,"DN_일수":202,"누적_지출":231761,"누적_매출":4376100,"누적_ROAS":1887.9,"소재_라이프사이클":"테스트","판정":"✅ 1차 통과","위너여부":true,"위너이력":[{"date":"2026-05-02","note":"테스트캠 고ROAS 소재"}],"개선시도_횟수":0,"승격/ASC 상태":"테스트→메인 승격 검토","ASC판정":"ASC제외","ASC이유":"테스트캠 소재는 ASC 후보로 바로 올리지 않음 (메인 승격 후 재평가)","ASC리스크":"-","ad_manager_url":"https://business.facebook.com/adsmanager/manage/ads?act=313374542193702&selected_ad_ids=120219107615180311"},{"소재ID":"120219108265220311","소재명":"슈퍼얼리버드_최저4,800원(영상)_250804_C","상품":"단백밥","캠페인":"(테스트)단백밥_270803","광고세트":"(테스트)단백밥_270803_ADSET","광고":"슈퍼얼리버드_최저4,800원(영상)_250804_C","effective_status":"ACTIVE","지출":230999,"구매전환값":4403700,"구매수":12,"ROAS":1906.5,"CPA":19250,"CTR":1.84,"CVR":5.86,"CPM":30963,"고유CTR":1.48,"ATC":46,"ATC_Rate":23.04,"LPView":198,"노출":7460,"도달":6754,"빈도":1.1,"영상조회":0,"영상조회율":0,"고유링크클릭수":117,"고유링크CVR":6.84,"노출당LPV율":2.65,"노출1천회당전환수":1.61,"구매_Rate":5.86,"LPV당구매율":6.06,"객단가":366975,"DN_일수":202,"누적_지출":230999,"누적_매출":4403700,"누적_ROAS":1906.5,"소재_라이프사이클":"테스트","판정":"✅ 1차 통과","위너여부":true,"위너이력":[{"date":"2026-05-02","note":"테스트캠 고ROAS 소재"}],"개선시도_횟수":0,"승격/ASC 상태":"테스트→메인 승격 검토","ASC판정":"ASC제외","ASC이유":"테스트캠 소재는 ASC 후보로 바로 올리지 않음 (메인 승격 후 재평가)","ASC리스크":"-","ad_manager_url":"https://business.facebook.com/adsmanager/manage/ads?act=313374542193702&selected_ad_ids=120219108265220311"},{"소재ID":"120219109115260311","소재명":"슈퍼얼리버드_최저4,800원(영상)_250804_D","상품":"단백밥","캠페인":"(테스트)단백밥_270803","광고세트":"(테스트)단백밥_270803_ADSET","광고":"슈퍼얼리버드_최저4,800원(영상)_250804_D","effective_status":"ACTIVE","지출":226649,"구매전환값":4312500,"구매수":12,"ROAS":1903.0,"CPA":18887,"CTR":1.84,"CVR":5.89,"CPM":30916,"고유CTR":1.48,"ATC":45,"ATC_Rate":23.08,"LPView":195,"노출":7334,"도달":6654,"빈도":1.1,"영상조회":0,"영상조회율":0,"고유링크클릭수":115,"고유링크CVR":6.96,"노출당LPV율":2.66,"노출1천회당전환수":1.64,"구매_Rate":5.89,"LPV당구매율":6.15,"객단가":359375,"DN_일수":202,"누적_지출":226649,"누적_매출":4312500,"누적_ROAS":1903.0,"소재_라이프사이클":"테스트","판정":"✅ 1차 통과","위너여부":true,"위너이력":[{"date":"2026-05-02","note":"테스트캠 고ROAS 소재"}],"개선시도_횟수":0,"승격/ASC 상태":"테스트→메인 승격 검토","ASC판정":"ASC제외","ASC이유":"테스트캠 소재는 ASC 후보로 바로 올리지 않음 (메인 승격 후 재평가)","ASC리스크":"-","ad_manager_url":"https://business.facebook.com/adsmanager/manage/ads?act=313374542193702&selected_ad_ids=120219109115260311"},{"소재ID":"120219109775160311","소재명":"슈퍼얼리버드_최저4,800원(영상)_250804_E","상품":"단백밥","캠페인":"(테스트)단백밥_270803","광고세트":"(테스트)단백밥_270803_ADSET","광고":"슈퍼얼리버드_최저4,800원(영상)_250804_E","effective_status":"ACTIVE","지출":222905,"구매전환값":4389300,"구매수":12,"ROAS":1969.2,"CPA":18575,"CTR":1.84,"CVR":5.8,"CPM":30961,"고유CTR":1.46,"ATC":44,"ATC_Rate":23.03,"LPView":191,"노출":7200,"도달":6535,"빈도":1.1,"영상조회":0,"영상조회율":0,"고유링크클릭수":114,"고유링크CVR":6.96,"노출당LPV율":2.65,"노출1천회당전환수":1.67,"구매_Rate":5.8,"LPV당구매율":6.28,"객단가":365775,"DN_일수":202,"누적_지출":222905,"누적_매출":4389300,"누적_ROAS":1969.2,"소재_라이프사이클":"테스트","판정":"✅ 1차 통과","위너여부":true,"위너이력":[{"date":"2026-05-02","note":"테스트캠 고ROAS 소재"}],"개선시도_횟수":0,"승격/ASC 상태":"테스트→메인 승격 검토","ASC판정":"ASC제외","ASC이유":"테스트캠 소재는 ASC 후보로 바로 올리지 않음 (메인 승격 후 재평가)","ASC리스크":"-","ad_manager_url":"https://business.facebook.com/adsmanager/manage/ads?act=313374542193702&selected_ad_ids=120219109775160311"},{"소재ID":"120219110695180311","소재명":"슈퍼얼리버드_최저4,800원(영상)_250804_F","상품":"단백밥","캠페인":"(테스트)단백밥_270803","광고세트":"(테스트)단백밥_270803_ADSET","광고":"슈퍼얼리버드_최저4,800원(영상)_250804_F","effective_status":"ACTIVE","지출":219508,"구매전환값":4390800,"구매수":12,"ROAS":2000.4,"CPA":18292,"CTR":1.83,"CVR":5.77,"CPM":30924,"고유CTR":1.46,"ATC":44,"ATC_Rate":23.06,"LPView":191,"노출":7125,"도달":6498,"빈도":1.1,"영상조회":0,"영상조회율":0,"고유링크클릭수":114,"고유링크CVR":7.02,"노출당LPV율":2.68,"노출1천회당전환수":1.68,"구매_Rate":5.77,"LPV당구매율":6.28,"객단가":365900,"DN_일수":202,"누적_지출":219508,"누적_매출":4390800,"누적_ROAS":2000.4,"소재_라이프사이클":"테스트","판정":"✅ 1차 통과","위너여부":true,"위너이력":[{"date":"2026-05-02","note":"테스트캠 고ROAS 소재"}],"개선시도_횟수":0,"승격/ASC 상태":"테스트→메인 승격 검토","ASC판정":"ASC제외","ASC이유":"테스트캠 소재는 ASC 후보로 바로 올리지 않음 (메인 승격 후 재평가)","ASC리스크":"-","ad_manager_url":"https://business.facebook.com/adsmanager/manage/ads?act=313374542193702&selected_ad_ids=120219110695180311"},{"소재ID":"120219111275060311","소재명":"슈퍼얼리버드_최저4,800원(영상)_250804_G","상품":"단백밥","캠페인":"(테스트)단백밥_270803","광고세트":"(테스트)단백밥_270803_ADSET","광고":"슈퍼얼리버드_최저4,800원(영상)_250804_G","effective_status":"ACTIVE","지출":218548,"구매전환값":4372500,"구매수":12,"ROAS":2000.9,"CPA":18212,"CTR":1.82,"CVR":5.74,"CPM":30960,"고유CTR":1.46,"ATC":44,"ATC_Rate":23.05,"LPView":191,"노출":7061,"도달":6444,"빈도":1.1,"영상조회":0,"영상조회율":0,"고유링크클릭수":114,"고유링크CVR":7.02,"노출당LPV율":2.71,"노출1천회당전환수":1.7,"구매_Rate":5.74,"LPV당구매율":6.28,"객단가":364375,"DN_일수":202,"누적_지출":218548,"누적_매출":4372500,"누적_ROAS":2000.9,"소재_라이프사이클":"테스트","판정":"✅ 1차 통과","위너여부":true,"위너이력":[{"date":"2026-05-02","note":"테스트캠 고ROAS 소재"}],"개선시도_횟수":0,"승격/ASC 상태":"테스트→메인 승격 검토","ASC판정":"ASC제외","ASC이유":"테스트캠 소재는 ASC 후보로 바로 올리지 않음 (메인 승격 후 재평가)","ASC리스크":"-","ad_manager_url":"https://business.facebook.com/adsmanager/manage/ads?act=313374542193702&selected_ad_ids=120219111275060311"},{"소재ID":"120219112035180311","소재명":"슈퍼얼리버드_최저4,800원(영상)_250804_H","상품":"단백밥","캠페인":"(테스트)단백밥_270803","광고세트":"(테스트)단백밥_270803_ADSET","광고":"슈퍼얼리버드_최저4,800원(영상)_250804_H","effective_status":"ACTIVE","지출":217762,"구매전환값":4372800,"구매수":12,"ROAS":2007.3,"CPA":18147,"CTR":1.82,"CVR":5.72,"CPM":30944,"고유CTR":1.45,"ATC":44,"ATC_Rate":23.1,"LPView":191,"노출":7046,"도달":6433,"빈도":1.1,"영상조회":0,"영상조회율":0,"고유링크클릭수":114,"고유링크CVR":7.02,"노출당LPV율":2.71,"노출1천회당전환수":1.7,"구매_Rate":5.72,"LPV당구매율":6.28,"객단가":364400,"DN_일수":202,"누적_지출":217762,"누적_매출":4372800,"누적_ROAS":2007.3,"소재_라이프사이클":"테스트","판정":"✅ 1차 통과","위너여부":true,"위너이력":[{"date":"2026-05-02","note":"테스트캠 고ROAS 소재"}],"개선시도_횟수":0,"승격/ASC 상태":"테스트→메인 승격 검토","ASC판정":"ASC제외","ASC이유":"테스트캠 소재는 ASC 후보로 바로 올리지 않음 (메인 승격 후 재평가)","ASC리스크":"-","ad_manager_url":"https://business.facebook.com/adsmanager/manage/ads?act=313374542193702&selected_ad_ids=120219112035180311"},{"소재ID":"120219112555180311","소재명":"슈퍼얼리버드_최저4,800원(영상)_250804_I","상품":"단백밥","캠페인":"(테스트)단백밥_270803","광고세트":"(테스트)단백밥_270803_ADSET","광고":"슈퍼얼리버드_최저4,800원(영상)_250804_I","effective_status":"ACTIVE","지출":217625,"구매전환값":4372200,"구매수":12,"ROAS":2008.6,"CPA":18135,"CTR":1.82,"CVR":5.71,"CPM":30936,"고유CTR":1.45,"ATC":44,"ATC_Rate":23.08,"LPView":191,"노출":7041,"도달":6428,"빈도":1.1,"영상조회":0,"영상조회율":0,"고유링크클릭수":114,"고유링크CVR":7.02,"노출당LPV율":2.71,"노출1천회당전환수":1.7,"구매_Rate":5.71,"LPV당구매율":6.28,"객단가":364350,"DN_일수":202,"누적_지출":217625,"누적_매출":4372200,"누적_ROAS":2008.6,"소재_라이프사이클":"테스트","판정":"✅ 1차 통과","위너여부":true,"위너이력":[{"date":"2026-05-02","note":"테스트캠 고ROAS 소재"}],"개선시도_횟수":0,"승격/ASC 상태":"테스트→메인 승격 검토","ASC판정":"ASC제외","ASC이유":"테스트캠 소재는 ASC 후보로 바로 올리지 않음 (메인 승격 후 재평가)","ASC리스크":"-","ad_manager_url":"https://business.facebook.com/adsmanager/manage/ads?act=313374542193702&selected_ad_ids=120219112555180311"},{"소재ID":"120219113265300311","소재명":"슈퍼얼리버드_최저4,800원(영상)_250804_J","상품":"단백밥","캠페인":"(테스트)단백밥_270803","광고세트":"(테스트)단백밥_270803_ADSET","광고":"슈퍼얼리버드_최저4,800원(영상)_250804_J","effective_status":"ACTIVE","지출":215524,"구매전환값":4336800,"구매수":12,"ROAS":2011.8,"CPA":17960,"CTR":1.82,"CVR":5.68,"CPM":30964,"고유CTR":1.45,"ATC":44,"ATC_Rate":23.08,"LPView":190,"노출":6958,"도달":6350,"빈도":1.1,"영상조회":0,"영상조회율":0,"고유링크클릭수":114,"고유링크CVR":7.02,"노출당LPV율":2.73,"노출1천회당전환수":1.73,"구매_Rate":5.68,"LPV당구매율":6.32,"객단가":361400,"DN_일수":202,"누적_지출":215524,"누적_매출":4336800,"누적_ROAS":2011.8,"소재_라이프사이클":"테스트","판정":"✅ 1차 통과","위너여부":true,"위너이력":[{"date":"2026-05-02","note":"테스트캠 고ROAS 소재"}],"개선시도_횟수":0,"승격/ASC 상태":"테스트→메인 승격 검토","ASC판정":"ASC제외","ASC이유":"테스트캠 소재는 ASC 후보로 바로 올리지 않음 (메인 승격 후 재평가)","ASC리스크":"-","ad_manager_url":"https://business.facebook.com/adsmanager/manage/ads?act=313374542193702&selected_ad_ids=120219113265300311"},{"소재ID":"120219113915180311","소재명":"슈퍼얼리버드_최저4,800원(영상)_250804_K","상품":"단백밥","캠페인":"(테스트)단백밥_270803","광고세트":"(테스트)단백밥_270803_ADSET","광고":"슈퍼얼리버드_최저4,800원(영상)_250804_K","effective_status":"ACTIVE","지출":214753,"구매전환값":4340400,"구매수":12,"ROAS":2021.4,"CPA":17896,"CTR":1.82,"CVR":5.68,"CPM":30963,"고유CTR":1.45,"ATC":44,"ATC_Rate":23.07,"LPView":190,"노출":6933,"도달":6326,"빈도":1.1,"영상조회":0,"영상조회율":0,"고유링크클릭수":114,"고유링크CVR":7.02,"노출당LPV율":2.74,"노출1천회당전환수":1.73,"구매_Rate":5.68,"LPV당구매율":6.32,"객단가":361700,"DN_일수":202,"누적_지출":214753,"누적_매출":4340400,"누적_ROAS":2021.4,"소재_라이프사이클":"테스트","판정":"✅ 1차 통과","위너여부":true,"위너이력":[{"date":"2026-05-02","note":"테스트캠 고ROAS 소재"}],"개선시도_횟수":0,"승격/ASC 상태":"테스트→메인 승격 검토","ASC판정":"ASC제외","ASC이유":"테스트캨 소재는 ASC 후보로 바로 올리지 않음 (메인 승격 후 재평가)","ASC리스크":"-","ad_manager_url":"https://business.facebook.com/adsmanager/manage/ads?act=313374542193702&selected_ad_ids=120219113915180311"}/* ... file continues ... */</script>
+<script>
+const payload = JSON.parse(document.getElementById('dashboard-data').textContent);
+
+function number(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+function formatCurrency(value) {
+  const n = number(value);
+  if (n === null) return '-';
+  return `₩${n.toLocaleString('ko-KR')}`;
+}
+function formatPercent(value, digits=2) {
+  const n = number(value);
+  if (n === null) return '-';
+  return `${n.toFixed(digits)}%`;
+}
+function formatPlain(value) {
+  const n = number(value);
+  if (n === null) return '-';
+  return n.toLocaleString('ko-KR');
+}
+function badge(text, tone) {
+  if (!text) return '';
+  const cls = tone ? `badge ${tone}` : 'badge';
+  return `<span class="${cls}">${text}</span>`;
+}
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+function renderChips(meta) {
+  const chips = document.getElementById('metaChips');
+  if (!chips) return;
+  const items = [
+    { label: 'Account', value: meta.ad_account_id },
+    { label: 'Rule', value: meta.period_rule },
+    { label: 'Generated', value: meta.generated_at },
+  ];
+  chips.innerHTML = items.map(item => `<div class="chip"><strong>${item.label}</strong> ${item.value || '-'}</div>`).join('');
+}
+
+function renderMtdKpis(rows) {
+  const el = document.getElementById('mtdKpis');
+  if (!el) return;
+  const cards = [];
+  for (const row of rows || []) {
+    const category = row['카테고리'] || row.category || '-';
+    const spend = row['누적_지출'] ?? row.spend;
+    const revenue = row['누적_매출'] ?? row.revenue;
+    const roas = row['누적_ROAS'] ?? row.roas;
+    const active = row['활성광고수'] ?? row.active_count;
+    const off = row['OFF광고수'] ?? row.off_count;
+    const meta = `${active ?? '-'} active / ${off ?? '-'} off`;
+    cards.push(
+      `<div class="kpi">
+        <div class="label">${category}</div>
+        <div class="value">${formatCurrency(spend)}</div>
+        <div class="meta">매출 ${formatCurrency(revenue)} · ROAS ${formatPercent(roas,1)} · ${meta}</div>
+      </div>`
+    );
+  }
+  el.innerHTML = cards.join('');
+}
+
+function renderSimpleRows(targetId, rows, cols) {
+  const tbody = document.getElementById(targetId);
+  if (!tbody) return;
+  if (!rows || rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="${cols.length}" class="empty">표시할 데이터가 없습니다.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(row => {
+    const tds = cols.map(c => {
+      const raw = typeof c.value === 'function' ? c.value(row) : row[c.value];
+      const val = raw == null ? '-' : raw;
+      return `<td>${val}</td>`;
+    }).join('');
+    return `<tr>${tds}</tr>`;
+  }).join('');
+}
+
+function renderPipelineRows(creatives) {
+  const tbody = document.getElementById('pipelineRows');
+  if (!tbody) return;
+  if (!creatives || creatives.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10" class="empty">표시할 데이터가 없습니다.</td></tr>';
+    return;
+  }
+  const rows = creatives.slice(0, 40).map(row => {
+    const judgment = row['판정'] || '';
+    const asc = row['ASC판정'] || '';
+    const status = row['승격/ASC 상태'] || '';
+    const note = row['ASC이유'] || '';
+    const tone = judgment.includes('🏆') ? 'good' : judgment.includes('OFF') ? 'bad' : judgment.includes('관찰') ? 'warn' : 'info';
+    const ascTone = asc.includes('합격') ? 'good' : asc.includes('탈락') ? 'bad' : asc.includes('후보') ? 'warn' : 'info';
+    return `<tr>
+      <td>${row['소재명'] || '-'}</td>
+      <td>${row['상품'] || '-'}</td>
+      <td>${badge(judgment, tone)}</td>
+      <td>${badge(status, 'info')}</td>
+      <td>${badge(asc, ascTone)}</td>
+      <td class="mono">${formatCurrency(row['지출'])}</td>
+      <td class="mono">${formatPlain(row['구매수'])}</td>
+      <td class="mono">${formatPercent(row['ROAS'],1)}</td>
+      <td class="mono">${formatCurrency(row['CPA'])}</td>
+      <td>${note}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = rows.join('');
+}
+
+function renderCreativeRows(creatives) {
+  const tbody = document.getElementById('creativeRows');
+  if (!tbody) return;
+  if (!creatives || creatives.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="12" class="empty">표시할 데이터가 없습니다.</td></tr>';
+    return;
+  }
+  const rows = creatives.slice(0, 88).map(row => {
+    const judgment = row['판정'] || '';
+    const asc = row['ASC판정'] || '';
+    const status = row['승격/ASC 상태'] || '';
+    const tone = judgment.includes('🏆') ? 'good' : judgment.includes('OFF') ? 'bad' : judgment.includes('관찰') ? 'warn' : 'info';
+    const ascTone = asc.includes('합격') ? 'good' : asc.includes('탈락') ? 'bad' : asc.includes('후보') ? 'warn' : 'info';
+    const funnel = row['퍼널진단'] || row['ASC리스크'] || '';
+    return `<tr>
+      <td>${row['소재명'] || '-'}</td>
+      <td>${row['상품'] || '-'}</td>
+      <td>${row['캠페인'] || '-'}</td>
+      <td>${row['광고세트'] || '-'}</td>
+      <td>${badge(judgment, tone)}</td>
+      <td>${badge(status, 'info')}</td>
+      <td>${badge(asc, ascTone)}</td>
+      <td class="mono">${formatCurrency(row['지출'])}</td>
+      <td class="mono">${formatPlain(row['구매수'])}</td>
+      <td class="mono">${formatPercent(row['ROAS'],1)}</td>
+      <td class="mono">${formatCurrency(row['CPA'])}</td>
+      <td>${funnel}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = rows.join('');
+}
+
+function buildOpsRows(creatives) {
+  // group by campaign+adset
+  const map = new Map();
+  for (const row of creatives || []) {
+    const key = `${row['캠페인'] || ''}|||${row['광고세트'] || ''}`;
+    const item = map.get(key) || {
+      캠페인: row['캠페인'] || '-',
+      광고세트: row['광고세트'] || '-',
+      운영상태: row['effective_status'] || '-',
+      '승격/ASC 상태': row['승격/ASC 상태'] || '-',
+      지출: 0,
+      구매수: 0,
+      매출: 0,
+    };
+    item.지출 += Number(row['지출'] || 0);
+    item.구매수 += Number(row['구매수'] || 0);
+    item.매출 += Number(row['구매전환값'] || 0);
+    map.set(key, item);
+  }
+  // compute roas/cpa
+  const rows = [];
+  for (const item of map.values()) {
+    item.ROAS = item.지출 ? (item.매출 / item.지출) * 100 : null;
+    item.CPA = item.구매수 ? (item.지출 / item.구매수) : null;
+    item.메모 = '';
+    rows.push(item);
+  }
+  rows.sort((a,b) => (b.지출 - a.지출));
+  return rows.slice(0, 60);
+}
+
+function renderOpsRows(creatives) {
+  const tbody = document.getElementById('opsRows');
+  if (!tbody) return;
+  const rows = buildOpsRows(creatives);
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="empty">표시할 데이터가 없습니다.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(row => {
+    return `<tr>
+      <td>${row['캠페인']}</td>
+      <td>${row['광고세트']}</td>
+      <td>${badge(row['운영상태'], 'info')}</td>
+      <td>${badge(row['승격/ASC 상태'], 'info')}</td>
+      <td class="mono">${formatCurrency(row['지출'])}</td>
+      <td class="mono">${formatPlain(row['구매수'])}</td>
+      <td class="mono">${formatPercent(row['ROAS'],1)}</td>
+      <td class="mono">${formatCurrency(row['CPA'])}</td>
+      <td>${row['메모'] || ''}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderFunnel(rows) {
+  renderSimpleRows('funnelRows', rows || [], [
+    { value: 'label' },
+    { value: r => `<span class="mono">${r.value || '-'}</span>` },
+    { value: 'note' },
+  ]);
+}
+
+function renderValidation(validation) {
+  const rows = [];
+  for (const [key, obj] of Object.entries(validation || {})) {
+    if (key === 'notes') continue;
+    rows.push({ metric: key, value: obj.value, note: obj.note || '' });
+  }
+  renderSimpleRows('validationRows', rows, [
+    { value: 'metric' },
+    { value: r => `<span class="mono">${r.value ?? '-'}</span>` },
+    { value: 'note' },
+  ]);
+}
+
+function renderGa4Daily(rows) {
+  const tbody = document.getElementById('ga4DailyRows');
+  if (!tbody) return;
+  if (!rows || rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty">표시할 데이터가 없습니다.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => {
+    const roi = r['실ROI'] == null ? '-' : (Number(r['실ROI'])*100).toFixed(1)+'%';
+    return `<tr>
+      <td class="mono">${r['날짜'] || '-'}</td>
+      <td>${r['카테고리'] || '-'}</td>
+      <td class="mono">${formatCurrency(r['매출'])}</td>
+      <td class="mono">${formatCurrency(r['광고비'])}</td>
+      <td class="mono">${formatCurrency(r['순이익'])}</td>
+      <td class="mono">${roi}</td>
+      <td class="mono">${formatPlain(r['주문수'])}</td>
+      <td class="mono">${formatPlain(r['소재수'])}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderGa4Monthly(rows) {
+  const tbody = document.getElementById('ga4MonthlyRows');
+  if (!tbody) return;
+  if (!rows || rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">표시할 데이터가 없습니다.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => {
+    const roas = r['ROAS'] == null ? '-' : Number(r['ROAS']).toFixed(1)+'%';
+    return `<tr>
+      <td class="mono">${(r['월'] || '').slice(0,7)}</td>
+      <td>${r['product'] || r['상품'] || '-'}</td>
+      <td class="mono">${formatCurrency(r['revenue'] || r['매출'])}</td>
+      <td class="mono">${formatCurrency(r['광고지출'])}</td>
+      <td class="mono">${formatCurrency(r['순이익'])}</td>
+      <td class="mono">${r['순이익률'] == null ? '-' : Number(r['순이익률']).toFixed(1)+'%'}</td>
+      <td class="mono">${roas}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderMonthlyProfit(rows) {
+  const tbody = document.getElementById('monthlyProfitRows');
+  if (!tbody) return;
+  if (!rows || rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty">표시할 데이터가 없습니다.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => {
+    const roas = r['ROAS'] == null ? '-' : Number(r['ROAS']).toFixed(1)+'%';
+    return `<tr>
+      <td class="mono">${(r['월'] || '').slice(0,7)}</td>
+      <td>${r['product'] || r['상품'] || '-'}</td>
+      <td class="mono">${formatCurrency(r['구매전환값'])}</td>
+      <td class="mono">${formatCurrency(r['매출총이익'])}</td>
+      <td class="mono">${formatCurrency(r['광고지출'])}</td>
+      <td class="mono">${formatCurrency(r['순이익'])}</td>
+      <td class="mono">${r['순이익률'] == null ? '-' : Number(r['순이익률']).toFixed(1)+'%'}</td>
+      <td class="mono">${roas}</td>
+    </tr>`;
+  }).join('');
+}
+
+function run() {
+  const meta = payload.meta || {};
+  setText('reportDate', meta.date || '-');
+  setText('generatedAt', meta.generated_at || '-');
+  setText('periodRule', meta.period_rule || '-');
+  setText('accountId', meta.ad_account_id || '-');
+  renderChips(meta);
+  renderMtdKpis(payload.mtd_kpis || []);
+  const notes = (payload.validation && payload.validation.notes) ? payload.validation.notes : [];
+  document.getElementById('mtdNote').textContent = notes.join(' / ');
+  document.getElementById('pipelineNote').textContent = '상위 지출/승격 후보 소재 중심 (최대 40개)';
+  document.getElementById('creativeNote').textContent = '전체 소재(최대 88개)';
+  document.getElementById('opsNote').textContent = '캠페인/광고세트 단위 운영 구조 요약 (최대 60개)';
+
+  renderPipelineRows(payload.creatives || []);
+  renderCreativeRows(payload.creatives || []);
+  renderOpsRows(payload.creatives || []);
+  renderFunnel(payload.funnel_insights || []);
+  renderValidation(payload.validation || {});
+  renderGa4Daily(payload.ga4_profit_daily || []);
+  renderGa4Monthly(payload.ga4_profit_monthly || []);
+  renderMonthlyProfit(payload.monthly_profit || []);
+}
+
+run();
+</script>
+</body>
+</html>
