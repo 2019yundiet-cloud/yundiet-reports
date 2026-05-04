@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>직화후지궈 — PC / Mobile Preview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100%; }
+  body {
+    background: #141414;
+    color: #fff;
+    font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  .preview-shell {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+  .preview-bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 14px 20px;
+    background: rgba(255,255,255,0.94);
+    color: #0a0a0a;
+    border-bottom: 2px solid #0a0a0a;
+  }
+  .brand {
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    white-space: nowrap;
+  }
+  .brand em { color: oklch(0.58 0.22 28); font-style: normal; }
+  .switcher {
+    display: inline-flex;
+    padding: 4px;
+    gap: 4px;
+    border: 2px solid #0a0a0a;
+    background: #fff;
+  }
+  .switcher button {
+    min-width: 92px;
+    border: 0;
+    padding: 10px 16px;
+    background: transparent;
+    color: #0a0a0a;
+    font: 800 13px/1 Pretendard, system-ui, sans-serif;
+    cursor: pointer;
+  }
+  .switcher button.is-active {
+    background: #0a0a0a;
+    color: #fff;
+  }
+  .preview-wrap {
+    min-height: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 28px;
+    overflow: auto;
+  }
+  .device {
+    width: min(100%, var(--device-width));
+    height: calc(100vh - 112px);
+    min-height: 680px;
+    background: #fff;
+    border: 2px solid #0a0a0a;
+    box-shadow: 10px 10px 0 rgba(232,80,46,0.95);
+    transition: width 180ms ease, border-radius 180ms ease;
+  }
+  .device[data-mode="mobile"] {
+    max-width: 430px;
+    border-radius: 28px;
+    overflow: hidden;
+  }
+  iframe {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border: 0;
+    background: #fff;
+  }
+  @media (max-width: 720px) {
+    .preview-bar { align-items: stretch; flex-direction: column; gap: 12px; }
+    .switcher { width: 100%; }
+    .switcher button { flex: 1; }
+    .preview-wrap { padding: 16px; }
+    .device { height: calc(100vh - 146px); min-height: 560px; box-shadow: 6px 6px 0 rgba(232,80,46,0.95); }
+  }
+</style>
+</head>
+<body>
+  <div class="preview-shell">
+    <header class="preview-bar">
+      <div class="brand">윤식단 직화후지궈<em>.</em></div>
+      <div class="switcher" role="group" aria-label="미리보기 버전 선택">
+        <button type="button" class="is-active" data-target="pc.html" data-width="860px" data-mode="pc">PC</button>
+        <button type="button" data-target="mobile.html" data-width="390px" data-mode="mobile">Mobile</button>
+      </div>
+    </header>
+    <main class="preview-wrap">
+      <section class="device" id="device" data-mode="pc" style="--device-width: 860px;">
+        <iframe id="previewFrame" src="pc.html" title="직화후지궈 상세페이지 미리보기"></iframe>
+      </section>
+    </main>
+  </div>
+<script>
+  const buttons = document.querySelectorAll(".switcher button");
+  const frame = document.getElementById("previewFrame");
+  const device = document.getElementById("device");
+
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      buttons.forEach((item) => item.classList.remove("is-active"));
+      button.classList.add("is-active");
+      frame.src = button.dataset.target;
+      device.style.setProperty("--device-width", button.dataset.width);
+      device.dataset.mode = button.dataset.mode;
+    });
+  });
+</script>
+</body>
+</html>
