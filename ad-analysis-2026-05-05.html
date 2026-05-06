@@ -2843,6 +2843,14 @@
               <th class="num">지출</th>
               <th class="num">매출</th>
               <th class="num">ROAS</th>
+              <th class="num">CTR</th>
+              <th class="num">CVR</th>
+              <th class="num">CPA</th>
+              <th class="num">구매수</th>
+              <th class="num">빈도</th>
+              <th class="num">LPV</th>
+              <th class="num">노출당LPV</th>
+              <th class="num">LPV당구매</th>
             </tr></thead>
             <tbody></tbody>
           </table>
@@ -2890,7 +2898,15 @@
           <td class="num">${fmtKRW(r.일예산)}</td>
           <td class="num">${fmtKRW(r.누적_지출)}</td>
           <td class="num">${fmtKRW(r.구매전환값)}</td>
-          <td class="num">${fmtROAS(r.누적_ROAS)}</td>`;
+          <td class="num">${fmtROAS(r.누적_ROAS)}</td>
+          <td class="num">${fmtPct(r.CTR, 2)}</td>
+          <td class="num">${fmtPct(r.고유링크CVR ?? r.CVR, 2)}</td>
+          <td class="num">${fmtKRW(r.CPA)}</td>
+          <td class="num">${fmtNum(r.구매수)}</td>
+          <td class="num">${fmtNum(r.빈도, 2)}</td>
+          <td class="num">${fmtNum(r.LPV ?? r.LPView)}</td>
+          <td class="num">${fmtPct(r.노출당LPV율, 2)}</td>
+          <td class="num">${fmtPct(r.LPV당구매율, 2)}</td>`;
         tbody.appendChild(tr);
       });
       const sum = computeSummary(rows);
