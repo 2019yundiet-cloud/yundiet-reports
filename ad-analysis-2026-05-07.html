@@ -3510,6 +3510,29 @@
         .map(row => ({ ...row, 실ROI: row.광고비 ? row.순이익 / row.광고비 : null }))
         .sort((a, b) => String(b[periodKey] || '').localeCompare(String(a[periodKey] || '')));
     };
+    const aggregateGa4RowsByCategoryPeriod = (rows, periodKey) => {
+      const map = new Map();
+      for (const row of (rows || [])) {
+        const cat = row?.카테고리 || '기타';
+        const period = row?.[periodKey] || '-';
+        const key = `${cat}__${period}`;
+        if (!map.has(key)) {
+          map.set(key, { 카테고리: cat, [periodKey]: period, 매출: 0, 원가: 0, 배송비: 0, 수수료: 0, 광고비: 0, 순이익: 0, 주문수: 0, rows: 0 });
+        }
+        const acc = map.get(key);
+        acc.매출 += money(row.매출);
+        acc.원가 += money(row.원가);
+        acc.배송비 += money(row.배송비);
+        acc.수수료 += money(row.수수료);
+        acc.광고비 += money(row.광고비);
+        acc.순이익 += money(row.순이익);
+        acc.주문수 += count(row.주문수);
+        acc.rows += 1;
+      }
+      return [...map.values()]
+        .map(row => ({ ...row, 실ROI: row.광고비 ? row.순이익 / row.광고비 : null }))
+        .sort((a, b) => String(b[periodKey] || '').localeCompare(String(a[periodKey] || '')));
+    };
     const renderGa4TotalSummary = (host, rows, periodKey, title, emptyText) => {
       if (!host) return;
       const totalRows = aggregateGa4RowsByPeriod(rows, periodKey);
@@ -3569,7 +3592,8 @@
       if (!host) return;
       const effectiveDailyRows = getEffectiveGa4DailyRows();
       renderGa4TotalSummary(summaryHost, effectiveDailyRows, '날짜', '일별 총합 순이익', '');
-      const byCat = groupByCategory(splitGa4RowsIfNeeded(effectiveDailyRows, 'daily'));
+      const dailyRows = aggregateGa4RowsByCategoryPeriod(splitGa4RowsIfNeeded(effectiveDailyRows, 'daily'), '날짜');
+      const byCat = groupByCategory(dailyRows);
       const cats = orderedCats(byCat);
       if (cats.length === 0) {
         if (summaryHost) summaryHost.innerHTML = '';
@@ -3638,7 +3662,7 @@
       const summaryHost = document.getElementById('ga4-monthly-total-summary');
       const host = document.getElementById('ga4-monthly-cats');
       if (!host) return;
-      const monthlyRows = splitGa4RowsIfNeeded(DATA.ga4_profit_monthly, 'monthly');
+      const monthlyRows = aggregateGa4RowsByCategoryPeriod(splitGa4RowsIfNeeded(DATA.ga4_profit_monthly, 'monthly'), '월');
       const byCat = groupByCategory(monthlyRows);
       const cats = orderedCats(byCat);
       if (cats.length === 0) {
