@@ -900,6 +900,23 @@
   }
   .ga4-total-headline small { font-size: 17px; font-weight: 700; color: var(--muted); }
   .ga4-total-sub { margin-top: 8px; font-size: 13px; color: var(--muted); font-weight: 700; }
+  .ga4-total-table-wrap {
+    margin-top: 14px; max-height: 260px; overflow: auto;
+    border: 1px solid var(--border); border-radius: 8px;
+  }
+  .ga4-total-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .ga4-total-table th {
+    position: sticky; top: 0; background: var(--brand-cream);
+    border-bottom: 2px solid var(--brand-green);
+    padding: 7px 6px; text-align: left; white-space: nowrap;
+  }
+  .ga4-total-table th.num,
+  .ga4-total-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .ga4-total-table td { padding: 6px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .ga4-total-table tbody tr:nth-child(even) td { background: #fafaf7; }
+  .ga4-total-table tfoot td {
+    background: var(--brand-cream); border-top: 2px solid var(--brand-green); font-weight: 800;
+  }
   .ga4-cat-card {
     background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 16px;
     box-shadow: 0 2px 8px rgba(45,80,22,0.06);
@@ -1279,6 +1296,7 @@
     <div class="period-caption">실결제 매출 × 매칭률 − 원가 − 배송비 − 수수료 − 광고비 = 순이익 · 카테고리별 · 매일 08:30 KST 업데이트</div>
 
     <h3 class="ga4-sub">📘 일별 (최근 30일 · 카테고리별)</h3>
+    <div id="ga4-daily-total-summary"></div>
     <div class="ga4-cat-grid" id="ga4-daily-cats"></div>
 
     <h3 class="ga4-sub">📙 월별 (전체 · 카테고리별)</h3>
@@ -3471,14 +3489,90 @@
       const extras = [...byCat.keys()].filter(c => !CAT_ORDER.includes(c));
       return [...present, ...extras];
     };
+    const aggregateGa4RowsByPeriod = (rows, periodKey) => {
+      const map = new Map();
+      for (const row of (rows || [])) {
+        const period = row?.[periodKey] || '-';
+        if (!map.has(period)) {
+          map.set(period, { [periodKey]: period, 매출: 0, 원가: 0, 배송비: 0, 수수료: 0, 광고비: 0, 순이익: 0, 주문수: 0, rows: 0 });
+        }
+        const acc = map.get(period);
+        acc.매출 += money(row.매출);
+        acc.원가 += money(row.원가);
+        acc.배송비 += money(row.배송비);
+        acc.수수료 += money(row.수수료);
+        acc.광고비 += money(row.광고비);
+        acc.순이익 += money(row.순이익);
+        acc.주문수 += count(row.주문수);
+        acc.rows += 1;
+      }
+      return [...map.values()]
+        .map(row => ({ ...row, 실ROI: row.광고비 ? row.순이익 / row.광고비 : null }))
+        .sort((a, b) => String(b[periodKey] || '').localeCompare(String(a[periodKey] || '')));
+    };
+    const renderGa4TotalSummary = (host, rows, periodKey, title, emptyText) => {
+      if (!host) return;
+      const totalRows = aggregateGa4RowsByPeriod(rows, periodKey);
+      if (!totalRows.length) {
+        host.innerHTML = emptyText ? `<div class="ga4-empty">${emptyText}</div>` : '';
+        return;
+      }
+      const latest = totalRows[0];
+      const displayed = totalRows.slice(0, periodKey === '날짜' ? 30 : 24);
+      const sum = displayed.reduce((s, r) => ({
+        매출: s.매출 + money(r.매출),
+        광고비: s.광고비 + money(r.광고비),
+        순이익: s.순이익 + money(r.순이익),
+        주문수: s.주문수 + count(r.주문수),
+      }), { 매출: 0, 광고비: 0, 순이익: 0, 주문수: 0 });
+      const latestROI = latest.실ROI != null ? ratio(latest.실ROI) : (money(latest.광고비) ? money(latest.순이익) / money(latest.광고비) : null);
+      const sumROI = sum.광고비 ? sum.순이익 / sum.광고비 : null;
+      host.innerHTML = `<div class="ga4-total-card">
+        <div class="ga4-total-title">${esc(title)}</div>
+        <div class="ga4-total-headline">${fmtKRW(latest.순이익)}
+          <small>(${esc(latest[periodKey] || '-')} · 실ROI ${fmtPctSigned(latestROI)})</small>
+        </div>
+        <div class="ga4-total-sub">${displayed.length}${periodKey === '날짜' ? '일' : '개월'} 합계 ${fmtKRW(sum.순이익)} · 총 매출 ${fmtKRW(sum.매출)} · 총 광고비 ${fmtKRW(sum.광고비)} · 주문수 ${fmtNum(sum.주문수)} · 평균 실ROI ${fmtPctSigned(sumROI)}</div>
+        <div class="ga4-total-table-wrap">
+          <table class="ga4-total-table">
+            <thead><tr>
+              <th>${esc(periodKey)}</th><th class="num">매출</th><th class="num">광고비</th>
+              <th class="num">순이익</th><th class="num">실ROI</th><th class="num">주문수</th>
+            </tr></thead>
+            <tbody>
+              ${displayed.map(r => `<tr>
+                <td>${esc(r[periodKey] || '-')}</td>
+                <td class="num">${fmtKRW(r.매출)}</td>
+                <td class="num">${fmtKRW(r.광고비)}</td>
+                <td class="num ${profitClass(r.순이익)}">${fmtKRW(r.순이익)}</td>
+                ${pctCell(r.실ROI)}
+                <td class="num">${fmtNum(r.주문수)}</td>
+              </tr>`).join('')}
+            </tbody>
+            <tfoot><tr>
+              <td>합계</td>
+              <td class="num">${fmtKRW(sum.매출)}</td>
+              <td class="num">${fmtKRW(sum.광고비)}</td>
+              <td class="num ${profitClass(sum.순이익)}">${fmtKRW(sum.순이익)}</td>
+              ${pctCell(sumROI)}
+              <td class="num">${fmtNum(sum.주문수)}</td>
+            </tr></tfoot>
+          </table>
+        </div>
+      </div>`;
+    };
 
     // ---- 일별 카테고리 카드 ----
     (function renderDailyCats() {
+      const summaryHost = document.getElementById('ga4-daily-total-summary');
       const host = document.getElementById('ga4-daily-cats');
       if (!host) return;
-      const byCat = groupByCategory(splitGa4RowsIfNeeded(getEffectiveGa4DailyRows(), 'daily'));
+      const effectiveDailyRows = getEffectiveGa4DailyRows();
+      renderGa4TotalSummary(summaryHost, effectiveDailyRows, '날짜', '일별 총합 순이익', '');
+      const byCat = groupByCategory(splitGa4RowsIfNeeded(effectiveDailyRows, 'daily'));
       const cats = orderedCats(byCat);
       if (cats.length === 0) {
+        if (summaryHost) summaryHost.innerHTML = '';
         host.innerHTML = `<div class="ga4-empty">데이터 없음 — 노션 DB 동기화 대기 중</div>`;
         return;
       }
@@ -3553,22 +3647,7 @@
         return;
       }
       const rawMonthlyRows = Array.isArray(DATA.ga4_profit_monthly) ? DATA.ga4_profit_monthly.slice() : [];
-      const monthlyOverallRows = rawMonthlyRows.filter(r => (r.카테고리 || '전체') === '전체' || (r.카테고리 || '기타') === '기타');
-      const monthlyOverall = monthlyOverallRows.slice().sort((a, b) => (b.월 || '').localeCompare(a.월 || ''))[0]
-        || rawMonthlyRows.slice().sort((a, b) => (b.월 || '').localeCompare(a.월 || ''))[0]
-        || monthlyRows.slice().sort((a, b) => (b.월 || '').localeCompare(a.월 || ''))[0];
-      const overallAdCost = money(monthlyOverall?.광고비);
-      const overallROI = monthlyOverall?.실ROI != null ? ratio(monthlyOverall.실ROI)
-        : (overallAdCost ? money(monthlyOverall.순이익) / overallAdCost : null);
-      if (summaryHost && monthlyOverall) {
-        summaryHost.innerHTML = `<div class="ga4-total-card">
-          <div class="ga4-total-title">월별 총합 순이익</div>
-          <div class="ga4-total-headline">${fmtKRW(monthlyOverall.순이익)}
-            <small>(${esc(monthlyOverall.월 || '-')} · 실ROI ${fmtPctSigned(overallROI)})</small>
-          </div>
-          <div class="ga4-total-sub">총 매출 ${fmtKRW(monthlyOverall.매출)} · 총 광고비 ${fmtKRW(monthlyOverall.광고비)} · 주문수 ${fmtNum(monthlyOverall.주문수)}</div>
-        </div>`;
-      }
+      renderGa4TotalSummary(summaryHost, rawMonthlyRows.length ? rawMonthlyRows : monthlyRows, '월', '월별 총합 순이익', '');
       host.innerHTML = cats.map(cat => {
         const catRows = byCat.get(cat).slice()
           .sort((a, b) => (b.월 || '').localeCompare(a.월 || ''));
