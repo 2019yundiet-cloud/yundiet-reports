@@ -1602,6 +1602,13 @@
   const normalizeStatus = (v) => String(v || '').trim().toUpperCase();
   const statusOf = (r) => normalizeStatus(r?.effective_status || r?.현재상태 || r?.status || '');
   const RUNNING_STATUSES = new Set(['ACTIVE', 'WITH_ISSUES']);
+  const statusChipHtml = (r) => {
+    const raw = statusOf(r);
+    if (RUNNING_STATUSES.has(raw)) {
+      return `<span class="type-chip type-asc" title="${esc(raw || 'ACTIVE')}">ON</span>`;
+    }
+    return `<span class="type-chip type-winner-history" title="${esc(raw || 'OFF')}">OFF</span>`;
+  };
   const hasMeasuredDailyBudget = (r) => {
     if (boolish(r?.일예산_미집계 ?? r?.daily_budget_missing)) return false;
     const budget = numOrNull(r?.일예산 ?? r?.daily_budget);
@@ -1972,6 +1979,7 @@
     { key: '__type', label: '구분', cls: 'col-type' },
     { key: '__thumb', label: '썸네일', cls: 'col-thumb' },
     { key: '__name', label: '소재명', cls: 'col-name' },
+    { key: '__current_status', label: 'ON/OFF [현재상태]', cls: 'col-ops-status' },
     { key: '__judge', label: '판정' },
     { key: '__asc_candidate', label: '승격/ASC 상태', cls: 'col-asc-candidate' },
     { key: '판정이유', label: '판정이유', cls: 'col-reason' },
@@ -2659,10 +2667,13 @@
             <span class="ad-meta">D+${esc(r.DN_일수 ?? '-')} · ${esc(r.캠페인명 || '')}</span>
           </td>`;
         }
-        if (col.key === '__judge') {
-          const key = judgeKey(r);
-          const meta = JUDGE_BADGE[key] || { cls: 'off', icon: '❔' };
-          return `<td><span class="badge ${meta.cls}">${meta.icon} ${esc(r.판정 || '-')}</span></td>`;
+	        if (col.key === '__judge') {
+	          const key = judgeKey(r);
+	          const meta = JUDGE_BADGE[key] || { cls: 'off', icon: '❔' };
+	          return `<td><span class="badge ${meta.cls}">${meta.icon} ${esc(r.판정 || '-')}</span></td>`;
+	        }
+        if (col.key === '__current_status') {
+          return `<td class="col-ops-status">${statusChipHtml(r)}</td>`;
         }
 	        if (col.key === '__asc_candidate') {
 	          const asc = promotionStatusMeta(r);
@@ -2896,7 +2907,7 @@
               <th class="col-type">캠페인</th>
               <th class="col-ops-type">위너 상태</th>
               <th class="col-name">소재명</th>
-              <th class="col-ops-status">현재상태</th>
+              <th class="col-ops-status">ON/OFF [현재상태]</th>
               <th>판정</th>
 	              <th class="col-ops-asc-state">승격/ASC 상태</th>
               <th class="col-ops-asc-score">ASC점수</th>
@@ -2931,9 +2942,7 @@
         const winnerChip = hasWinnerFlag(r)
           ? '<span class="type-chip type-winner">위너</span>'
           : (hasWinnerHistory(r) ? '<span class="type-chip type-winner-history">위너이력</span>' : '<span class="type-chip type-normal">일반</span>');
-        const statusChip = RUNNING_STATUSES.has(statusOf(r))
-          ? '<span class="type-chip type-asc">진행중</span>'
-          : '<span class="type-chip type-winner-history">OFF</span>';
+        const statusChip = statusChipHtml(r);
         const judgeMeta = JUDGE_BADGE[judgeKey(r)] || { cls: 'off', icon: '❔' };
 	        const ascMeta = promotionStatusMeta(r);
         const opsPlanHtml = buildActionPlanHtml(directActionPlan(r));
