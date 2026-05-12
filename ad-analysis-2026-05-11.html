@@ -1949,16 +1949,16 @@
     card.className = 'mtd-card';
     card.innerHTML = `
       <div class="cat">${cat}</div>
-      <div class="roas">${fmtROAS(row.누적_ROAS)} <small>누적 ROAS</small></div>
+      <div class="roas">${fmtROAS(row.누적_ROAS)} <small>누적 ROAS [광고수익률]</small></div>
       <div class="${budgetClass}" title="ACTIVE 애드셋 일예산 합계 · CBO는 애드셋 수로 균등 배분">${budgetText}</div>
       <dl>
-        <div><dt>고유CTR (링크 클릭률)</dt><dd>${fmtPct(row.고유CTR)}</dd></div>
-        <div><dt>고유링크CVR</dt><dd>${fmtPct(row.고유링크CVR)}</dd></div>
-        <div><dt>노출당LPV</dt><dd>${fmtPct(row.노출당LPV율)}</dd></div>
-        <div><dt>LPV당구매</dt><dd>${fmtPct(row.LPV당구매율)}</dd></div>
-        <div><dt>AOV</dt><dd>${fmtKRW(row.AOV)}</dd></div>
-        <div><dt>CPS</dt><dd>${fmtCPS(row)}</dd></div>
-        <div><dt>CPA</dt><dd>${fmtCPA(row)}</dd></div>
+        <div><dt>고유CTR [고유 링크 클릭률]</dt><dd>${fmtPct(row.고유CTR)}</dd></div>
+        <div><dt>고유링크CVR [링크클릭 구매전환율]</dt><dd>${fmtPct(row.고유링크CVR)}</dd></div>
+        <div><dt>노출당LPV [노출 대비 랜딩조회율]</dt><dd>${fmtPct(row.노출당LPV율)}</dd></div>
+        <div><dt>LPV당구매 [랜딩조회 후 구매율]</dt><dd>${fmtPct(row.LPV당구매율)}</dd></div>
+        <div><dt>AOV [평균 구매금액]</dt><dd>${fmtKRW(row.AOV)}</dd></div>
+        <div><dt>CPS [구매당 비용]</dt><dd>${fmtCPS(row)}</dd></div>
+        <div><dt>CPA [전환당 비용]</dt><dd>${fmtCPA(row)}</dd></div>
         <div><dt>누적지출</dt><dd>${fmtKRW(row.누적_지출)}</dd></div>
         <div><dt>누적매출</dt><dd>${fmtKRW(row.누적_매출)}</dd></div>
         <div title="MTD 내 상태 ACTIVE/WITH_ISSUES 이면서 노출 > 0인 광고 수"><dt>진행 중 광고</dt><dd>${fmtNum(row.활성광고수)}개</dd></div>
@@ -1981,23 +1981,23 @@
     { key: '__funnel', label: '퍼널진단', cls: 'col-funnel' },
     { key: '일예산', label: '일예산', fmt: fmtKRW, cls: 'num' },
     { key: '누적_지출', label: '지출', fmt: fmtKRW, cls: 'num' },
-    { key: '누적_ROAS', label: 'ROAS', fmt: fmtROAS, cls: 'num' },
+    { key: '누적_ROAS', label: 'ROAS [광고수익률]', fmt: fmtROAS, cls: 'num' },
     { key: '노출', label: '노출', fmt: fmtNum, cls: 'num' },
     { key: '도달', label: '도달', fmt: fmtNum, cls: 'num' },
-    { key: 'CTR', label: 'CTR', fmt: (v) => fmtPct(v,2), cls: 'num' },
-    { key: '고유CTR', label: '고유CTR (링크 클릭률)', fmt: (v) => fmtPct(v,2), cls: 'num' },
+    { key: 'CTR', label: 'CTR [클릭률]', fmt: (v) => fmtPct(v,2), cls: 'num' },
+    { key: '고유CTR', label: '고유CTR [고유 링크 클릭률]', fmt: (v) => fmtPct(v,2), cls: 'num' },
     { key: '고유링크클릭수', label: '고유링크클릭', fmt: fmtNum, cls: 'num' },
-    { key: '노출당LPV율', label: '노출당LPV', fmt: (v) => fmtPct(v,2), cls: 'num' },
-    { key: 'LPV당구매율', label: 'LPV당구매', fmt: (v) => fmtPct(v,2), cls: 'num' },
-    { key: '고유링크CVR', label: '고유링크CVR', fmt: (v) => fmtPct(v,2), cls: 'num' },
-    { key: 'CPM', label: 'CPM', fmt: fmtKRW, cls: 'num' },
-    { key: '노출1천회당전환수', label: '1K노출당전환', fmt: (v) => fmtNum(v,2), cls: 'num' },
+    { key: '노출당LPV율', label: '노출당LPV [노출 대비 랜딩조회율]', fmt: (v) => fmtPct(v,2), cls: 'num' },
+    { key: 'LPV당구매율', label: 'LPV당구매 [랜딩조회 후 구매율]', fmt: (v) => fmtPct(v,2), cls: 'num' },
+    { key: '고유링크CVR', label: '고유링크CVR [링크클릭 구매전환율]', fmt: (v) => fmtPct(v,2), cls: 'num' },
+    { key: 'CPM', label: 'CPM [1천회 노출비]', fmt: fmtKRW, cls: 'num' },
+    { key: '노출1천회당전환수', label: '1K노출당전환 [1천회 노출당 구매]', fmt: (v) => fmtNum(v,2), cls: 'num' },
     { key: '구매수', label: '구매수', fmt: fmtNum, cls: 'num' },
-    { key: 'CPS', label: 'CPS', fmt: (_v, r) => fmtCPS(r), cls: 'num' },
-    { key: 'CPA', label: 'CPA', fmt: (_v, r) => fmtCPA(r), cls: 'num' },
-    { key: '평균구매전환값', label: '평균구매값', fmt: fmtKRW, cls: 'num' },
+    { key: 'CPS', label: 'CPS [구매당 비용]', fmt: (_v, r) => fmtCPS(r), cls: 'num' },
+    { key: 'CPA', label: 'CPA [전환당 비용]', fmt: (_v, r) => fmtCPA(r), cls: 'num' },
+    { key: '평균구매전환값', label: '평균구매값 [AOV]', fmt: fmtKRW, cls: 'num' },
     { key: '구매전환값', label: '구매전환값', fmt: fmtKRW, cls: 'num' },
-    { key: '빈도', label: '빈도', fmt: (v) => fmtNum(v,2), cls: 'num' },
+    { key: '빈도', label: '빈도 [1인당 평균 노출]', fmt: (v) => fmtNum(v,2), cls: 'num' },
   ];
 
   const JUDGE_BADGE = {
@@ -2569,7 +2569,7 @@
 	    }
     const referenceCaptionTop = document.getElementById('caption-creatives-reference-top');
     if (referenceCaptionTop) {
-      referenceCaptionTop.textContent = `조회기준일: ${referenceDate} · D+N은 이 날짜 기준 경과일`;
+      referenceCaptionTop.textContent = `조회기준일: ${referenceDate} · DN/D+N은 광고 생성 후 이 날짜까지의 경과일`;
     }
 
     let currentCategory = null;
@@ -2712,32 +2712,32 @@
         <dl>
           <div><dt>지출</dt><dd>${fmtKRW(sum.지출)}</dd></div>
           <div><dt>매출</dt><dd>${fmtKRW(sum.매출)}</dd></div>
-          <div><dt>ROAS</dt><dd>${fmtROAS(sum.ROAS)}</dd></div>
+          <div><dt>ROAS [광고수익률]</dt><dd>${fmtROAS(sum.ROAS)}</dd></div>
           <div><dt>구매수</dt><dd>${fmtNum(sum.구매수)}</dd></div>
-          <div><dt>CPS</dt><dd>${fmtCPS(sum)}</dd></div>
-          <div><dt>CPA</dt><dd>${fmtCPA(sum)}</dd></div>
+          <div><dt>CPS [구매당 비용]</dt><dd>${fmtCPS(sum)}</dd></div>
+          <div><dt>CPA [전환당 비용]</dt><dd>${fmtCPA(sum)}</dd></div>
           <div><dt>구매전환값</dt><dd>${fmtKRW(sum.구매전환값)}</dd></div>
-          <div><dt>평균구매값</dt><dd>${fmtKRW(sum.AOV)}</dd></div>
+          <div><dt>AOV [평균 구매금액]</dt><dd>${fmtKRW(sum.AOV)}</dd></div>
         </dl>
       </div>
       <div class="creative-summary-card">
         <div class="sum-title">퍼널 요약</div>
         <dl>
           <div><dt>노출</dt><dd>${fmtNum(sum.노출)}</dd></div>
-          <div><dt>CTR</dt><dd>${fmtPct(sum.CTR, 2)}</dd></div>
-          <div><dt>고유CTR (링크 클릭률)</dt><dd>${fmtPct(sum.고유CTR, 2)}</dd></div>
+          <div><dt>CTR [클릭률]</dt><dd>${fmtPct(sum.CTR, 2)}</dd></div>
+          <div><dt>고유CTR [고유 링크 클릭률]</dt><dd>${fmtPct(sum.고유CTR, 2)}</dd></div>
           <div><dt>고유링크클릭</dt><dd>${fmtNum(sum.고유링크클릭수)}</dd></div>
-          <div><dt>LPV</dt><dd>${fmtNum(sum.LPV)}</dd></div>
-          <div><dt>노출당LPV</dt><dd>${fmtPct(sum.노출당LPV율, 2)}</dd></div>
-          <div><dt>LPV당구매</dt><dd>${fmtPct(sum.LPV당구매율, 2)}</dd></div>
-          <div><dt>1K노출당전환</dt><dd>${fmtNum(sum.노출1천회당전환수, 2)}</dd></div>
+          <div><dt>LPV [랜딩페이지 조회]</dt><dd>${fmtNum(sum.LPV)}</dd></div>
+          <div><dt>노출당LPV [노출 대비 랜딩조회율]</dt><dd>${fmtPct(sum.노출당LPV율, 2)}</dd></div>
+          <div><dt>LPV당구매 [랜딩조회 후 구매율]</dt><dd>${fmtPct(sum.LPV당구매율, 2)}</dd></div>
+          <div><dt>1K노출당전환 [1천회 노출당 구매]</dt><dd>${fmtNum(sum.노출1천회당전환수, 2)}</dd></div>
         </dl>
       </div>
       <div class="creative-summary-card">
         <div class="sum-title">판정 참고</div>
         <dl>
-          <div><dt>AOV</dt><dd>${fmtKRW(sum.AOV)}</dd></div>
-          <div><dt>고유링크CVR</dt><dd>${fmtPct(sum.CVR, 2)}</dd></div>
+          <div><dt>AOV [평균 구매금액]</dt><dd>${fmtKRW(sum.AOV)}</dd></div>
+          <div><dt>고유링크CVR [링크클릭 구매전환율]</dt><dd>${fmtPct(sum.CVR, 2)}</dd></div>
           <div><dt>도달</dt><dd>${fmtNum(sum.도달)}</dd></div>
           <div><dt>상태별 OFF</dt><dd>${fmtNum(sum.중단광고수)}</dd></div>
           <div><dt>데이터 기간</dt><dd>${esc(dataPeriod)}</dd></div>
@@ -2905,21 +2905,21 @@
               <th class="col-setting-context">셋팅 이력</th>
               <th class="col-target-kpi">목표 KPI</th>
               <th class="col-action">제안 근거 / 소재액션 / GA4액션</th>
-              <th class="num">DN</th>
+              <th class="num">DN [생성 후 경과일]</th>
               <th class="num">일예산</th>
               <th class="num">구매수</th>
-              <th class="num">CPS</th>
-              <th class="num">CPA</th>
-              <th class="num">ROAS</th>
-              <th class="num">CPM</th>
-              <th class="num">CTR</th>
-              <th class="num">CVR</th>
+              <th class="num">CPS [구매당 비용]</th>
+              <th class="num">CPA [전환당 비용]</th>
+              <th class="num">ROAS [광고수익률]</th>
+              <th class="num">CPM [1천회 노출비]</th>
+              <th class="num">CTR [클릭률]</th>
+              <th class="num">CVR [구매전환율]</th>
               <th class="num">지출</th>
               <th class="num">매출</th>
-              <th class="num">빈도</th>
-              <th class="num">LPV</th>
-              <th class="num">노출당LPV</th>
-              <th class="num">LPV당구매</th>
+              <th class="num">빈도 [1인당 평균 노출]</th>
+              <th class="num">LPV [랜딩페이지 조회]</th>
+              <th class="num">노출당LPV [노출 대비 랜딩조회율]</th>
+              <th class="num">LPV당구매 [랜딩조회 후 구매율]</th>
             </tr></thead>
             <tbody></tbody>
           </table>
@@ -3000,25 +3000,25 @@
       <div class="creative-summary-card">
         <div class="sum-title">성과 합계</div>
         <dl>
-          <div><dt>ROAS</dt><dd>${fmtROAS(sum.ROAS)}</dd></div>
+          <div><dt>ROAS [광고수익률]</dt><dd>${fmtROAS(sum.ROAS)}</dd></div>
           <div><dt>누적지출</dt><dd>${fmtKRW(sum.지출)}</dd></div>
           <div><dt>누적매출</dt><dd>${fmtKRW(sum.매출)}</dd></div>
           <div><dt>구매수</dt><dd>${fmtNum(sum.구매수)}</dd></div>
           <div><dt>구매전환값</dt><dd>${fmtKRW(sum.매출)}</dd></div>
-          <div><dt>AOV</dt><dd>${fmtKRW(sum.AOV)}</dd></div>
+          <div><dt>AOV [평균 구매금액]</dt><dd>${fmtKRW(sum.AOV)}</dd></div>
         </dl>
       </div>
       <div class="creative-summary-card">
         <div class="sum-title">퍼널 요약</div>
         <dl>
           <div><dt>노출</dt><dd>${fmtNum(sum.노출)}</dd></div>
-          <div><dt>CTR</dt><dd>${fmtPct(sum.CTR, 2)}</dd></div>
-          <div><dt>고유CTR (링크 클릭률)</dt><dd>${fmtPct(sum.고유CTR, 2)}</dd></div>
+          <div><dt>CTR [클릭률]</dt><dd>${fmtPct(sum.CTR, 2)}</dd></div>
+          <div><dt>고유CTR [고유 링크 클릭률]</dt><dd>${fmtPct(sum.고유CTR, 2)}</dd></div>
           <div><dt>고유링크클릭</dt><dd>${fmtNum(sum.고유링크클릭수)}</dd></div>
-          <div><dt>LPV</dt><dd>${fmtNum(sum.LPV)}</dd></div>
-          <div><dt>노출당LPV</dt><dd>${fmtPct(sum.노출당LPV율, 2)}</dd></div>
-          <div><dt>LPV당구매</dt><dd>${fmtPct(sum.LPV당구매율, 2)}</dd></div>
-          <div><dt>고유링크CVR</dt><dd>${fmtPct(sum.CVR, 2)}</dd></div>
+          <div><dt>LPV [랜딩페이지 조회]</dt><dd>${fmtNum(sum.LPV)}</dd></div>
+          <div><dt>노출당LPV [노출 대비 랜딩조회율]</dt><dd>${fmtPct(sum.노출당LPV율, 2)}</dd></div>
+          <div><dt>LPV당구매 [랜딩조회 후 구매율]</dt><dd>${fmtPct(sum.LPV당구매율, 2)}</dd></div>
+          <div><dt>고유링크CVR [링크클릭 구매전환율]</dt><dd>${fmtPct(sum.CVR, 2)}</dd></div>
         </dl>
       </div>
       <div class="creative-summary-card">
