@@ -1,0 +1,1059 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>광고 수익분석 통합 대시보드</title>
+  <style>
+    :root {
+      --bg: #f7f3e8;
+      --panel: #fffdfa;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --line: #e8dfcf;
+      --brand: #314d18;
+      --brand-2: #c38a35;
+      --good: #2e7d32;
+      --bad: #b45309;
+      --meta: #2563eb;
+      --naver: #03c75a;
+      --google: #ea4335;
+      --shadow: 0 10px 30px rgba(43, 33, 18, 0.08);
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(195,138,53,0.10), transparent 24%),
+        radial-gradient(circle at top right, rgba(49,77,24,0.08), transparent 22%),
+        var(--bg);
+    }
+    .page {
+      max-width: 1680px;
+      margin: 0 auto;
+      padding: 28px 28px 60px;
+    }
+    .hero, .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .hero {
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--brand);
+      font-weight: 800;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 6px;
+      height: 28px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--brand), var(--brand-2));
+    }
+    h1 {
+      margin: 0;
+      font-size: 42px;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+    }
+    .sub {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-top: 22px;
+    }
+    .toolbar label {
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .toolbar input {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font: inherit;
+      color: var(--ink);
+    }
+    .toolbar button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font: inherit;
+      font-weight: 700;
+      background: var(--brand);
+      color: #fff;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    .channel-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .channel-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,0.78);
+      padding: 18px;
+      min-width: 0;
+    }
+    .channel-card h3 {
+      margin: 0 0 12px;
+      font-size: 20px;
+    }
+    .channel-kpis {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .channel-kpi {
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+      min-width: 0;
+    }
+    .channel-kpi span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+    .channel-kpi strong {
+      font-size: 17px;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+    }
+    .section-title {
+      font-size: 30px;
+      margin: 0 0 8px;
+      letter-spacing: -0.03em;
+    }
+    .section-copy {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .panel {
+      padding: 22px;
+      margin-bottom: 24px;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,0.78);
+      padding: 18px;
+      min-height: 136px;
+    }
+    .stat h3 {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .value {
+      margin-top: 14px;
+      font-size: 28px;
+      line-height: 1.1;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+    .meta { color: var(--meta); }
+    .naver { color: var(--naver); }
+    .google { color: var(--google); }
+    .note {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    thead th {
+      background: var(--brand);
+      color: #fff;
+      font-size: 13px;
+      text-align: left;
+      padding: 14px 12px;
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 12px;
+      border-top: 1px solid var(--line);
+      font-size: 14px;
+    }
+    tbody tr:nth-child(even) td { background: rgba(49,77,24,0.03); }
+    .number { text-align: right; font-variant-numeric: tabular-nums; }
+    .good { color: var(--good); font-weight: 800; }
+    .bad { color: var(--bad); font-weight: 800; }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .channel-sections {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+    .channel-section {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 18px;
+      background: rgba(255,255,255,0.82);
+    }
+    .channel-section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .channel-section-head h3 {
+      margin: 0;
+      font-size: 26px;
+      letter-spacing: -0.03em;
+    }
+    .channel-section-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .compact-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      background: #fff;
+    }
+    .compact-card h4 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+    .category-card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 18px;
+      background: rgba(255,255,255,0.82);
+    }
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .card-head h3 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: -0.03em;
+    }
+    .card-meta {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .card-title {
+      margin: 0 0 10px;
+      font-size: 24px;
+    }
+    .empty {
+      color: var(--muted);
+      font-size: 14px;
+      padding: 16px;
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.6);
+    }
+    .footer {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 20px;
+    }
+    .operating-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .mini-stat {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.72);
+      padding: 16px;
+    }
+    .mini-stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .mini-stat strong {
+      display: block;
+      font-size: 24px;
+      letter-spacing: -0.02em;
+    }
+    .bar-list {
+      display: grid;
+      gap: 10px;
+    }
+    .bar-row {
+      display: grid;
+      gap: 6px;
+    }
+    .bar-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .bar-track {
+      height: 12px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #efe8db;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--brand);
+    }
+    @media (max-width: 1280px) {
+      .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .cards, .channel-grid, .channel-section-grid { grid-template-columns: 1fr; }
+      .operating-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 760px) {
+      .page { padding: 18px; }
+      h1 { font-size: 32px; }
+      .stat-grid { grid-template-columns: 1fr; }
+      .operating-summary { grid-template-columns: 1fr; }
+      .toolbar { flex-direction: column; align-items: stretch; }
+      .toolbar button { margin-top: 0; }
+    }
+  </style>
+</head>
+<body>
+  <script id="dashboard-data" type="application/json">{"generated_at": "2026-05-13T10:12:50", "latest_date": "2026-05-12", "platforms": [{"code": "meta", "label": "Meta"}, {"code": "naver_searchad", "label": "Naver SearchAd"}, {"code": "google_ads", "label": "Google Ads"}], "platform_labels": {"meta": "Meta", "naver_searchad": "Naver SearchAd", "google_ads": "Google Ads"}, "daily_rows": [{"report_date": "2026-04-20", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-20", "platform": "google_ads", "category": "단백밥", "spend": 41146, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-20", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-20", "platform": "meta", "category": "기타", "spend": 45573, "revenue": 105380, "net_profit": 29556, "order_count": 1, "real_roi": 0.6485418998090975}, {"report_date": "2026-04-20", "platform": "meta", "category": "단백밥", "spend": 288722, "revenue": 64300, "net_profit": 12053, "order_count": 1, "real_roi": 0.04174603944278579}, {"report_date": "2026-04-20", "platform": "meta", "category": "단백밥 ASC", "spend": 38412, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-20", "platform": "meta", "category": "밸런시", "spend": 178915, "revenue": 115450, "net_profit": 23176, "order_count": 2, "real_roi": 0.12953637202023308}, {"report_date": "2026-04-20", "platform": "meta", "category": "순수단백", "spend": 58799, "revenue": 125700, "net_profit": 35673, "order_count": 2, "real_roi": 0.6066939913944115}, {"report_date": "2026-04-20", "platform": "naver_searchad", "category": "기타", "spend": 4785, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-20", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-20", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-21", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-21", "platform": "google_ads", "category": "단백밥", "spend": 47830, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-21", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-21", "platform": "meta", "category": "기타", "spend": 55520, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-21", "platform": "meta", "category": "단백밥", "spend": 259775, "revenue": 277260, "net_profit": 38020, "order_count": 5, "real_roi": 0.14635742469444712}, {"report_date": "2026-04-21", "platform": "meta", "category": "단백밥 ASC", "spend": 39657, "revenue": 94000, "net_profit": 10392, "order_count": 1, "real_roi": 0.26204705348362206}, {"report_date": "2026-04-21", "platform": "meta", "category": "밸런시", "spend": 152905, "revenue": 106800, "net_profit": 52863, "order_count": 2, "real_roi": 0.3457244694418103}, {"report_date": "2026-04-21", "platform": "meta", "category": "순수단백", "spend": 55456, "revenue": 54300, "net_profit": 14382, "order_count": 1, "real_roi": 0.2593407386035776}, {"report_date": "2026-04-21", "platform": "naver_searchad", "category": "기타", "spend": 8763, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-21", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-21", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-22", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-22", "platform": "google_ads", "category": "단백밥", "spend": 38148, "revenue": 55270, "net_profit": 12063, "order_count": 1, "real_roi": 0.31621579112928594}, {"report_date": "2026-04-22", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-22", "platform": "meta", "category": "기타", "spend": 29274, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-22", "platform": "meta", "category": "단백밥", "spend": 232418, "revenue": 433300, "net_profit": 97088, "order_count": 5, "real_roi": 0.41773012417282657}, {"report_date": "2026-04-22", "platform": "meta", "category": "단백밥 ASC", "spend": 38589, "revenue": 41960, "net_profit": 8960, "order_count": 1, "real_roi": 0.23219052061468293}, {"report_date": "2026-04-22", "platform": "meta", "category": "밸런시", "spend": 136747, "revenue": 104800, "net_profit": 46659, "order_count": 2, "real_roi": 0.3412067540787001}, {"report_date": "2026-04-22", "platform": "meta", "category": "순수단백", "spend": 48118, "revenue": 93330, "net_profit": 24337, "order_count": 2, "real_roi": 0.5057774637349848}, {"report_date": "2026-04-22", "platform": "naver_searchad", "category": "기타", "spend": 7021, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-22", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-22", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-23", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-23", "platform": "google_ads", "category": "단백밥", "spend": 41067, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-23", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-23", "platform": "meta", "category": "기타", "spend": 39239, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-23", "platform": "meta", "category": "단백밥", "spend": 194958, "revenue": 259400, "net_profit": 39351, "order_count": 4, "real_roi": 0.20184347397901087}, {"report_date": "2026-04-23", "platform": "meta", "category": "단백밥 ASC", "spend": 25867, "revenue": 91490, "net_profit": 14439, "order_count": 1, "real_roi": 0.5582015695674025}, {"report_date": "2026-04-23", "platform": "meta", "category": "밸런시", "spend": 124411, "revenue": 63000, "net_profit": 46054, "order_count": 1, "real_roi": 0.370176270587006}, {"report_date": "2026-04-23", "platform": "meta", "category": "순수단백", "spend": 43509, "revenue": 82000, "net_profit": 19713, "order_count": 2, "real_roi": 0.4530786733779218}, {"report_date": "2026-04-23", "platform": "naver_searchad", "category": "기타", "spend": 7814, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-23", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-23", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-24", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-24", "platform": "google_ads", "category": "단백밥", "spend": 37977, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-24", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-24", "platform": "meta", "category": "기타", "spend": 74006, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-24", "platform": "meta", "category": "단백밥", "spend": 227774, "revenue": 139370, "net_profit": 4599, "order_count": 3, "real_roi": 0.020191066583543336}, {"report_date": "2026-04-24", "platform": "meta", "category": "단백밥 ASC", "spend": 6501, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-24", "platform": "meta", "category": "밸런시", "spend": 101976, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-24", "platform": "meta", "category": "순수단백", "spend": 65249, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-24", "platform": "naver_searchad", "category": "기타", "spend": 5645, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-24", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-24", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-25", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-25", "platform": "google_ads", "category": "단백밥", "spend": 41637, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-25", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-25", "platform": "meta", "category": "기타", "spend": 87781, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-25", "platform": "meta", "category": "단백밥", "spend": 220208, "revenue": 56820, "net_profit": 7035, "order_count": 1, "real_roi": 0.03194706822640413}, {"report_date": "2026-04-25", "platform": "meta", "category": "단백밥 ASC", "spend": 10703, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-25", "platform": "meta", "category": "밸런시", "spend": 90191, "revenue": 123920, "net_profit": 8354, "order_count": 2, "real_roi": 0.09262565000942444}, {"report_date": "2026-04-25", "platform": "meta", "category": "순수단백", "spend": 60451, "revenue": 26700, "net_profit": 1479, "order_count": 1, "real_roi": 0.0244660965079155}, {"report_date": "2026-04-25", "platform": "naver_searchad", "category": "기타", "spend": 4567, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-25", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-25", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-26", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-26", "platform": "google_ads", "category": "단백밥", "spend": 64138, "revenue": 56500, "net_profit": 5729, "order_count": 1, "real_roi": 0.08932302223330943}, {"report_date": "2026-04-26", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-26", "platform": "meta", "category": "기타", "spend": 88748, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-26", "platform": "meta", "category": "단백밥", "spend": 247669, "revenue": 674810, "net_profit": 193639, "order_count": 8, "real_roi": 0.7818459314649795}, {"report_date": "2026-04-26", "platform": "meta", "category": "단백밥 ASC", "spend": 3041, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-26", "platform": "meta", "category": "밸런시", "spend": 108252, "revenue": 50400, "net_profit": 3938, "order_count": 1, "real_roi": 0.036378080774489154}, {"report_date": "2026-04-26", "platform": "meta", "category": "순수단백", "spend": 69154, "revenue": 42820, "net_profit": 6217, "order_count": 1, "real_roi": 0.08990080111056482}, {"report_date": "2026-04-26", "platform": "naver_searchad", "category": "기타", "spend": 12976, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-26", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-26", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-27", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-27", "platform": "google_ads", "category": "단백밥", "spend": 43048, "revenue": 170520, "net_profit": 43729, "order_count": 2, "real_roi": 1.0158195502694667}, {"report_date": "2026-04-27", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-27", "platform": "meta", "category": "기타", "spend": 83377, "revenue": 182750, "net_profit": -369, "order_count": 2, "real_roi": -0.00442568094318577}, {"report_date": "2026-04-27", "platform": "meta", "category": "단백밥", "spend": 301813, "revenue": 620550, "net_profit": 160664, "order_count": 6, "real_roi": 0.5323296213218118}, {"report_date": "2026-04-27", "platform": "meta", "category": "단백밥 ASC", "spend": 13954, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-27", "platform": "meta", "category": "밸런시", "spend": 143702, "revenue": 211000, "net_profit": 110906, "order_count": 2, "real_roi": 0.7717777066429138}, {"report_date": "2026-04-27", "platform": "meta", "category": "순수단백", "spend": 65222, "revenue": 52720, "net_profit": 15224, "order_count": 1, "real_roi": 0.23341817178252736}, {"report_date": "2026-04-27", "platform": "naver_searchad", "category": "기타", "spend": 10604, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-27", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-27", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-28", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-28", "platform": "google_ads", "category": "단백밥", "spend": 35320, "revenue": 135700, "net_profit": 29004, "order_count": 2, "real_roi": 0.8211778029445074}, {"report_date": "2026-04-28", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-28", "platform": "meta", "category": "기타", "spend": 65531, "revenue": 78980, "net_profit": 25249, "order_count": 1, "real_roi": 0.38529856098640336}, {"report_date": "2026-04-28", "platform": "meta", "category": "단백밥", "spend": 307823, "revenue": 427312, "net_profit": 101644, "order_count": 6, "real_roi": 0.33020274638347363}, {"report_date": "2026-04-28", "platform": "meta", "category": "단백밥 ASC", "spend": 8612, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-28", "platform": "meta", "category": "밸런시", "spend": 160700, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-28", "platform": "meta", "category": "순수단백", "spend": 69681, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-28", "platform": "naver_searchad", "category": "기타", "spend": 10034, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-28", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-28", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-29", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-29", "platform": "google_ads", "category": "단백밥", "spend": 34508, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-29", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-29", "platform": "meta", "category": "기타", "spend": 54156, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-29", "platform": "meta", "category": "단백밥", "spend": 288922, "revenue": 415270, "net_profit": 135585, "order_count": 4, "real_roi": 0.4692789057254207}, {"report_date": "2026-04-29", "platform": "meta", "category": "단백밥 ASC", "spend": 16139, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-29", "platform": "meta", "category": "밸런시", "spend": 151722, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-29", "platform": "meta", "category": "순수단백", "spend": 61915, "revenue": 150440, "net_profit": 30374, "order_count": 2, "real_roi": 0.490575789388678}, {"report_date": "2026-04-29", "platform": "naver_searchad", "category": "기타", "spend": 10330, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-29", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-29", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-30", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-30", "platform": "google_ads", "category": "단백밥", "spend": 36947, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-30", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-30", "platform": "meta", "category": "기타", "spend": 40840, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-30", "platform": "meta", "category": "단백밥", "spend": 228133, "revenue": 276650, "net_profit": 29100, "order_count": 4, "real_roi": 0.12755717059785301}, {"report_date": "2026-04-30", "platform": "meta", "category": "단백밥 ASC", "spend": 12269, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-30", "platform": "meta", "category": "밸런시", "spend": 125924, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-30", "platform": "meta", "category": "순수단백", "spend": 50138, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-30", "platform": "naver_searchad", "category": "기타", "spend": 7005, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-30", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-04-30", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-01", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-01", "platform": "google_ads", "category": "단백밥", "spend": 76586, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-01", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-01", "platform": "meta", "category": "기타", "spend": 54774, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-01", "platform": "meta", "category": "단백밥", "spend": 252419, "revenue": 160130, "net_profit": -8456, "order_count": 3, "real_roi": -0.03349985539915775}, {"report_date": "2026-05-01", "platform": "meta", "category": "단백밥 ASC", "spend": 8288, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-01", "platform": "meta", "category": "밸런시", "spend": 129822, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-01", "platform": "meta", "category": "순수단백", "spend": 55784, "revenue": 111100, "net_profit": 5549, "order_count": 2, "real_roi": 0.09947296715904203}, {"report_date": "2026-05-01", "platform": "naver_searchad", "category": "기타", "spend": 10671, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-01", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-01", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-02", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-02", "platform": "google_ads", "category": "단백밥", "spend": 47956, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-02", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-02", "platform": "meta", "category": "기타", "spend": 57957, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-02", "platform": "meta", "category": "단백밥", "spend": 226429, "revenue": 377590, "net_profit": 14482, "order_count": 5, "real_roi": 0.06395823856484814}, {"report_date": "2026-05-02", "platform": "meta", "category": "단백밥 ASC", "spend": 3997, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-02", "platform": "meta", "category": "밸런시", "spend": 122137, "revenue": 141400, "net_profit": 71944, "order_count": 2, "real_roi": 0.5890434512064321}, {"report_date": "2026-05-02", "platform": "meta", "category": "순수단백", "spend": 50419, "revenue": 71830, "net_profit": 10856, "order_count": 1, "real_roi": 0.21531565481266982}, {"report_date": "2026-05-02", "platform": "naver_searchad", "category": "기타", "spend": 9111, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-02", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-02", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-03", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-03", "platform": "google_ads", "category": "단백밥", "spend": 44204, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-03", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-03", "platform": "meta", "category": "기타", "spend": 37386, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-03", "platform": "meta", "category": "단백밥", "spend": 301338, "revenue": 301950, "net_profit": -9628, "order_count": 5, "real_roi": -0.03195083261984881}, {"report_date": "2026-05-03", "platform": "meta", "category": "단백밥 ASC", "spend": 38590, "revenue": 44730, "net_profit": -86, "order_count": 1, "real_roi": -0.00222855662088624}, {"report_date": "2026-05-03", "platform": "meta", "category": "밸런시", "spend": 154479, "revenue": 133640, "net_profit": 47628, "order_count": 3, "real_roi": 0.3083137513836832}, {"report_date": "2026-05-03", "platform": "meta", "category": "순수단백", "spend": 66732, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-03", "platform": "naver_searchad", "category": "기타", "spend": 5863, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-03", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-03", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-04", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-04", "platform": "google_ads", "category": "단백밥", "spend": 43950, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-04", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-04", "platform": "meta", "category": "기타", "spend": 36046, "revenue": 116900, "net_profit": 22431, "order_count": 1, "real_roi": 0.622288187316207}, {"report_date": "2026-05-04", "platform": "meta", "category": "단백밥", "spend": 278647, "revenue": 267330, "net_profit": 104876, "order_count": 3, "real_roi": 0.3763758447067437}, {"report_date": "2026-05-04", "platform": "meta", "category": "단백밥 ASC", "spend": 34241, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-04", "platform": "meta", "category": "밸런시", "spend": 144706, "revenue": 181690, "net_profit": 121811, "order_count": 3, "real_roi": 0.841782648957196}, {"report_date": "2026-05-04", "platform": "meta", "category": "순수단백", "spend": 60695, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-04", "platform": "naver_searchad", "category": "기타", "spend": 10818, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-04", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-04", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-05", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-05", "platform": "google_ads", "category": "단백밥", "spend": 38750, "revenue": 32300, "net_profit": 2259, "order_count": 1, "real_roi": 0.05829677419354839}, {"report_date": "2026-05-05", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-05", "platform": "meta", "category": "기타", "spend": 35128, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-05", "platform": "meta", "category": "단백밥", "spend": 302718, "revenue": 329370, "net_profit": 60121, "order_count": 5, "real_roi": 0.19860398126308973}, {"report_date": "2026-05-05", "platform": "meta", "category": "단백밥 ASC", "spend": 43517, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-05", "platform": "meta", "category": "밸런시", "spend": 153318, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-05", "platform": "meta", "category": "순수단백", "spend": 68227, "revenue": 61385, "net_profit": 10025, "order_count": 1, "real_roi": 0.14693596376800974}, {"report_date": "2026-05-05", "platform": "naver_searchad", "category": "기타", "spend": 16423, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-05", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-05", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-06", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-06", "platform": "google_ads", "category": "단백밥", "spend": 41178, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-06", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-06", "platform": "meta", "category": "기타", "spend": 57916, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-06", "platform": "meta", "category": "단백밥", "spend": 287311, "revenue": 549120, "net_profit": -8600, "order_count": 7, "real_roi": -0.029932720988754345}, {"report_date": "2026-05-06", "platform": "meta", "category": "단백밥 ASC", "spend": 21275, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-06", "platform": "meta", "category": "밸런시", "spend": 149939, "revenue": 64600, "net_profit": 41149, "order_count": 2, "real_roi": 0.27443827156376926}, {"report_date": "2026-05-06", "platform": "meta", "category": "순수단백", "spend": 68102, "revenue": 166891, "net_profit": 33094, "order_count": 3, "real_roi": 0.4859475492643388}, {"report_date": "2026-05-06", "platform": "naver_searchad", "category": "기타", "spend": 18580, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-06", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-06", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-07", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-07", "platform": "google_ads", "category": "단백밥", "spend": 27156, "revenue": 95940, "net_profit": 36188, "order_count": 1, "real_roi": 1.3325968478420975}, {"report_date": "2026-05-07", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-07", "platform": "meta", "category": "기타", "spend": 55901, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-07", "platform": "meta", "category": "단백밥", "spend": 252933, "revenue": 337680, "net_profit": 106667, "order_count": 5, "real_roi": 0.4217203765424045}, {"report_date": "2026-05-07", "platform": "meta", "category": "단백밥 ASC", "spend": 11204, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-07", "platform": "meta", "category": "밸런시", "spend": 126326, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-07", "platform": "meta", "category": "순수단백", "spend": 59610, "revenue": 168620, "net_profit": 57805, "order_count": 3, "real_roi": 0.9697198456634792}, {"report_date": "2026-05-07", "platform": "naver_searchad", "category": "기타", "spend": 17047, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-07", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-07", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-08", "platform": "meta", "category": "기타", "spend": 52935, "revenue": 36440, "net_profit": 11668, "order_count": 1, "real_roi": 0.2204212713705488}, {"report_date": "2026-05-08", "platform": "meta", "category": "단백밥", "spend": 205293, "revenue": 92650, "net_profit": 27033, "order_count": 1, "real_roi": 0.13168008651049962}, {"report_date": "2026-05-08", "platform": "meta", "category": "단백밥 ASC", "spend": 5418, "revenue": 39940, "net_profit": 13614, "order_count": 1, "real_roi": 2.5127353266888153}, {"report_date": "2026-05-08", "platform": "meta", "category": "밸런시", "spend": 107484, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-08", "platform": "meta", "category": "순수단백", "spend": 52098, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-08", "platform": "naver_searchad", "category": "기타", "spend": 9774, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-08", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-08", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-09", "platform": "meta", "category": "기타", "spend": 48789, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-09", "platform": "meta", "category": "단백밥", "spend": 185619, "revenue": 380170, "net_profit": 188934, "order_count": 5, "real_roi": 1.0178591631244647}, {"report_date": "2026-05-09", "platform": "meta", "category": "단백밥 ASC", "spend": 11544, "revenue": 40190, "net_profit": 14106, "order_count": 1, "real_roi": 1.221933471933472}, {"report_date": "2026-05-09", "platform": "meta", "category": "밸런시", "spend": 87477, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-09", "platform": "meta", "category": "순수단백", "spend": 43683, "revenue": 27350, "net_profit": 8639, "order_count": 1, "real_roi": 0.19776572121878075}, {"report_date": "2026-05-09", "platform": "naver_searchad", "category": "기타", "spend": 11221, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-09", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-09", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-10", "platform": "meta", "category": "기타", "spend": 65175, "revenue": 34190, "net_profit": 8522, "order_count": 1, "real_roi": 0.13075565784426543}, {"report_date": "2026-05-10", "platform": "meta", "category": "단백밥", "spend": 263965, "revenue": 163080, "net_profit": 55836, "order_count": 2, "real_roi": 0.2115280434906143}, {"report_date": "2026-05-10", "platform": "meta", "category": "단백밥 ASC", "spend": 6865, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-10", "platform": "meta", "category": "밸런시", "spend": 136217, "revenue": 190200, "net_profit": 166092, "order_count": 3, "real_roi": 1.2193191745523686}, {"report_date": "2026-05-10", "platform": "meta", "category": "순수단백", "spend": 64428, "revenue": 93220, "net_profit": 32921, "order_count": 2, "real_roi": 0.5109734897870492}, {"report_date": "2026-05-10", "platform": "naver_searchad", "category": "기타", "spend": 11324, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-10", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-10", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-11", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-11", "platform": "google_ads", "category": "단백밥", "spend": 15233, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-11", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-11", "platform": "meta", "category": "기타", "spend": 62808, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-11", "platform": "meta", "category": "단백밥", "spend": 256613, "revenue": 367050, "net_profit": 182911, "order_count": 4, "real_roi": 0.7127892975024648}, {"report_date": "2026-05-11", "platform": "meta", "category": "단백밥 ASC", "spend": 13440, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-11", "platform": "meta", "category": "밸런시", "spend": 95465, "revenue": 184040, "net_profit": 131836, "order_count": 3, "real_roi": 1.3809877965746609}, {"report_date": "2026-05-11", "platform": "meta", "category": "순수단백", "spend": 65737, "revenue": 52200, "net_profit": 20178, "order_count": 1, "real_roi": 0.30695042365790953}, {"report_date": "2026-05-11", "platform": "naver_searchad", "category": "기타", "spend": 12928, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-11", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-11", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-12", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-12", "platform": "google_ads", "category": "단백밥", "spend": 14655, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-12", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-12", "platform": "meta", "category": "기타", "spend": 67147, "revenue": 124540, "net_profit": 45146, "order_count": 1, "real_roi": 0.6723457488793244}, {"report_date": "2026-05-12", "platform": "meta", "category": "단백밥", "spend": 331393, "revenue": 101290, "net_profit": 33178, "order_count": 2, "real_roi": 0.10011677977507069}, {"report_date": "2026-05-12", "platform": "meta", "category": "단백밥 ASC", "spend": 9957, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-12", "platform": "meta", "category": "밸런시", "spend": 92472, "revenue": 97800, "net_profit": 88188, "order_count": 1, "real_roi": 0.9536724630158319}, {"report_date": "2026-05-12", "platform": "meta", "category": "순수단백", "spend": 68969, "revenue": 158640, "net_profit": 52016, "order_count": 3, "real_roi": 0.754193913207383}, {"report_date": "2026-05-12", "platform": "naver_searchad", "category": "기타", "spend": 6553, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-12", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"report_date": "2026-05-12", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}], "monthly_rows": [{"month": "2026-04", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"month": "2026-04", "platform": "google_ads", "category": "단백밥", "spend": 461766, "revenue": 417990, "net_profit": 90525, "order_count": 6, "real_roi": 0.196040851860033}, {"month": "2026-04", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"month": "2026-04", "platform": "meta", "category": "기타", "spend": 664045, "revenue": 367110, "net_profit": 54436, "order_count": 4, "real_roi": 0.08197637208321726}, {"month": "2026-04", "platform": "meta", "category": "단백밥", "spend": 2798215, "revenue": 3645042, "net_profit": 818778, "order_count": 47, "real_roi": 0.2926072514084872}, {"month": "2026-04", "platform": "meta", "category": "단백밥 ASC", "spend": 213744, "revenue": 227450, "net_profit": 33791, "order_count": 3, "real_roi": 0.1580909873493525}, {"month": "2026-04", "platform": "meta", "category": "밸런시", "spend": 1475445, "revenue": 775370, "net_profit": 291950, "order_count": 12, "real_roi": 0.197872506260823}, {"month": "2026-04", "platform": "meta", "category": "순수단백", "spend": 647692, "revenue": 628010, "net_profit": 147399, "order_count": 12, "real_roi": 0.22757576131865145}, {"month": "2026-04", "platform": "naver_searchad", "category": "기타", "spend": 89544, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"month": "2026-04", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"month": "2026-04", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"month": "2026-05", "platform": "google_ads", "category": "기타", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"month": "2026-05", "platform": "google_ads", "category": "단백밥", "spend": 349668, "revenue": 128240, "net_profit": 38447, "order_count": 2, "real_roi": 0.10995286957914364}, {"month": "2026-05", "platform": "google_ads", "category": "샐러드", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"month": "2026-05", "platform": "meta", "category": "기타", "spend": 631962, "revenue": 312070, "net_profit": 87767, "order_count": 4, "real_roi": 0.13888018583395836}, {"month": "2026-05", "platform": "meta", "category": "단백밥", "spend": 3144678, "revenue": 3427410, "net_profit": 747354, "order_count": 47, "real_roi": 0.23765676485796003}, {"month": "2026-05", "platform": "meta", "category": "단백밥 ASC", "spend": 208336, "revenue": 124860, "net_profit": 27634, "order_count": 3, "real_roi": 0.132641502188772}, {"month": "2026-05", "platform": "meta", "category": "밸런시", "spend": 1499842, "revenue": 993370, "net_profit": 668648, "order_count": 17, "real_roi": 0.4458122922281147}, {"month": "2026-05", "platform": "meta", "category": "순수단백", "spend": 724484, "revenue": 911236, "net_profit": 231083, "order_count": 17, "real_roi": 0.3189621855003009}, {"month": "2026-05", "platform": "naver_searchad", "category": "기타", "spend": 140313, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"month": "2026-05", "platform": "naver_searchad", "category": "단백밥", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}, {"month": "2026-05", "platform": "naver_searchad", "category": "밸런시", "spend": 0, "revenue": 0, "net_profit": 0, "order_count": 0, "real_roi": 0.0}], "channel_rows": [{"report_date": "2026-03-29", "channel_code": "meta", "ad_spend": 0, "impressions": 0, "clicks": 0, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 9900, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-03-30", "channel_code": "meta", "ad_spend": 0, "impressions": 0, "clicks": 0, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 10500, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-01", "channel_code": "google_ads", "ad_spend": 52073, "impressions": 6618, "clicks": 172, "ad_conversions": 6.713342, "ad_conversion_value": 622254, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-01", "channel_code": "meta", "ad_spend": 305468, "impressions": 27934, "clicks": 502, "ad_conversions": 27.0, "ad_conversion_value": 1860096, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-01", "channel_code": "naver_searchad", "ad_spend": 11053, "impressions": 598, "clicks": 11, "ad_conversions": 1.0, "ad_conversion_value": 53700, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-02", "channel_code": "google_ads", "ad_spend": 48797, "impressions": 5586, "clicks": 135, "ad_conversions": 6.0, "ad_conversion_value": 251720, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-02", "channel_code": "meta", "ad_spend": 280395, "impressions": 25731, "clicks": 516, "ad_conversions": 23.0, "ad_conversion_value": 1666729, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-02", "channel_code": "naver_searchad", "ad_spend": 6668, "impressions": 522, "clicks": 7, "ad_conversions": 1.0, "ad_conversion_value": 71430, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-03", "channel_code": "google_ads", "ad_spend": 50644, "impressions": 7200, "clicks": 158, "ad_conversions": 2.017616, "ad_conversion_value": 144491, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-03", "channel_code": "meta", "ad_spend": 224779, "impressions": 22349, "clicks": 414, "ad_conversions": 14.0, "ad_conversion_value": 1036346, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-03", "channel_code": "naver_searchad", "ad_spend": 9749, "impressions": 480, "clicks": 10, "ad_conversions": 2.0, "ad_conversion_value": 108960, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-04", "channel_code": "google_ads", "ad_spend": 49522, "impressions": 4747, "clicks": 124, "ad_conversions": 11.074332, "ad_conversion_value": 570260, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-04", "channel_code": "meta", "ad_spend": 230063, "impressions": 25902, "clicks": 401, "ad_conversions": 15.0, "ad_conversion_value": 840758, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-04", "channel_code": "naver_searchad", "ad_spend": 7957, "impressions": 435, "clicks": 7, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-05", "channel_code": "google_ads", "ad_spend": 53821, "impressions": 7547, "clicks": 149, "ad_conversions": 7.5, "ad_conversion_value": 700544, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-05", "channel_code": "meta", "ad_spend": 284456, "impressions": 29038, "clicks": 545, "ad_conversions": 28.0, "ad_conversion_value": 1941127, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-05", "channel_code": "naver_searchad", "ad_spend": 12651, "impressions": 452, "clicks": 12, "ad_conversions": 3.0, "ad_conversion_value": 94990, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-06", "channel_code": "google_ads", "ad_spend": 72430, "impressions": 8509, "clicks": 162, "ad_conversions": 12.0, "ad_conversion_value": 924680, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-06", "channel_code": "meta", "ad_spend": 500256, "impressions": 42176, "clicks": 802, "ad_conversions": 48.0, "ad_conversion_value": 3216924, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-06", "channel_code": "naver_searchad", "ad_spend": 16637, "impressions": 675, "clicks": 15, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-07", "channel_code": "google_ads", "ad_spend": 39439, "impressions": 6655, "clicks": 126, "ad_conversions": 3.0, "ad_conversion_value": 200320, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-07", "channel_code": "meta", "ad_spend": 581645, "impressions": 46300, "clicks": 824, "ad_conversions": 33.0, "ad_conversion_value": 2352083, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-07", "channel_code": "naver_searchad", "ad_spend": 18365, "impressions": 512, "clicks": 21, "ad_conversions": 3.0, "ad_conversion_value": 205020, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-08", "channel_code": "google_ads", "ad_spend": 43034, "impressions": 5095, "clicks": 163, "ad_conversions": 8.0, "ad_conversion_value": 586301, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-08", "channel_code": "meta", "ad_spend": 511450, "impressions": 40426, "clicks": 749, "ad_conversions": 36.0, "ad_conversion_value": 2657376, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-08", "channel_code": "naver_searchad", "ad_spend": 5338, "impressions": 376, "clicks": 5, "ad_conversions": 2.0, "ad_conversion_value": 90700, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-09", "channel_code": "google_ads", "ad_spend": 49561, "impressions": 9713, "clicks": 155, "ad_conversions": 7.395026, "ad_conversion_value": 618009, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -45055}, {"report_date": "2026-04-09", "channel_code": "meta", "ad_spend": 488646, "impressions": 42026, "clicks": 796, "ad_conversions": 31.0, "ad_conversion_value": 2123102, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-09", "channel_code": "naver_searchad", "ad_spend": 5809, "impressions": 315, "clicks": 7, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -5809}, {"report_date": "2026-04-10", "channel_code": "google_ads", "ad_spend": 41672, "impressions": 8218, "clicks": 155, "ad_conversions": 3.982384, "ad_conversion_value": 285099, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -37884}, {"report_date": "2026-04-10", "channel_code": "meta", "ad_spend": 426351, "impressions": 40053, "clicks": 652, "ad_conversions": 18.0, "ad_conversion_value": 1596026, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-10", "channel_code": "naver_searchad", "ad_spend": 5986, "impressions": 308, "clicks": 6, "ad_conversions": 1.0, "ad_conversion_value": 74000, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -5986}, {"report_date": "2026-04-11", "channel_code": "google_ads", "ad_spend": 77751, "impressions": 8554, "clicks": 252, "ad_conversions": 3.0, "ad_conversion_value": 288979, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -70683}, {"report_date": "2026-04-11", "channel_code": "meta", "ad_spend": 416594, "impressions": 41954, "clicks": 717, "ad_conversions": 16.0, "ad_conversion_value": 1162001, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-11", "channel_code": "naver_searchad", "ad_spend": 4453, "impressions": 430, "clicks": 5, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -4453}, {"report_date": "2026-04-12", "channel_code": "google_ads", "ad_spend": 61311, "impressions": 9005, "clicks": 252, "ad_conversions": 6.0, "ad_conversion_value": 380434, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -55737}, {"report_date": "2026-04-12", "channel_code": "meta", "ad_spend": 456898, "impressions": 44710, "clicks": 794, "ad_conversions": 26.0, "ad_conversion_value": 1909277, "ga4_revenue": 0, "attributed_order_revenue": 95060, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-12", "channel_code": "naver_searchad", "ad_spend": 8585, "impressions": 429, "clicks": 10, "ad_conversions": 1.0, "ad_conversion_value": 214800, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -8585}, {"report_date": "2026-04-13", "channel_code": "google_ads", "ad_spend": 57421, "impressions": 8784, "clicks": 167, "ad_conversions": 3.0, "ad_conversion_value": 208240, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -52201}, {"report_date": "2026-04-13", "channel_code": "meta", "ad_spend": 524090, "impressions": 46669, "clicks": 737, "ad_conversions": 49.0, "ad_conversion_value": 3623193, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-13", "channel_code": "naver_searchad", "ad_spend": 4602, "impressions": 499, "clicks": 5, "ad_conversions": 1.0, "ad_conversion_value": 30800, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -4602}, {"report_date": "2026-04-14", "channel_code": "google_ads", "ad_spend": 52270, "impressions": 5780, "clicks": 231, "ad_conversions": 16.0, "ad_conversion_value": 1453065, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -47518}, {"report_date": "2026-04-14", "channel_code": "meta", "ad_spend": 526453, "impressions": 47061, "clicks": 841, "ad_conversions": 38.0, "ad_conversion_value": 2457310, "ga4_revenue": 0, "attributed_order_revenue": 198381, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-14", "channel_code": "naver_searchad", "ad_spend": 11894, "impressions": 447, "clicks": 14, "ad_conversions": 5.0, "ad_conversion_value": 480130, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -11894}, {"report_date": "2026-04-15", "channel_code": "google_ads", "ad_spend": 43295, "impressions": 5422, "clicks": 189, "ad_conversions": 3.0, "ad_conversion_value": 153190, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -39359}, {"report_date": "2026-04-15", "channel_code": "meta", "ad_spend": 536425, "impressions": 46210, "clicks": 804, "ad_conversions": 28.0, "ad_conversion_value": 2227008, "ga4_revenue": 0, "attributed_order_revenue": 91240, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-15", "channel_code": "naver_searchad", "ad_spend": 7953, "impressions": 256, "clicks": 9, "ad_conversions": 1.0, "ad_conversion_value": 69080, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -7953}, {"report_date": "2026-04-16", "channel_code": "google_ads", "ad_spend": 50001, "impressions": 6443, "clicks": 193, "ad_conversions": 4.0, "ad_conversion_value": 233560, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -45455}, {"report_date": "2026-04-16", "channel_code": "meta", "ad_spend": 502040, "impressions": 43534, "clicks": 753, "ad_conversions": 24.0, "ad_conversion_value": 1677722, "ga4_revenue": 0, "attributed_order_revenue": 306701, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-16", "channel_code": "naver_searchad", "ad_spend": 4496, "impressions": 227, "clicks": 5, "ad_conversions": 1.0, "ad_conversion_value": 61550, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -4496}, {"report_date": "2026-04-17", "channel_code": "google_ads", "ad_spend": 55149, "impressions": 7102, "clicks": 245, "ad_conversions": 5.0, "ad_conversion_value": 440540, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -50135}, {"report_date": "2026-04-17", "channel_code": "meta", "ad_spend": 483791, "impressions": 40924, "clicks": 737, "ad_conversions": 32.0, "ad_conversion_value": 2244888, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-17", "channel_code": "naver_searchad", "ad_spend": 3207, "impressions": 253, "clicks": 4, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -3207}, {"report_date": "2026-04-18", "channel_code": "google_ads", "ad_spend": 50721, "impressions": 8406, "clicks": 192, "ad_conversions": 3.0, "ad_conversion_value": 200160, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -46110}, {"report_date": "2026-04-18", "channel_code": "meta", "ad_spend": 426732, "impressions": 37323, "clicks": 697, "ad_conversions": 26.0, "ad_conversion_value": 2122189, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-18", "channel_code": "naver_searchad", "ad_spend": 6240, "impressions": 262, "clicks": 6, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -6240}, {"report_date": "2026-04-19", "channel_code": "google_ads", "ad_spend": 48247, "impressions": 5660, "clicks": 181, "ad_conversions": 3.0, "ad_conversion_value": 242560, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -43861}, {"report_date": "2026-04-19", "channel_code": "meta", "ad_spend": 508666, "impressions": 43427, "clicks": 786, "ad_conversions": 32.0, "ad_conversion_value": 2463180, "ga4_revenue": 0, "attributed_order_revenue": 129240, "gross_margin": 0, "net_profit": 0}, {"report_date": "2026-04-19", "channel_code": "naver_searchad", "ad_spend": 3193, "impressions": 253, "clicks": 4, "ad_conversions": 1.0, "ad_conversion_value": 1980, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -3193}, {"report_date": "2026-04-20", "channel_code": "google_ads", "ad_spend": 45261, "impressions": 5827, "clicks": 204, "ad_conversions": 10.0, "ad_conversion_value": 591202, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -41146}, {"report_date": "2026-04-20", "channel_code": "meta", "ad_spend": 610421, "impressions": 49127, "clicks": 996, "ad_conversions": 44.0, "ad_conversion_value": 3406309, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -610421}, {"report_date": "2026-04-20", "channel_code": "naver_searchad", "ad_spend": 4785, "impressions": 342, "clicks": 5, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -4785}, {"report_date": "2026-04-21", "channel_code": "google_ads", "ad_spend": 52613, "impressions": 7059, "clicks": 205, "ad_conversions": 15.0, "ad_conversion_value": 664582, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -47830}, {"report_date": "2026-04-21", "channel_code": "meta", "ad_spend": 563313, "impressions": 45095, "clicks": 853, "ad_conversions": 43.0, "ad_conversion_value": 1719391, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -563313}, {"report_date": "2026-04-21", "channel_code": "naver_searchad", "ad_spend": 8763, "impressions": 298, "clicks": 11, "ad_conversions": 5.0, "ad_conversion_value": 256560, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -8763}, {"report_date": "2026-04-22", "channel_code": "google_ads", "ad_spend": 41963, "impressions": 6723, "clicks": 172, "ad_conversions": 1.0, "ad_conversion_value": 75780, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -38148}, {"report_date": "2026-04-22", "channel_code": "meta", "ad_spend": 485146, "impressions": 39952, "clicks": 761, "ad_conversions": 62.0, "ad_conversion_value": 2247370, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -485146}, {"report_date": "2026-04-22", "channel_code": "naver_searchad", "ad_spend": 7021, "impressions": 437, "clicks": 11, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -7021}, {"report_date": "2026-04-23", "channel_code": "google_ads", "ad_spend": 45174, "impressions": 8091, "clicks": 202, "ad_conversions": 6.0, "ad_conversion_value": 273602, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -41067}, {"report_date": "2026-04-23", "channel_code": "meta", "ad_spend": 427984, "impressions": 32978, "clicks": 641, "ad_conversions": 49.0, "ad_conversion_value": 1850064, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -427984}, {"report_date": "2026-04-23", "channel_code": "naver_searchad", "ad_spend": 7814, "impressions": 350, "clicks": 10, "ad_conversions": 1.0, "ad_conversion_value": 65880, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -7814}, {"report_date": "2026-04-24", "channel_code": "google_ads", "ad_spend": 41775, "impressions": 9118, "clicks": 246, "ad_conversions": 4.067398, "ad_conversion_value": 129325, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -37977}, {"report_date": "2026-04-24", "channel_code": "meta", "ad_spend": 475506, "impressions": 39219, "clicks": 698, "ad_conversions": 35.0, "ad_conversion_value": 1137716, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -475506}, {"report_date": "2026-04-24", "channel_code": "naver_searchad", "ad_spend": 5645, "impressions": 304, "clicks": 6, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -5645}, {"report_date": "2026-04-25", "channel_code": "google_ads", "ad_spend": 45801, "impressions": 9139, "clicks": 207, "ad_conversions": 15.0, "ad_conversion_value": 709071, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -41637}, {"report_date": "2026-04-25", "channel_code": "meta", "ad_spend": 469334, "impressions": 41773, "clicks": 741, "ad_conversions": 36.0, "ad_conversion_value": 1341601, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -469334}, {"report_date": "2026-04-25", "channel_code": "naver_searchad", "ad_spend": 4567, "impressions": 270, "clicks": 5, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -4567}, {"report_date": "2026-04-26", "channel_code": "google_ads", "ad_spend": 70552, "impressions": 9492, "clicks": 301, "ad_conversions": 4.0, "ad_conversion_value": 121941, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -64138}, {"report_date": "2026-04-26", "channel_code": "meta", "ad_spend": 516864, "impressions": 42988, "clicks": 850, "ad_conversions": 48.0, "ad_conversion_value": 1813252, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -516741}, {"report_date": "2026-04-26", "channel_code": "naver_searchad", "ad_spend": 12976, "impressions": 295, "clicks": 14, "ad_conversions": 3.0, "ad_conversion_value": 303090, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -12976}, {"report_date": "2026-04-27", "channel_code": "google_ads", "ad_spend": 47353, "impressions": 8201, "clicks": 223, "ad_conversions": 17.932602, "ad_conversion_value": 711022, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -43048}, {"report_date": "2026-04-27", "channel_code": "meta", "ad_spend": 608071, "impressions": 47160, "clicks": 944, "ad_conversions": 71.0, "ad_conversion_value": 3218596, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -608068}, {"report_date": "2026-04-27", "channel_code": "naver_searchad", "ad_spend": 10604, "impressions": 376, "clicks": 12, "ad_conversions": 2.0, "ad_conversion_value": 62800, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -10604}, {"report_date": "2026-04-28", "channel_code": "google_ads", "ad_spend": 38852, "impressions": 6338, "clicks": 151, "ad_conversions": 9.0, "ad_conversion_value": 463403, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -35320}, {"report_date": "2026-04-28", "channel_code": "meta", "ad_spend": 612372, "impressions": 47781, "clicks": 823, "ad_conversions": 80.0, "ad_conversion_value": 3567995, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -612347}, {"report_date": "2026-04-28", "channel_code": "naver_searchad", "ad_spend": 10034, "impressions": 426, "clicks": 14, "ad_conversions": 1.0, "ad_conversion_value": 16700, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -10034}, {"report_date": "2026-04-29", "channel_code": "google_ads", "ad_spend": 37959, "impressions": 4228, "clicks": 97, "ad_conversions": 10.0, "ad_conversion_value": 552903, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -34508}, {"report_date": "2026-04-29", "channel_code": "meta", "ad_spend": 572949, "impressions": 42228, "clicks": 787, "ad_conversions": 87.0, "ad_conversion_value": 3060090, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -572854}, {"report_date": "2026-04-29", "channel_code": "naver_searchad", "ad_spend": 10330, "impressions": 381, "clicks": 12, "ad_conversions": 3.0, "ad_conversion_value": 258340, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -10330}, {"report_date": "2026-04-30", "channel_code": "google_ads", "ad_spend": 40642, "impressions": 9693, "clicks": 227, "ad_conversions": 10.0, "ad_conversion_value": 253033, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -36947}, {"report_date": "2026-04-30", "channel_code": "meta", "ad_spend": 457304, "impressions": 36903, "clicks": 661, "ad_conversions": 34.0, "ad_conversion_value": 1387610, "ga4_revenue": 0, "attributed_order_revenue": 238200, "gross_margin": 0, "net_profit": -457304}, {"report_date": "2026-04-30", "channel_code": "naver_searchad", "ad_spend": 7005, "impressions": 454, "clicks": 8, "ad_conversions": 3.0, "ad_conversion_value": 217590, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -7005}, {"report_date": "2026-05-01", "channel_code": "google_ads", "ad_spend": 84245, "impressions": 17213, "clicks": 565, "ad_conversions": 9.0, "ad_conversion_value": 481552, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -76586}, {"report_date": "2026-05-01", "channel_code": "meta", "ad_spend": 501087, "impressions": 42822, "clicks": 796, "ad_conversions": 30.0, "ad_conversion_value": 986378, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -501087}, {"report_date": "2026-05-01", "channel_code": "naver_searchad", "ad_spend": 10671, "impressions": 399, "clicks": 12, "ad_conversions": 6.0, "ad_conversion_value": 735530, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -10671}, {"report_date": "2026-05-02", "channel_code": "google_ads", "ad_spend": 52751, "impressions": 6446, "clicks": 165, "ad_conversions": 2.0, "ad_conversion_value": 167660, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -47956}, {"report_date": "2026-05-02", "channel_code": "meta", "ad_spend": 460939, "impressions": 43284, "clicks": 802, "ad_conversions": 33.0, "ad_conversion_value": 1422742, "ga4_revenue": 0, "attributed_order_revenue": 90400, "gross_margin": 0, "net_profit": -460939}, {"report_date": "2026-05-02", "channel_code": "naver_searchad", "ad_spend": 9111, "impressions": 431, "clicks": 13, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -9111}, {"report_date": "2026-05-03", "channel_code": "google_ads", "ad_spend": 48626, "impressions": 9417, "clicks": 387, "ad_conversions": 6.0, "ad_conversion_value": 320498, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -44204}, {"report_date": "2026-05-03", "channel_code": "meta", "ad_spend": 598525, "impressions": 52301, "clicks": 927, "ad_conversions": 47.0, "ad_conversion_value": 1457606, "ga4_revenue": 0, "attributed_order_revenue": 93380, "gross_margin": 0, "net_profit": -598525}, {"report_date": "2026-05-03", "channel_code": "naver_searchad", "ad_spend": 5863, "impressions": 593, "clicks": 7, "ad_conversions": 1.0, "ad_conversion_value": 64880, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -5863}, {"report_date": "2026-05-04", "channel_code": "google_ads", "ad_spend": 48346, "impressions": 6166, "clicks": 221, "ad_conversions": 3.0, "ad_conversion_value": 184001, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -43950}, {"report_date": "2026-05-04", "channel_code": "meta", "ad_spend": 554335, "impressions": 48044, "clicks": 816, "ad_conversions": 47.0, "ad_conversion_value": 1785560, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -554335}, {"report_date": "2026-05-04", "channel_code": "naver_searchad", "ad_spend": 10818, "impressions": 648, "clicks": 13, "ad_conversions": 1.0, "ad_conversion_value": 109800, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -10818}, {"report_date": "2026-05-05", "channel_code": "google_ads", "ad_spend": 42625, "impressions": 6406, "clicks": 246, "ad_conversions": 7.0, "ad_conversion_value": 233114, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -38750}, {"report_date": "2026-05-05", "channel_code": "meta", "ad_spend": 602960, "impressions": 51575, "clicks": 947, "ad_conversions": 66.0, "ad_conversion_value": 2841791, "ga4_revenue": 158441, "attributed_order_revenue": 161760, "gross_margin": 0, "net_profit": -602908}, {"report_date": "2026-05-05", "channel_code": "naver_searchad", "ad_spend": 16423, "impressions": 648, "clicks": 16, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -16423}, {"report_date": "2026-05-06", "channel_code": "google_ads", "ad_spend": 41178, "impressions": 9792, "clicks": 245, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -41178}, {"report_date": "2026-05-06", "channel_code": "meta", "ad_spend": 584543, "impressions": 49814, "clicks": 917, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 165000, "gross_margin": 0, "net_profit": -584543}, {"report_date": "2026-05-06", "channel_code": "naver_searchad", "ad_spend": 18580, "impressions": 670, "clicks": 21, "ad_conversions": 1.0, "ad_conversion_value": 70050, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -18580}, {"report_date": "2026-05-07", "channel_code": "google_ads", "ad_spend": 27156, "impressions": 3600, "clicks": 92, "ad_conversions": 1.0, "ad_conversion_value": 63960, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -27156}, {"report_date": "2026-05-07", "channel_code": "meta", "ad_spend": 505974, "impressions": 41956, "clicks": 838, "ad_conversions": 64.0, "ad_conversion_value": 2590517, "ga4_revenue": 0, "attributed_order_revenue": 90400, "gross_margin": 0, "net_profit": -505974}, {"report_date": "2026-05-07", "channel_code": "naver_searchad", "ad_spend": 17047, "impressions": 683, "clicks": 17, "ad_conversions": 3.0, "ad_conversion_value": 265400, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -17047}, {"report_date": "2026-05-08", "channel_code": "google_ads", "ad_spend": 19688, "impressions": 4964, "clicks": 199, "ad_conversions": 6.940816, "ad_conversion_value": 298768, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -17899}, {"report_date": "2026-05-08", "channel_code": "meta", "ad_spend": 423228, "impressions": 34340, "clicks": 623, "ad_conversions": 33.0, "ad_conversion_value": 1278282, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -423228}, {"report_date": "2026-05-08", "channel_code": "naver_searchad", "ad_spend": 9774, "impressions": 351, "clicks": 15, "ad_conversions": 1.0, "ad_conversion_value": 66800, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -9774}, {"report_date": "2026-05-09", "channel_code": "google_ads", "ad_spend": 17702, "impressions": 2797, "clicks": 105, "ad_conversions": 6.894535, "ad_conversion_value": 316001, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -16093}, {"report_date": "2026-05-09", "channel_code": "meta", "ad_spend": 377112, "impressions": 34305, "clicks": 591, "ad_conversions": 37.0, "ad_conversion_value": 1407957, "ga4_revenue": 0, "attributed_order_revenue": 27350, "gross_margin": 0, "net_profit": -377112}, {"report_date": "2026-05-09", "channel_code": "naver_searchad", "ad_spend": 11221, "impressions": 480, "clicks": 17, "ad_conversions": 5.0, "ad_conversion_value": 314780, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -11221}, {"report_date": "2026-05-10", "channel_code": "google_ads", "ad_spend": 13597, "impressions": 2712, "clicks": 87, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -12361}, {"report_date": "2026-05-10", "channel_code": "meta", "ad_spend": 536674, "impressions": 43336, "clicks": 889, "ad_conversions": 44.0, "ad_conversion_value": 1584134, "ga4_revenue": 0, "attributed_order_revenue": 63400, "gross_margin": 0, "net_profit": -536818}, {"report_date": "2026-05-10", "channel_code": "naver_searchad", "ad_spend": 11324, "impressions": 700, "clicks": 14, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -11324}, {"report_date": "2026-05-11", "channel_code": "google_ads", "ad_spend": 15233, "impressions": 2549, "clicks": 53, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -15233}, {"report_date": "2026-05-11", "channel_code": "meta", "ad_spend": 494063, "impressions": 38047, "clicks": 745, "ad_conversions": 76.0, "ad_conversion_value": 3060470, "ga4_revenue": 0, "attributed_order_revenue": 302250, "gross_margin": 0, "net_profit": -494063}, {"report_date": "2026-05-11", "channel_code": "naver_searchad", "ad_spend": 12928, "impressions": 655, "clicks": 14, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -12928}, {"report_date": "2026-05-12", "channel_code": "google_ads", "ad_spend": 14655, "impressions": 3601, "clicks": 118, "ad_conversions": 0.0, "ad_conversion_value": 0, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -14655}, {"report_date": "2026-05-12", "channel_code": "meta", "ad_spend": 569956, "impressions": 48314, "clicks": 848, "ad_conversions": 50.0, "ad_conversion_value": 1992725, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -569956}, {"report_date": "2026-05-12", "channel_code": "naver_searchad", "ad_spend": 6553, "impressions": 905, "clicks": 10, "ad_conversions": 2.0, "ad_conversion_value": 56850, "ga4_revenue": 0, "attributed_order_revenue": 0, "gross_margin": 0, "net_profit": -6553}], "operating_category_months": ["2026-05", "2026-04"], "operating_category_daily_rows": [{"report_date": "2026-04-01", "source_system": "naver_commerce", "category": "단백밥", "order_count": 33, "revenue": 2637539, "cogs": 1397547, "channel_fee": 179353, "delivery_fee": 186600, "net_profit": 874039}, {"report_date": "2026-04-01", "source_system": "naver_commerce", "category": "미분류", "order_count": 2, "revenue": 73861, "cogs": 31200, "channel_fee": 5023, "delivery_fee": 4920, "net_profit": 32718}, {"report_date": "2026-04-01", "source_system": "naver_commerce", "category": "순수단백", "order_count": 1, "revenue": 51490, "cogs": 31500, "channel_fee": 3501, "delivery_fee": 5700, "net_profit": 10789}, {"report_date": "2026-04-01", "source_system": "naver_commerce", "category": "저당소스", "order_count": 1, "revenue": 23960, "cogs": 5520, "channel_fee": 1629, "delivery_fee": 2280, "net_profit": 14531}, {"report_date": "2026-04-02", "source_system": "naver_commerce", "category": "단백밥", "order_count": 28, "revenue": 1890471, "cogs": 1005720, "channel_fee": 128552, "delivery_fee": 155400, "net_profit": 600799}, {"report_date": "2026-04-02", "source_system": "naver_commerce", "category": "미분류", "order_count": 1, "revenue": 85709, "cogs": 32760, "channel_fee": 5828, "delivery_fee": 4200, "net_profit": 42921}, {"report_date": "2026-04-02", "source_system": "naver_commerce", "category": "순수단백", "order_count": 2, "revenue": 102980, "cogs": 63000, "channel_fee": 7003, "delivery_fee": 11400, "net_profit": 21577}, {"report_date": "2026-04-03", "source_system": "naver_commerce", "category": "단백밥", "order_count": 12, "revenue": 836120, "cogs": 443955, "channel_fee": 56856, "delivery_fee": 68400, "net_profit": 266909}, {"report_date": "2026-04-04", "source_system": "naver_commerce", "category": "단백밥", "order_count": 11, "revenue": 842970, "cogs": 457255, "channel_fee": 57322, "delivery_fee": 60800, "net_profit": 267593}, {"report_date": "2026-04-04", "source_system": "naver_commerce", "category": "미분류", "order_count": 2, "revenue": 131750, "cogs": 65130, "channel_fee": 8959, "delivery_fee": 7600, "net_profit": 50061}, {"report_date": "2026-04-04", "source_system": "naver_commerce", "category": "순수단백", "order_count": 1, "revenue": 51490, "cogs": 31500, "channel_fee": 3501, "delivery_fee": 5700, "net_profit": 10789}, {"report_date": "2026-04-05", "source_system": "naver_commerce", "category": "단백밥", "order_count": 29, "revenue": 2163050, "cogs": 1089981, "channel_fee": 147087, "delivery_fee": 165300, "net_profit": 760681}, {"report_date": "2026-04-05", "source_system": "naver_commerce", "category": "순수단백", "order_count": 1, "revenue": 51490, "cogs": 31500, "channel_fee": 3501, "delivery_fee": 5700, "net_profit": 10789}, {"report_date": "2026-04-06", "source_system": "naver_commerce", "category": "단백밥", "order_count": 39, "revenue": 2898383, "cogs": 1558771, "channel_fee": 197090, "delivery_fee": 213418, "net_profit": 929104}, {"report_date": "2026-04-06", "source_system": "naver_commerce", "category": "미분류", "order_count": 1, "revenue": 35940, "cogs": 23400, "channel_fee": 2444, "delivery_fee": 3420, "net_profit": 6676}, {"report_date": "2026-04-06", "source_system": "naver_commerce", "category": "밸런시", "order_count": 1, "revenue": 110290, "cogs": 29640, "channel_fee": 7500, "delivery_fee": 5700, "net_profit": 67450}, {"report_date": "2026-04-06", "source_system": "naver_commerce", "category": "순수단백", "order_count": 2, "revenue": 243657, "cogs": 88209, "channel_fee": 16569, "delivery_fee": 8882, "net_profit": 129997}, {"report_date": "2026-04-06", "source_system": "naver_commerce", "category": "저당소스", "order_count": 1, "revenue": 23960, "cogs": 4560, "channel_fee": 1629, "delivery_fee": 2280, "net_profit": 15491}, {"report_date": "2026-04-07", "source_system": "naver_commerce", "category": "단백밥", "order_count": 27, "revenue": 2195610, "cogs": 1086853, "channel_fee": 149301, "delivery_fee": 153900, "net_profit": 805555}, {"report_date": "2026-04-07", "source_system": "naver_commerce", "category": "미분류", "order_count": 2, "revenue": 75634, "cogs": 31200, "channel_fee": 5143, "delivery_fee": 4689, "net_profit": 34602}, {"report_date": "2026-04-07", "source_system": "naver_commerce", "category": "순수단백", "order_count": 2, "revenue": 100256, "cogs": 57410, "channel_fee": 6817, "delivery_fee": 6711, "net_profit": 29317}, {"report_date": "2026-04-08", "source_system": "naver_commerce", "category": "단백밥", "order_count": 24, "revenue": 1848330, "cogs": 959756, "channel_fee": 125686, "delivery_fee": 136800, "net_profit": 626087}, {"report_date": "2026-04-08", "source_system": "naver_commerce", "category": "미분류", "order_count": 1, "revenue": 61200, "cogs": 31200, "channel_fee": 4162, "delivery_fee": 5700, "net_profit": 20138}, {"report_date": "2026-04-08", "source_system": "naver_commerce", "category": "밸런시", "order_count": 1, "revenue": 14700, "cogs": 6530, "channel_fee": 1000, "delivery_fee": 5700, "net_profit": 1470}, {"report_date": "2026-04-08", "source_system": "naver_commerce", "category": "순수단백", "order_count": 2, "revenue": 135600, "cogs": 84000, "channel_fee": 9221, "delivery_fee": 11400, "net_profit": 30979}, {"report_date": "2026-04-09", "source_system": "naver_commerce", "category": "단백밥", "order_count": 22, "revenue": 1512708, "cogs": 774933, "channel_fee": 102864, "delivery_fee": 121410, "net_profit": 513501}, {"report_date": "2026-04-09", "source_system": "naver_commerce", "category": "밸런시", "order_count": 2, "revenue": 111192, "cogs": 59121, "channel_fee": 7561, "delivery_fee": 9690, "net_profit": 34820}, {"report_date": "2026-04-09", "source_system": "naver_commerce", "category": "순수단백", "order_count": 1, "revenue": 51490, "cogs": 31500, "channel_fee": 3501, "delivery_fee": 5700, "net_profit": 10789}, {"report_date": "2026-04-10", "source_system": "naver_commerce", "category": "단백밥", "order_count": 12, "revenue": 880360, "cogs": 450021, "channel_fee": 59864, "delivery_fee": 68400, "net_profit": 302074}, {"report_date": "2026-04-10", "source_system": "naver_commerce", "category": "순수단백", "order_count": 1, "revenue": 51490, "cogs": 31500, "channel_fee": 3501, "delivery_fee": 5700, "net_profit": 10789}, {"report_date": "2026-04-10", "source_system": "naver_commerce", "category": "저당소스", "order_count": 2, "revenue": 237850, "cogs": 10230, "channel_fee": 16174, "delivery_fee": 11400, "net_profit": 200046}, {"report_date": "2026-04-11", "source_system": "naver_commerce", "category": "단백밥", "order_count": 8, "revenue": 576830, "cogs": 306102, "channel_fee": 39224, "delivery_fee": 45600, "net_profit": 185904}, {"report_date": "2026-04-11", "source_system": "naver_commerce", "category": "미분류", "order_count": 1, "revenue": 75200, "cogs": 31200, "channel_fee": 5114, "delivery_fee": 3800, "net_profit": 35086}, {"report_date": "2026-04-11", "source_system": "naver_commerce", "category": "순수단백", "order_count": 1, "revenue": 37600, "cogs": 23600, "channel_fee": 2557, "delivery_fee": 1900, "net_profit": 9543}, {"report_date": "2026-04-12", "source_system": "naver_commerce", "category": "단백밥", "order_count": 22, "revenue": 1584195, "cogs": 853152, "channel_fee": 107725, "delivery_fee": 120612, "net_profit": 502706}, {"report_date": "2026-04-12", "source_system": "naver_commerce", "category": "미분류", "order_count": 1, "revenue": 61200, "cogs": 31200, "channel_fee": 4162, "delivery_fee": 5700, "net_profit": 20138}, {"report_date": "2026-04-12", "source_system": "naver_commerce", "category": "밸런시", "order_count": 1, "revenue": 59900, "cogs": 35600, "channel_fee": 4073, "delivery_fee": 5700, "net_profit": 14527}, {"report_date": "2026-04-12", "source_system": "naver_commerce", "category": "순수단백", "order_count": 1, "revenue": 80144, "cogs": 31500, "channel_fee": 5450, "delivery_fee": 4788, "net_profit": 38407}, {"report_date": "2026-04-13", "source_system": "naver_commerce", "category": "단백밥", "order_count": 31, "revenue": 2300247, "cogs": 1219886, "channel_fee": 156417, "delivery_fee": 173153, "net_profit": 750791}, {"report_date": "2026-04-13", "source_system": "naver_commerce", "category": "미분류", "order_count": 1, "revenue": 82892, "cogs": 32760, "channel_fee": 5637, "delivery_fee": 3547, "net_profit": 40949}, {"report_date": "2026-04-13", "source_system": "naver_commerce", "category": "순수단백", "order_count": 3, "revenue": 253540, "cogs": 87675, "channel_fee": 17241, "delivery_fee": 17100, "net_profit": 131524}, {"report_date": "2026-04-14", "source_system": "naver_commerce", "category": "단백밥", "order_count": 18, "revenue": 1508470, "cogs": 804339, "channel_fee": 102576, "delivery_fee": 102600, "net_profit": 498955}, {"report_date": "2026-04-14", "source_system": "naver_commerce", "category": "미분류", "order_count": 3, "revenue": 203248, "cogs": 97110, "channel_fee": 13821, "delivery_fee": 12287, "net_profit": 80030}, {"report_date": "2026-04-14", "source_system": "naver_commerce", "category": "밸런시", "order_count": 1, "revenue": 49900, "cogs": 28190, "channel_fee": 3393, "delivery_fee": 5700, "net_profit": 12617}, {"report_date": "2026-04-14", "source_system": "naver_commerce", "category": "순수단백", "order_count": 4, "revenue": 237012, "cogs": 137120, "channel_fee": 16117, "delivery_fee": 16213, "net_profit": 67562}, {"report_date": "2026-04-15", "source_system": "naver_commerce", "category": "단백밥", "order_count": 28, "revenue": 1991560, "cogs": 1043563, "channel_fee": 135426, "delivery_fee": 159600, "net_profit": 652971}, {"report_date": "2026-04-15", "source_system": "naver_commerce", "category": "미분류", "order_count": 1, "revenue": 74450, "cogs": 40950, "channel_fee": 5063, "delivery_fee": 5700, "net_profit": 22737}, {"report_date": "2026-04-15", "source_system": "naver_commerce", "category": "저당소스", "order_count": 1, "revenue": 118800, "cogs": 4620, "channel_fee": 8078, "delivery_fee": 5700, "net_profit": 100402}, {"report_date": "2026-04-16", "source_system": "naver_commerce", "category": "단백밥", "order_count": 29, "revenue": 2069330, "cogs": 1091278, "channel_fee": 140714, "delivery_fee": 159480, "net_profit": 677858}, {"report_date": "2026-04-16", "source_system": "naver_commerce", "category": "미분류", "order_count": 1, "revenue": 66128, "cogs": 32760, "channel_fee": 4497, "delivery_fee": 5503, "net_profit": 23368}, {"report_date": "2026-04-16", "source_system": "naver_commerce", "category": "부가옵션", "order_count": 1, "revenue": 3892, "cogs": 0, "channel_fee": 265, "delivery_fee": 317, "net_profit": 3310}, {"report_date": "2026-04-17", "source_system": "naver_commerce", "category": "단백밥", "order_count": 11, "revenue": 796850, "cogs": 415227, "channel_fee": 54186, "delivery_fee": 62700, "net_profit": 264737}, {"report_date": "2026-04-17", "source_system": "naver_commerce", "category": "순수단백", "order_count": 1, "revenue": 67800, "cogs": 42000, "channel_fee": 4610, "delivery_fee": 5700, "net_profit": 15490}, {"report_date": "2026-04-18", "source_system": "naver_commerce", "category": "단백밥", "order_count": 12, "revenue": 932500, "cogs": 493866, "channel_fee": 63410, "delivery_fee": 68400, "net_profit": 306824}, {"report_date": "2026-04-18", "source_system": "naver_commerce", "category": "순수단백", "order_count": 1, "revenue": 51490, "cogs": 31500, "channel_fee": 3501, "delivery_fee": 5700, "net_profit": 10789}, {"report_date": "2026-04-19", "source_system": "naver_commerce", "category": "단백밥", "order_count": 16, "revenue": 1126690, "cogs": 589318, "channel_fee": 76615, "delivery_fee": 91200, "net_profit": 369557}, {"report_date": "2026-04-19", "source_system": "naver_commerce", "category": "순수단백", "order_count": 2, "revenue": 129290, "cogs": 78000, "channel_fee": 8792, "delivery_fee": 11400, "net_profit": 31098}, {"report_date": "2026-04-20", "source_system": "imweb", "category": "단백밥", "order_count": 3, "revenue": 83260, "cogs": 42185, "channel_fee": 3330, "delivery_fee": 17100, "net_profit": 20645}, {"report_date": "2026-04-20", "source_system": "imweb", "category": "미분류", "order_count": 1, "revenue": 66420, "cogs": 32760, "channel_fee": 2657, "delivery_fee": 5700, "net_profit": 25303}, {"report_date": "2026-04-20", "source_system": "imweb", "category": "순수단백", "order_count": 2, "revenue": 145950, "cogs": 81623, "channel_fee": 5838, "delivery_fee": 11400, "net_profit": 47089}, {"report_date": "2026-04-20", "source_system": "naver_commerce", "category": "단백밥", "order_count": 37, "revenue": 2456259, "cogs": 1304364, "channel_fee": 167026, "delivery_fee": 207547, "net_profit": 777322}, {"report_date": "2026-04-20", "source_system": "naver_commerce", "category": "미분류", "order_count": 4, "revenue": 261055, "cogs": 130650, "channel_fee": 17752, "delivery_fee": 18380, "net_profit": 94273}, {"report_date": "2026-04-20", "source_system": "naver_commerce", "category": "밸런시", "order_count": 1, "revenue": 59900, "cogs": 35600, "channel_fee": 4073, "delivery_fee": 5700, "net_profit": 14527}, {"report_date": "2026-04-20", "source_system": "naver_commerce", "category": "부가옵션", "order_count": 1, "revenue": 2096, "cogs": 0, "channel_fee": 143, "delivery_fee": 83, "net_profit": 1871}, {"report_date": "2026-04-20", "source_system": "naver_commerce", "category": "순수단백", "order_count": 9, "revenue": 662730, "cogs": 343980, "channel_fee": 45066, "delivery_fee": 47590, "net_profit": 226094}, {"report_date": "2026-04-20", "source_system": "naver_commerce", "category": "저당소스", "order_count": 1, "revenue": 119000, "cogs": 5196, "channel_fee": 8092, "delivery_fee": 5700, "net_profit": 100012}, {"report_date": "2026-04-21", "source_system": "imweb", "category": "단백밥", "order_count": 42, "revenue": 3049352, "cogs": 1688044, "channel_fee": 121974, "delivery_fee": 234748, "net_profit": 1004586}, {"report_date": "2026-04-21", "source_system": "imweb", "category": "미분류", "order_count": 1, "revenue": 24829, "cogs": 7800, "channel_fee": 993, "delivery_fee": 2714, "net_profit": 13321}, {"report_date": "2026-04-21", "source_system": "imweb", "category": "밸런시", "order_count": 2, "revenue": 71228, "cogs": 50730, "channel_fee": 2849, "delivery_fee": 7454, "net_profit": 10195}, {"report_date": "2026-04-21", "source_system": "imweb", "category": "부가옵션", "order_count": 1, "revenue": 3085, "cogs": 0, "channel_fee": 123, "delivery_fee": 184, "net_profit": 2778}, {"report_date": "2026-04-21", "source_system": "imweb", "category": "순수단백", "order_count": 3, "revenue": 228870, "cogs": 120007, "channel_fee": 9155, "delivery_fee": 17100, "net_profit": 82608}, {"report_date": "2026-04-21", "source_system": "naver_commerce", "category": "단백밥", "order_count": 28, "revenue": 2246400, "cogs": 1204484, "channel_fee": 152755, "delivery_fee": 159000, "net_profit": 730161}, {"report_date": "2026-04-21", "source_system": "naver_commerce", "category": "미분류", "order_count": 2, "revenue": 153478, "cogs": 81900, "channel_fee": 10436, "delivery_fee": 8867, "net_profit": 52275}, {"report_date": "2026-04-21", "source_system": "naver_commerce", "category": "부가옵션", "order_count": 1, "revenue": 7389, "cogs": 0, "channel_fee": 502, "delivery_fee": 600, "net_profit": 6287}, {"report_date": "2026-04-21", "source_system": "naver_commerce", "category": "순수단백", "order_count": 3, "revenue": 250422, "cogs": 149600, "channel_fee": 17029, "delivery_fee": 13933, "net_profit": 69860}, {"report_date": "2026-04-22", "source_system": "naver_commerce", "category": "단백밥", "order_count": 15, "revenue": 1161510, "cogs": 577462, "channel_fee": 78983, "delivery_fee": 85500, "net_profit": 419565}, {"report_date": "2026-04-22", "source_system": "naver_commerce", "category": "미분류", "order_count": 1, "revenue": 37810, "cogs": 32760, "channel_fee": 2571, "delivery_fee": 2752, "net_profit": -273}, {"report_date": "2026-04-22", "source_system": "naver_commerce", "category": "밸런시", "order_count": 2, "revenue": 109800, "cogs": 65550, "channel_fee": 7466, "delivery_fee": 11400, "net_profit": 25384}, {"report_date": "2026-04-22", "source_system": "naver_commerce", "category": "순수단백", "order_count": 2, "revenue": 135600, "cogs": 84000, "channel_fee": 9221, "delivery_fee": 11400, "net_profit": 30979}, {"report_date": "2026-04-22", "source_system": "naver_commerce", "category": "저당소스", "order_count": 1, "revenue": 40510, "cogs": 8430, "channel_fee": 2755, "delivery_fee": 2948, "net_profit": 26377}, {"report_date": "2026-04-23", "source_system": "naver_commerce", "category": "단백밥", "order_count": 20, "revenue": 1595300, "cogs": 805033, "channel_fee": 108480, "delivery_fee": 114000, "net_profit": 567787}, {"report_date": "2026-04-23", "source_system": "naver_commerce", "category": "밸런시", "order_count": 1, "revenue": 58800, "cogs": 29640, "channel_fee": 3998, "delivery_fee": 5700, "net_profit": 19462}, {"report_date": "2026-04-23", "source_system": "naver_commerce", "category": "순수단백", "order_count": 1, "revenue": 51490, "cogs": 31500, "channel_fee": 3501, "delivery_fee": 5700, "net_profit": 10789}, {"report_date": "2026-04-23", "source_system": "naver_commerce", "category": "저당소스", "order_count": 1, "revenue": 118800, "cogs": 5700, "channel_fee": 8078, "delivery_fee": 5700, "net_profit": 99322}, {"report_date": "2026-04-24", "source_system": "naver_commerce", "category": "단백밥", "order_count": 17, "revenue": 1190220, "cogs": 626095, "channel_fee": 80935, "delivery_fee": 96900, "net_profit": 386290}, {"report_date": "2026-04-25", "source_system": "naver_commerce", "category": "단백밥", "order_count": 12, "revenue": 852160, "cogs": 450814, "channel_fee": 57947, "delivery_fee": 68400, "net_profit": 274999}, {"report_date": "2026-04-25", "source_system": "naver_commerce", "category": "밸런시", "order_count": 1, "revenue": 29400, "cogs": 13060, "channel_fee": 1999, "delivery_fee": 5700, "net_profit": 8641}, {"report_date": "2026-04-26", "source_system": "naver_commerce", "category": "단백밥", "order_count": 22, "revenue": 1577290, "cogs": 829028, "channel_fee": 107256, "delivery_fee": 125400, "net_profit": 515606}, {"report_date": "2026-04-26", "source_system": "naver_commerce", "category": "미분류", "order_count": 1, "revenue": 59641, "cogs": 23400, "channel_fee": 4056, "delivery_fee": 3353, "net_profit": 28833}, {"report_date": "2026-04-26", "source_system": "naver_commerce", "category": "순수단백", "order_count": 3, "revenue": 144839, "cogs": 86600, "channel_fee": 9849, "delivery_fee": 13747, "net_profit": 34643}, {"report_date": "2026-04-27", "source_system": "naver_commerce", "category": "단백밥", "order_count": 16, "revenue": 1249270, "cogs": 604850, "channel_fee": 84950, "delivery_fee": 91200, "net_profit": 468269}, {"report_date": "2026-04-27", "source_system": "naver_commerce", "category": "순수단백", "order_count": 1, "revenue": 51490, "cogs": 31500, "channel_fee": 3501, "delivery_fee": 5700, "net_profit": 10789}, {"report_date": "2026-04-28", "source_system": "naver_commerce", "category": "단백밥", "order_count": 21, "revenue": 1802380, "cogs": 952526, "channel_fee": 122562, "delivery_fee": 119700, "net_profit": 607592}, {"report_date": "2026-04-28", "source_system": "naver_commerce", "category": "밸런시", "order_count": 2, "revenue": 129800, "cogs": 58140, "channel_fee": 8826, "delivery_fee": 11400, "net_profit": 51434}, {"report_date": "2026-04-28", "source_system": "naver_commerce", "category": "저당소스", "order_count": 1, "revenue": 119200, "cogs": 5352, "channel_fee": 8106, "delivery_fee": 5700, "net_profit": 100042}, {"report_date": "2026-04-29", "source_system": "naver_commerce", "category": "단백밥", "order_count": 14, "revenue": 1090772, "cogs": 524460, "channel_fee": 74173, "delivery_fee": 77583, "net_profit": 414556}, {"report_date": "2026-04-29", "source_system": "naver_commerce", "category": "미분류", "order_count": 1, "revenue": 18838, "cogs": 16380, "channel_fee": 1281, "delivery_fee": 2217, "net_profit": -1040}, {"report_date": "2026-04-30", "source_system": "naver_commerce", "category": "단백밥", "order_count": 8, "revenue": 523310, "cogs": 270773, "channel_fee": 35585, "delivery_fee": 45600, "net_profit": 171352}, {"report_date": "2026-04-30", "source_system": "naver_commerce", "category": "미분류", "order_count": 1, "revenue": 54132, "cogs": 23400, "channel_fee": 3681, "delivery_fee": 2515, "net_profit": 24537}, {"report_date": "2026-04-30", "source_system": "naver_commerce", "category": "순수단백", "order_count": 2, "revenue": 125058, "cogs": 79080, "channel_fee": 8504, "delivery_fee": 8885, "net_profit": 28588}, {"report_date": "2026-05-01", "source_system": "naver_commerce", "category": "단백밥", "order_count": 12, "revenue": 898420, "cogs": 481576, "channel_fee": 61093, "delivery_fee": 68400, "net_profit": 287351}, {"report_date": "2026-05-01", "source_system": "naver_commerce", "category": "미분류", "order_count": 2, "revenue": 130516, "cogs": 73710, "channel_fee": 8875, "delivery_fee": 8769, "net_profit": 39162}, {"report_date": "2026-05-01", "source_system": "naver_commerce", "category": "순수단백", "order_count": 2, "revenue": 181614, "cogs": 72180, "channel_fee": 12350, "delivery_fee": 8331, "net_profit": 88753}, {"report_date": "2026-05-02", "source_system": "naver_commerce", "category": "단백밥", "order_count": 14, "revenue": 1170370, "cogs": 594520, "channel_fee": 79585, "delivery_fee": 79800, "net_profit": 416465}, {"report_date": "2026-05-02", "source_system": "naver_commerce", "category": "순수단백", "order_count": 2, "revenue": 222090, "cogs": 75810, "channel_fee": 15102, "delivery_fee": 11400, "net_profit": 119778}, {"report_date": "2026-05-03", "source_system": "naver_commerce", "category": "단백밥", "order_count": 11, "revenue": 875050, "cogs": 463435, "channel_fee": 59503, "delivery_fee": 62700, "net_profit": 289412}, {"report_date": "2026-05-03", "source_system": "naver_commerce", "category": "미분류", "order_count": 1, "revenue": 91950, "cogs": 81900, "channel_fee": 6253, "delivery_fee": 2850, "net_profit": 947}, {"report_date": "2026-05-03", "source_system": "naver_commerce", "category": "저당소스", "order_count": 1, "revenue": 91950, "cogs": 18090, "channel_fee": 6253, "delivery_fee": 2850, "net_profit": 64757}, {"report_date": "2026-05-04", "source_system": "naver_commerce", "category": "단백밥", "order_count": 27, "revenue": 2292300, "cogs": 1105703, "channel_fee": 155876, "delivery_fee": 153900, "net_profit": 876820}, {"report_date": "2026-05-04", "source_system": "naver_commerce", "category": "순수단백", "order_count": 1, "revenue": 51490, "cogs": 31500, "channel_fee": 3501, "delivery_fee": 5700, "net_profit": 10789}, {"report_date": "2026-05-05", "source_system": "naver_commerce", "category": "단백밥", "order_count": 10, "revenue": 757150, "cogs": 402633, "channel_fee": 51486, "delivery_fee": 57000, "net_profit": 246031}, {"report_date": "2026-05-05", "source_system": "naver_commerce", "category": "미분류", "order_count": 1, "revenue": 50341, "cogs": 32760, "channel_fee": 3423, "delivery_fee": 4200, "net_profit": 9958}, {"report_date": "2026-05-05", "source_system": "naver_commerce", "category": "저당소스", "order_count": 2, "revenue": 136979, "cogs": 7446, "channel_fee": 9315, "delivery_fee": 7200, "net_profit": 113018}, {"report_date": "2026-05-06", "source_system": "naver_commerce", "category": "단백밥", "order_count": 28, "revenue": 2023448, "cogs": 1079470, "channel_fee": 137594, "delivery_fee": 155709, "net_profit": 650675}, {"report_date": "2026-05-06", "source_system": "naver_commerce", "category": "미분류", "order_count": 1, "revenue": 27377, "cogs": 7800, "channel_fee": 1862, "delivery_fee": 2591, "net_profit": 15125}, {"report_date": "2026-05-06", "source_system": "naver_commerce", "category": "부가옵션", "order_count": 4, "revenue": 19575, "cogs": 0, "channel_fee": 1331, "delivery_fee": 1300, "net_profit": 16943}, {"report_date": "2026-05-06", "source_system": "naver_commerce", "category": "순수단백", "order_count": 1, "revenue": 71700, "cogs": 35400, "channel_fee": 4876, "delivery_fee": 5700, "net_profit": 25724}, {"report_date": "2026-05-06", "source_system": "naver_commerce", "category": "저당소스", "order_count": 2, "revenue": 237600, "cogs": 11400, "channel_fee": 16157, "delivery_fee": 11400, "net_profit": 198643}, {"report_date": "2026-05-07", "source_system": "naver_commerce", "category": "단백밥", "order_count": 17, "revenue": 1434558, "cogs": 767029, "channel_fee": 97550, "delivery_fee": 96583, "net_profit": 473396}, {"report_date": "2026-05-07", "source_system": "naver_commerce", "category": "부가옵션", "order_count": 1, "revenue": 3892, "cogs": 0, "channel_fee": 265, "delivery_fee": 317, "net_profit": 3310}, {"report_date": "2026-05-07", "source_system": "naver_commerce", "category": "순수단백", "order_count": 3, "revenue": 226490, "cogs": 122950, "channel_fee": 15401, "delivery_fee": 17100, "net_profit": 71039}, {"report_date": "2026-05-08", "source_system": "naver_commerce", "category": "단백밥", "order_count": 17, "revenue": 1394240, "cogs": 738949, "channel_fee": 94808, "delivery_fee": 96900, "net_profit": 463583}, {"report_date": "2026-05-08", "source_system": "naver_commerce", "category": "미분류", "order_count": 3, "revenue": 132037, "cogs": 70980, "channel_fee": 8979, "delivery_fee": 8671, "net_profit": 43407}, {"report_date": "2026-05-08", "source_system": "naver_commerce", "category": "순수단백", "order_count": 2, "revenue": 109920, "cogs": 60620, "channel_fee": 7475, "delivery_fee": 6529, "net_profit": 35296}, {"report_date": "2026-05-08", "source_system": "naver_commerce", "category": "저당소스", "order_count": 2, "revenue": 137533, "cogs": 11610, "channel_fee": 9352, "delivery_fee": 7600, "net_profit": 108971}, {"report_date": "2026-05-09", "source_system": "naver_commerce", "category": "단백밥", "order_count": 13, "revenue": 1022713, "cogs": 550593, "channel_fee": 69545, "delivery_fee": 70553, "net_profit": 332022}, {"report_date": "2026-05-09", "source_system": "naver_commerce", "category": "미분류", "order_count": 1, "revenue": 81947, "cogs": 32760, "channel_fee": 5572, "delivery_fee": 3547, "net_profit": 40068}, {"report_date": "2026-05-09", "source_system": "naver_commerce", "category": "순수단백", "order_count": 1, "revenue": 51490, "cogs": 31500, "channel_fee": 3501, "delivery_fee": 5700, "net_profit": 10789}, {"report_date": "2026-05-10", "source_system": "naver_commerce", "category": "단백밥", "order_count": 21, "revenue": 1475869, "cogs": 786043, "channel_fee": 100359, "delivery_fee": 117118, "net_profit": 472349}, {"report_date": "2026-05-10", "source_system": "naver_commerce", "category": "미분류", "order_count": 1, "revenue": 25521, "cogs": 7800, "channel_fee": 1735, "delivery_fee": 2036, "net_profit": 13950}, {"report_date": "2026-05-10", "source_system": "naver_commerce", "category": "부가옵션", "order_count": 2, "revenue": 9210, "cogs": 0, "channel_fee": 626, "delivery_fee": 546, "net_profit": 8037}, {"report_date": "2026-05-10", "source_system": "naver_commerce", "category": "순수단백", "order_count": 1, "revenue": 67800, "cogs": 42000, "channel_fee": 4610, "delivery_fee": 5700, "net_profit": 15490}, {"report_date": "2026-05-11", "source_system": "naver_commerce", "category": "단백밥", "order_count": 40, "revenue": 2954745, "cogs": 1532143, "channel_fee": 200923, "delivery_fee": 224385, "net_profit": 997294}, {"report_date": "2026-05-11", "source_system": "naver_commerce", "category": "미분류", "order_count": 3, "revenue": 160750, "cogs": 72150, "channel_fee": 10931, "delivery_fee": 14250, "net_profit": 63419}, {"report_date": "2026-05-11", "source_system": "naver_commerce", "category": "부가옵션", "order_count": 3, "revenue": 11665, "cogs": 0, "channel_fee": 793, "delivery_fee": 765, "net_profit": 10107}, {"report_date": "2026-05-11", "source_system": "naver_commerce", "category": "순수단백", "order_count": 3, "revenue": 248690, "cogs": 145220, "channel_fee": 16911, "delivery_fee": 17100, "net_profit": 69459}, {"report_date": "2026-05-11", "source_system": "naver_commerce", "category": "저당소스", "order_count": 1, "revenue": 118800, "cogs": 4620, "channel_fee": 8078, "delivery_fee": 5700, "net_profit": 100402}, {"report_date": "2026-05-12", "source_system": "naver_commerce", "category": "단백밥", "order_count": 22, "revenue": 1677690, "cogs": 881178, "channel_fee": 114083, "delivery_fee": 125400, "net_profit": 557029}, {"report_date": "2026-05-12", "source_system": "naver_commerce", "category": "저당소스", "order_count": 1, "revenue": 119050, "cogs": 5070, "channel_fee": 8095, "delivery_fee": 5700, "net_profit": 100185}], "operating_category_monthly_rows": [{"month": "2026-04", "category": "단백밥", "order_count": 667, "revenue": 49469696, "cogs": 25921641, "channel_fee": 3276224, "delivery_fee": 3756451, "net_profit": 16515375, "source_breakdown": {"naver_commerce": {"order_count": 622, "revenue": 46337084, "net_profit": 15490144}, "imweb": {"order_count": 45, "revenue": 3132612, "net_profit": 1025231}}}, {"month": "2026-04", "category": "순수단백", "order_count": 52, "revenue": 3493268, "cogs": 1889404, "channel_fee": 227047, "delivery_fee": 265149, "net_profit": 1111667, "source_breakdown": {"naver_commerce": {"order_count": 47, "revenue": 3118448, "net_profit": 981970}, "imweb": {"order_count": 5, "revenue": 374820, "net_profit": 129697}}}, {"month": "2026-04", "category": "저당소스", "order_count": 9, "revenue": 802080, "cogs": 49608, "channel_fee": 54541, "delivery_fee": 41708, "net_profit": 656223, "source_breakdown": {"naver_commerce": {"order_count": 9, "revenue": 802080, "net_profit": 656223}}}, {"month": "2026-04", "category": "미분류", "order_count": 29, "revenue": 1703415, "cogs": 829920, "channel_fee": 113280, "delivery_fee": 113564, "net_profit": 646653, "source_breakdown": {"naver_commerce": {"order_count": 27, "revenue": 1612166, "net_profit": 608029}, "imweb": {"order_count": 2, "revenue": 91249, "net_profit": 38624}}}, {"month": "2026-04", "category": "밸런시", "order_count": 15, "revenue": 804910, "cogs": 411801, "channel_fee": 52738, "delivery_fee": 79844, "net_profit": 260527, "source_breakdown": {"naver_commerce": {"order_count": 13, "revenue": 733682, "net_profit": 250332}, "imweb": {"order_count": 2, "revenue": 71228, "net_profit": 10195}}}, {"month": "2026-04", "category": "부가옵션", "order_count": 4, "revenue": 16462, "cogs": 0, "channel_fee": 1033, "delivery_fee": 1184, "net_profit": 14246, "source_breakdown": {"naver_commerce": {"order_count": 3, "revenue": 13377, "net_profit": 11468}, "imweb": {"order_count": 1, "revenue": 3085, "net_profit": 2778}}}, {"month": "2026-05", "category": "단백밥", "order_count": 232, "revenue": 17976553, "cogs": 9383272, "channel_fee": 1222405, "delivery_fee": 1308448, "net_profit": 6062427, "source_breakdown": {"naver_commerce": {"order_count": 232, "revenue": 17976553, "net_profit": 6062427}}}, {"month": "2026-05", "category": "저당소스", "order_count": 9, "revenue": 841912, "cogs": 58236, "channel_fee": 57250, "delivery_fee": 40450, "net_profit": 685976, "source_breakdown": {"naver_commerce": {"order_count": 9, "revenue": 841912, "net_profit": 685976}}}, {"month": "2026-05", "category": "순수단백", "order_count": 16, "revenue": 1231284, "cogs": 617180, "channel_fee": 83727, "delivery_fee": 83260, "net_profit": 447117, "source_breakdown": {"naver_commerce": {"order_count": 16, "revenue": 1231284, "net_profit": 447117}}}, {"month": "2026-05", "category": "미분류", "order_count": 13, "revenue": 700439, "cogs": 379860, "channel_fee": 47630, "delivery_fee": 46914, "net_profit": 226036, "source_breakdown": {"naver_commerce": {"order_count": 13, "revenue": 700439, "net_profit": 226036}}}, {"month": "2026-05", "category": "부가옵션", "order_count": 10, "revenue": 44342, "cogs": 0, "channel_fee": 3015, "delivery_fee": 2928, "net_profit": 38397, "source_breakdown": {"naver_commerce": {"order_count": 10, "revenue": 44342, "net_profit": 38397}}}]}</script>
+  <div class="page">
+    <section class="hero">
+      <div class="eyebrow">광고 수익분석 통합 대시보드</div>
+      <h1>Google · Naver · Meta를 한 화면에서 관리</h1>
+      <p class="sub">광고 전환 주문 기준입니다. Meta는 Supabase 집계값을 그대로 보고, Google Ads와 Naver SearchAd는 채널 광고비/클릭/노출/API 전환값만 raw API 원본으로 다시 맞춥니다. 주문 연결 매출·순이익은 세 채널 모두 Supabase 집계값을 유지합니다.</p>
+      <div class="toolbar">
+        <label>조회 시작일
+          <input id="since-input" type="date">
+        </label>
+        <label>조회 종료일
+          <input id="until-input" type="date">
+        </label>
+        <button id="reset-range">최신 MTD로 되돌리기</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2 class="section-title">채널별 수익분석</h2>
+      <p class="section-copy">선택 기간의 광고 채널별 지출과 주문 연결 순이익을 비교합니다. 채널 요약은 `vw_marketing_profit_query_daily`를 읽고, Google Ads와 Naver SearchAd의 광고 API 수치만 raw snapshot으로 덮어씁니다.</p>
+      <div class="channel-grid" id="channel-overview"></div>
+      <div style="margin-top:18px;">
+        <h3 style="margin:0 0 10px;font-size:18px;">채널별 기간 합계</h3>
+        <p class="section-copy" style="margin-top:0;">선택 기간에 합산된 채널별 광고비를 바로 확인합니다. Meta는 DB 기준, Google Ads는 `metrics.cost_micros / 1,000,000`, Naver SearchAd는 `salesAmt` 기준입니다.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>채널</th>
+                <th class="number">집계일수</th>
+                <th class="number">광고비 합계</th>
+                <th class="number">광고매출(API)</th>
+                <th class="number">주문 연결 매출</th>
+                <th class="number">주문 연결 순이익</th>
+              </tr>
+            </thead>
+            <tbody id="channel-summary-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2 class="section-title">채널별 일별</h2>
+      <p class="section-copy">Meta, Naver SearchAd, Google Ads를 각각 분리해서 최근 일별 광고비와 주문 연결 실적을 봅니다. Google Ads와 Naver SearchAd는 광고비/광고지표를 raw API 일별 원본으로 표시합니다.</p>
+      <div class="channel-sections" id="channel-daily-sections"></div>
+    </section>
+
+    <section class="panel">
+      <h2 class="section-title">채널별 월별</h2>
+      <p class="section-copy">Meta, Naver SearchAd, Google Ads의 월 누적 광고비와 주문 연결 실적을 채널별로 분리해 봅니다. Google Ads와 Naver SearchAd는 월 누적 광고비를 raw API 합계로 계산합니다.</p>
+      <div class="channel-sections" id="channel-monthly-sections"></div>
+    </section>
+
+    <section class="panel">
+      <h2 class="section-title">자사몰 + 네이버 카테고리별 운영 순익</h2>
+      <p class="section-copy">Supabase 주문/원가 기준으로 자사몰과 네이버 주문을 합산합니다. 계산식은 매출 - 원가 - 채널수수료 - 배송비이며, 광고비는 이 섹션에서 제외합니다.</p>
+      <div class="operating-summary" id="operating-category-summary"></div>
+      <div class="channel-section-grid">
+        <article class="compact-card">
+          <h4>월별 카테고리 순익</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>월</th>
+                <th>카테고리</th>
+                <th class="number">매출</th>
+                <th class="number">원가</th>
+                <th class="number">수수료</th>
+                <th class="number">배송비</th>
+                <th class="number">순익</th>
+                <th class="number">순익률</th>
+                <th class="number">주문수</th>
+              </tr>
+            </thead>
+            <tbody id="operating-category-table"></tbody>
+          </table>
+        </article>
+        <article class="compact-card">
+          <h4>순익 기여도</h4>
+          <div class="bar-list" id="operating-category-bars"></div>
+        </article>
+      </div>
+    </section>
+  </div>
+  <script>
+    const payload = JSON.parse(document.getElementById('dashboard-data').textContent);
+    const platformColors = { meta: 'meta', naver_searchad: 'naver', google_ads: 'google' };
+    const channelOverviewEl = document.getElementById('channel-overview');
+    const channelSummaryTableEl = document.getElementById('channel-summary-table');
+    const channelDailySectionsEl = document.getElementById('channel-daily-sections');
+    const channelMonthlySectionsEl = document.getElementById('channel-monthly-sections');
+    const operatingCategorySummaryEl = document.getElementById('operating-category-summary');
+    const operatingCategoryTableEl = document.getElementById('operating-category-table');
+    const operatingCategoryBarsEl = document.getElementById('operating-category-bars');
+    const sinceInput = document.getElementById('since-input');
+    const untilInput = document.getElementById('until-input');
+    const resetRangeButton = document.getElementById('reset-range');
+
+    const fmtWon = (value) => `₩${Number(value || 0).toLocaleString('ko-KR')}`;
+    const fmtPct = (value) => `${(Number(value || 0) * 100).toFixed(1)}%`;
+    const fmtInt = (value) => Number(value || 0).toLocaleString('ko-KR');
+    const safe = (value) => value == null || value === '' ? '-' : value;
+
+    function adSalesLabel(platformCode) {
+      if (platformCode === 'naver_searchad') return '네이버 광고매출';
+      if (platformCode === 'google_ads') return 'Google 참고 전환값';
+      return '광고 전환값';
+    }
+
+    function allDates() {
+      const dates = [
+        ...(payload.daily_rows || []).map((row) => row.report_date),
+        ...(payload.channel_rows || []).map((row) => row.report_date),
+      ];
+      return [...new Set(dates)].sort();
+    }
+
+    function latestRange() {
+      const dates = allDates();
+      if (!dates.length) return { since: '', until: '' };
+      const until = dates[dates.length - 1];
+      const monthStart = `${until.slice(0, 8)}01`;
+      const since = dates.find((date) => date >= monthStart) || dates[0];
+      return { since, until };
+    }
+
+    function selectedRange() {
+      return { since: sinceInput.value, until: untilInput.value };
+    }
+
+    function inRange(date, range) {
+      if (range.since && date < range.since) return false;
+      if (range.until && date > range.until) return false;
+      return true;
+    }
+
+    function rowsForPlatform(platformCode) {
+      return (payload.daily_rows || []).filter((row) => row.platform === platformCode && inRange(row.report_date, selectedRange()));
+    }
+
+    function summarize(rows) {
+      const byDate = new Map();
+      rows.forEach((row) => {
+        const current = byDate.get(row.report_date) || { spend: 0, revenue: 0, net_profit: 0, order_count: 0 };
+        current.spend += row.spend || 0;
+        current.revenue += row.revenue || 0;
+        current.net_profit += row.net_profit || 0;
+        current.order_count += row.order_count || 0;
+        byDate.set(row.report_date, current);
+      });
+      const days = [...byDate.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+      const includedDays = days.length;
+      const totals = days.reduce((acc, [, value]) => {
+        acc.spend += value.spend;
+        acc.revenue += value.revenue;
+        acc.net_profit += value.net_profit;
+        acc.order_count += value.order_count;
+        return acc;
+      }, { spend: 0, revenue: 0, net_profit: 0, order_count: 0 });
+      const latest = days[days.length - 1]?.[1] || { spend: 0, revenue: 0, net_profit: 0, order_count: 0 };
+      return {
+        includedDays,
+        totalSpend: totals.spend,
+        totalRevenue: totals.revenue,
+        totalProfit: totals.net_profit,
+        totalOrders: totals.order_count,
+        avgSpend: includedDays ? Math.round(totals.spend / includedDays) : 0,
+        avgRevenue: includedDays ? Math.round(totals.revenue / includedDays) : 0,
+        avgProfit: includedDays ? Math.round(totals.net_profit / includedDays) : 0,
+        avgOrders: includedDays ? (totals.order_count / includedDays) : 0,
+        avgRoi: totals.spend ? totals.net_profit / totals.spend : 0,
+        avgRoas: totals.spend ? totals.revenue / totals.spend : 0,
+        latestSpend: latest.spend,
+        latestRevenue: latest.revenue,
+        latestProfit: latest.net_profit,
+      };
+    }
+
+    function channelDailyRows(platformCode) {
+      return (payload.channel_rows || []).filter((row) => row.channel_code === platformCode && inRange(row.report_date, selectedRange()));
+    }
+
+    function summarizeChannelRows(rows) {
+      return rows.reduce((acc, row) => {
+        acc.spend += row.ad_spend || 0;
+        acc.impressions += row.impressions || 0;
+        acc.clicks += row.clicks || 0;
+        acc.conversions += Number(row.ad_conversions || 0);
+        acc.conversionValue += row.ad_conversion_value || 0;
+        acc.ga4Revenue += row.ga4_revenue || 0;
+        acc.attributedRevenue += row.attributed_order_revenue || 0;
+        acc.grossMargin += row.gross_margin || 0;
+        acc.netProfit += row.net_profit || 0;
+        return acc;
+      }, { spend: 0, impressions: 0, clicks: 0, conversions: 0, conversionValue: 0, ga4Revenue: 0, attributedRevenue: 0, grossMargin: 0, netProfit: 0 });
+    }
+
+    function hasMeaningfulCategoryData(row) {
+      return (row.spend || 0) > 0 || (row.revenue || 0) > 0 || (row.net_profit || 0) !== 0 || (row.order_count || 0) > 0;
+    }
+
+    function operatingCategoryRows() {
+      const range = selectedRange();
+      return (payload.operating_category_monthly_rows || []).filter((row) => {
+        const monthStart = `${row.month}-01`;
+        const monthEnd = `${row.month}-31`;
+        if (range.since && monthEnd < range.since) return false;
+        if (range.until && monthStart > range.until) return false;
+        return true;
+      });
+    }
+
+    function summarizeOperatingCategories(rows) {
+      return rows.reduce((acc, row) => {
+        acc.revenue += row.revenue || 0;
+        acc.cogs += row.cogs || 0;
+        acc.channelFee += row.channel_fee || 0;
+        acc.deliveryFee += row.delivery_fee || 0;
+        acc.netProfit += row.net_profit || 0;
+        acc.orderCount += row.order_count || 0;
+        return acc;
+      }, { revenue: 0, cogs: 0, channelFee: 0, deliveryFee: 0, netProfit: 0, orderCount: 0 });
+    }
+
+    function renderChannelOverview() {
+      const html = payload.platforms.map((platform) => {
+        const rows = channelDailyRows(platform.code);
+        const categoryRows = rowsForPlatform(platform.code);
+        const s = summarizeChannelRows(rows);
+        const matched = summarize(categoryRows);
+        const color = platformColors[platform.code] || 'meta';
+        const roas = s.spend ? matched.totalRevenue / s.spend : 0;
+        const apiRoas = s.spend ? s.conversionValue / s.spend : 0;
+        const realRoi = s.spend ? matched.totalProfit / s.spend : 0;
+        const profitClass = matched.totalProfit >= 0 ? 'good' : 'bad';
+        if (platform.code === 'google_ads') {
+          return `
+            <article class="channel-card">
+              <h3 class="${color}">${platform.label}</h3>
+              <div class="value ${profitClass}">${fmtWon(s.spend)}</div>
+              <div class="note">API 원본 광고비 · 주문 연결 순이익 ${fmtWon(matched.totalProfit)} · ${rows.length}일 집계</div>
+              <div class="channel-kpis">
+                <div class="channel-kpi"><span>광고비</span><strong>${fmtWon(s.spend)}</strong></div>
+                <div class="channel-kpi"><span>주문 연결 매출</span><strong>${fmtWon(matched.totalRevenue)}</strong></div>
+                <div class="channel-kpi"><span>주문 연결 순이익</span><strong>${fmtWon(matched.totalProfit)}</strong></div>
+                <div class="channel-kpi"><span>주문 연결 실ROI</span><strong>${fmtPct(realRoi)}</strong></div>
+                <div class="channel-kpi"><span>클릭</span><strong>${fmtInt(s.clicks)}</strong></div>
+                <div class="channel-kpi"><span>노출</span><strong>${fmtInt(s.impressions)}</strong></div>
+              </div>
+            </article>
+          `;
+        }
+        return `
+          <article class="channel-card">
+            <h3 class="${color}">${platform.label}</h3>
+            <div class="value ${profitClass}">${fmtWon(matched.totalProfit)}</div>
+            <div class="note">매칭 주문 순이익 · 실ROI ${fmtPct(realRoi)} · ${rows.length}일 집계</div>
+            <div class="channel-kpis">
+              <div class="channel-kpi"><span>광고비</span><strong>${fmtWon(s.spend)}</strong></div>
+              <div class="channel-kpi"><span>매칭 매출</span><strong>${fmtWon(matched.totalRevenue)}</strong></div>
+              <div class="channel-kpi"><span>${adSalesLabel(platform.code)}</span><strong>${fmtWon(s.conversionValue)}</strong></div>
+              <div class="channel-kpi"><span>전환수</span><strong>${Number(s.conversions || 0).toFixed(1)}</strong></div>
+              <div class="channel-kpi"><span>매칭 ROAS</span><strong>${fmtPct(roas)}</strong></div>
+              <div class="channel-kpi"><span>API ROAS</span><strong>${fmtPct(apiRoas)}</strong></div>
+              <div class="channel-kpi"><span>클릭</span><strong>${fmtInt(s.clicks)}</strong></div>
+              <div class="channel-kpi"><span>노출</span><strong>${fmtInt(s.impressions)}</strong></div>
+            </div>
+          </article>
+        `;
+      }).join('');
+      channelOverviewEl.innerHTML = html || `<div class="empty">선택 기간의 광고 채널 데이터가 없습니다.</div>`;
+    }
+
+    function renderChannelSummaryTable() {
+      const html = payload.platforms.map((platform) => {
+        const rows = channelDailyRows(platform.code);
+        const categoryRows = rowsForPlatform(platform.code);
+        const s = summarizeChannelRows(rows);
+        const matched = summarize(categoryRows);
+        const profitClass = matched.totalProfit >= 0 ? 'good' : 'bad';
+        return `
+          <tr>
+            <td>${platform.label}</td>
+            <td class="number">${fmtInt(rows.length)}</td>
+            <td class="number"><strong>${fmtWon(s.spend)}</strong></td>
+            <td class="number">${fmtWon(s.conversionValue)}</td>
+            <td class="number">${fmtWon(matched.totalRevenue)}</td>
+            <td class="number ${profitClass}">${fmtWon(matched.totalProfit)}</td>
+          </tr>
+        `;
+      }).join('');
+      channelSummaryTableEl.innerHTML = html || `<tr><td colspan="6" class="empty">선택 기간의 광고 채널 데이터가 없습니다.</td></tr>`;
+    }
+
+    function renderChannelDailySections() {
+      const html = payload.platforms.map((platform) => {
+        const rows = rowsForPlatform(platform.code).filter((row) => hasMeaningfulCategoryData(row));
+        const apiRows = channelDailyRows(platform.code);
+        if (platform.code === 'google_ads') {
+          const recentApiRows = [...apiRows].sort((a, b) => b.report_date.localeCompare(a.report_date)).slice(0, 30);
+          const totalApi = summarizeChannelRows(recentApiRows);
+          const profitByDate = new Map();
+          rows.forEach((row) => {
+            const bucket = profitByDate.get(row.report_date) || { report_date: row.report_date, revenue: 0, net_profit: 0, order_count: 0 };
+            bucket.revenue += row.revenue || 0;
+            bucket.net_profit += row.net_profit || 0;
+            bucket.order_count += row.order_count || 0;
+            profitByDate.set(row.report_date, bucket);
+          });
+          const apiTableRows = recentApiRows.map((row) => `
+            <tr>
+              <td>${row.report_date}</td>
+              <td class="number">${fmtWon(row.ad_spend)}</td>
+              <td class="number">${fmtInt(row.clicks)}</td>
+              <td class="number">${fmtInt(row.impressions)}</td>
+            </tr>
+          `).join('');
+          const profitRows = [...profitByDate.values()].sort((a, b) => b.report_date.localeCompare(a.report_date)).slice(0, 30);
+          const profitTableRows = profitRows.map((row) => `
+            <tr>
+              <td>${row.report_date}</td>
+              <td class="number">${fmtWon(row.revenue)}</td>
+              <td class="number ${row.net_profit >= 0 ? 'good' : 'bad'}">${fmtWon(row.net_profit)}</td>
+              <td class="number">${fmtInt(row.order_count)}</td>
+            </tr>
+          `).join('');
+          return `
+            <section class="channel-section">
+              <div class="channel-section-head">
+                <h3 class="${platformColors[platform.code] || 'meta'}">${platform.label}</h3>
+                <div class="value">${fmtWon(totalApi.spend)}</div>
+              </div>
+              <div class="note">Google Ads 광고비는 <code>metrics.cost_micros / 1,000,000</code> raw snapshot 기준입니다. 주문 연결 매출·순이익은 Supabase 집계에서 확인된 주문만 따로 표시합니다.</div>
+              <div class="channel-section-grid" style="margin-top:14px;">
+                <article class="compact-card">
+                  <h4>API 일별 광고비</h4>
+                  <table>
+                    <thead><tr><th>날짜</th><th class="number">광고비</th><th class="number">클릭</th><th class="number">노출</th></tr></thead>
+                    <tbody>${apiTableRows || `<tr><td colspan="6" class="empty">데이터 없음</td></tr>`}</tbody>
+                  </table>
+                </article>
+                <article class="compact-card">
+                  <h4>주문 연결 실적</h4>
+                  <table>
+                    <thead><tr><th>날짜</th><th class="number">매출</th><th class="number">순이익</th><th class="number">주문수</th></tr></thead>
+                    <tbody>${profitTableRows || `<tr><td colspan="4" class="empty">주문 연결 데이터 없음</td></tr>`}</tbody>
+                  </table>
+                </article>
+              </div>
+            </section>
+          `;
+        }
+        if (!rows.length && apiRows.length) {
+          const recentRows = [...apiRows].sort((a, b) => b.report_date.localeCompare(a.report_date)).slice(0, 8);
+          const totalApi = summarizeChannelRows(recentRows);
+          const apiRoas = totalApi.spend ? totalApi.conversionValue / totalApi.spend : 0;
+          const tableRows = recentRows.map((row) => {
+            const rowApiRoas = row.ad_spend ? row.ad_conversion_value / row.ad_spend : 0;
+            return `
+              <tr>
+                <td>${row.report_date}</td>
+                <td class="number">${fmtWon(row.ad_spend)}</td>
+                <td class="number">${fmtWon(row.ad_conversion_value)}</td>
+                <td class="number">${Number(row.ad_conversions || 0).toFixed(1)}</td>
+                <td class="number">${fmtInt(row.clicks)}</td>
+                <td class="number">${fmtInt(row.impressions)}</td>
+                <td class="number">${fmtPct(rowApiRoas)}</td>
+              </tr>
+            `;
+          }).join('');
+          return `
+            <section class="channel-section">
+              <div class="channel-section-head">
+                <h3 class="${platformColors[platform.code] || 'meta'}">${platform.label}</h3>
+                <div class="value ${apiRoas >= 1 ? 'good' : 'bad'}">${fmtPct(apiRoas)}</div>
+              </div>
+              <div class="note">광고 API 원천 기준 · 광고비 ${fmtWon(totalApi.spend)} · ${adSalesLabel(platform.code)} ${fmtWon(totalApi.conversionValue)} · 전환수 ${Number(totalApi.conversions || 0).toFixed(1)}</div>
+              <div class="channel-section-grid" style="margin-top:14px;">
+                <article class="compact-card" style="grid-column: 1 / -1;">
+                  <h4>API 일별 데이터</h4>
+                  <table>
+                    <thead><tr><th>날짜</th><th class="number">광고비</th><th class="number">${adSalesLabel(platform.code)}</th><th class="number">전환수</th><th class="number">클릭</th><th class="number">노출</th><th class="number">API ROAS</th></tr></thead>
+                    <tbody>${tableRows}</tbody>
+                  </table>
+                </article>
+              </div>
+            </section>
+          `;
+        }
+        const total = summarize(rows);
+        const recentByDate = new Map();
+        rows.forEach((row) => {
+          const bucket = recentByDate.get(row.report_date) || { report_date: row.report_date, revenue: 0, spend: 0, net_profit: 0, real_roi: 0 };
+          bucket.revenue += row.revenue || 0;
+          bucket.spend += row.spend || 0;
+          bucket.net_profit += row.net_profit || 0;
+          bucket.real_roi = bucket.spend ? bucket.net_profit / bucket.spend : 0;
+          recentByDate.set(row.report_date, bucket);
+        });
+        const recentRows = [...recentByDate.values()].sort((a, b) => b.report_date.localeCompare(a.report_date)).slice(0, 8);
+        const categoryCards = [...new Set(rows.map((row) => row.category))].sort().map((category) => {
+          const categoryRows = rows.filter((row) => row.category === category).sort((a, b) => b.report_date.localeCompare(a.report_date)).slice(0, 8);
+          const sumProfit = categoryRows.reduce((sum, row) => sum + (row.net_profit || 0), 0);
+          return `
+            <article class="compact-card">
+              <h4>${category}</h4>
+              <div class="note">합계 ${fmtWon(sumProfit)} · ${categoryRows.length}일</div>
+            </article>
+          `;
+        }).join('');
+        const tableRows = recentRows.map((row) => `
+          <tr>
+            <td>${row.report_date}</td>
+            <td class="number">${fmtWon(row.revenue)}</td>
+            <td class="number">${fmtWon(row.spend)}</td>
+            <td class="number ${row.net_profit >= 0 ? 'good' : 'bad'}">${fmtWon(row.net_profit)}</td>
+            <td class="number ${row.real_roi >= 0 ? 'good' : 'bad'}">${fmtPct(row.real_roi)}</td>
+          </tr>
+        `).join('');
+        return `
+          <section class="channel-section">
+            <div class="channel-section-head">
+              <h3 class="${platformColors[platform.code] || 'meta'}">${platform.label}</h3>
+              <div class="value ${total.totalProfit >= 0 ? 'good' : 'bad'}">${fmtWon(total.totalProfit)}</div>
+            </div>
+            <div class="note">선택 기간 총 매출 ${fmtWon(total.totalRevenue)} · 총 광고비 ${fmtWon(total.totalSpend)} · 총 주문 ${fmtInt(total.totalOrders)}</div>
+            <div class="channel-section-grid" style="margin-top:14px;">
+              <article class="compact-card">
+                <h4>일별 합계</h4>
+                <table>
+                  <thead><tr><th>날짜</th><th class="number">매출</th><th class="number">광고비</th><th class="number">순이익</th><th class="number">실ROI</th></tr></thead>
+                  <tbody>${tableRows || `<tr><td colspan="5" class="empty">데이터 없음</td></tr>`}</tbody>
+                </table>
+              </article>
+              <article class="compact-card">
+                <h4>카테고리 요약</h4>
+                <div class="channel-section-grid">${categoryCards || `<div class="empty">카테고리 데이터 없음</div>`}</div>
+              </article>
+            </div>
+          </section>
+        `;
+      }).join('');
+      channelDailySectionsEl.innerHTML = html;
+    }
+
+    function renderChannelMonthlySections() {
+      const html = payload.platforms.map((platform) => {
+        const range = selectedRange();
+        const rows = (payload.monthly_rows || []).filter((row) => {
+          if (row.platform !== platform.code || !hasMeaningfulCategoryData(row)) return false;
+          const monthStart = `${row.month}-01`;
+          const monthEnd = `${row.month}-31`;
+          if (range.since && monthEnd < range.since) return false;
+          if (range.until && monthStart > range.until) return false;
+          return true;
+        });
+        const apiRows = channelDailyRows(platform.code);
+        if (platform.code === 'google_ads' || platform.code === 'naver_searchad') {
+          const byMonth = new Map();
+          apiRows.forEach((row) => {
+            const month = row.report_date.slice(0, 7);
+            const bucket = byMonth.get(month) || { month, spend: 0, clicks: 0, impressions: 0, conversions: 0, conversionValue: 0 };
+            bucket.spend += row.ad_spend || 0;
+            bucket.clicks += row.clicks || 0;
+            bucket.impressions += row.impressions || 0;
+            bucket.conversions += Number(row.ad_conversions || 0);
+            bucket.conversionValue += row.ad_conversion_value || 0;
+            byMonth.set(month, bucket);
+          });
+          const profitByMonth = new Map();
+          rows.forEach((row) => {
+            const bucket = profitByMonth.get(row.month) || { month: row.month, revenue: 0, net_profit: 0, order_count: 0 };
+            bucket.revenue += row.revenue || 0;
+            bucket.net_profit += row.net_profit || 0;
+            bucket.order_count += row.order_count || 0;
+            profitByMonth.set(row.month, bucket);
+          });
+          const apiMonthRows = [...byMonth.values()].sort((a, b) => b.month.localeCompare(a.month));
+          const apiTableRows = apiMonthRows.map((row) => `
+            <tr>
+              <td>${row.month}</td>
+              <td class="number">${fmtWon(row.spend)}</td>
+              <td class="number">${fmtWon(row.conversionValue)}</td>
+              <td class="number">${Number(row.conversions || 0).toFixed(1)}</td>
+              <td class="number">${fmtInt(row.clicks)}</td>
+              <td class="number">${fmtInt(row.impressions)}</td>
+            </tr>
+          `).join('');
+          const profitMonthRows = [...profitByMonth.values()]
+            .filter((row) => (row.revenue || 0) > 0 || (row.net_profit || 0) !== 0 || (row.order_count || 0) > 0)
+            .sort((a, b) => b.month.localeCompare(a.month));
+          const profitTableRows = profitMonthRows.map((row) => `
+            <tr>
+              <td>${row.month}</td>
+              <td class="number">${fmtWon(row.revenue)}</td>
+              <td class="number ${row.net_profit >= 0 ? 'good' : 'bad'}">${fmtWon(row.net_profit)}</td>
+              <td class="number">${fmtInt(row.order_count)}</td>
+            </tr>
+          `).join('');
+          const totalApi = summarizeChannelRows(apiRows);
+          const channelLabel = platform.code === 'google_ads' ? 'Google Ads' : 'Naver SearchAd';
+          return `
+            <section class="channel-section">
+              <div class="channel-section-head">
+                <h3 class="${platformColors[platform.code] || 'meta'}">${platform.label}</h3>
+                <div class="value">${fmtWon(totalApi.spend)}</div>
+              </div>
+              <div class="note">월 누적 ${channelLabel} 광고비는 raw API 합계입니다. 주문 연결 성과는 Supabase 집계에서 확인된 범위만 별도 표로 관리합니다.</div>
+              <div class="channel-section-grid" style="margin-top:14px;">
+                <article class="compact-card">
+                  <h4>월별 광고비</h4>
+                  <table>
+                    <thead><tr><th>월</th><th class="number">광고비</th><th class="number">${adSalesLabel(platform.code)}</th><th class="number">전환수</th><th class="number">클릭</th><th class="number">노출</th></tr></thead>
+                    <tbody>${apiTableRows || `<tr><td colspan="4" class="empty">데이터 없음</td></tr>`}</tbody>
+                  </table>
+                </article>
+                <article class="compact-card">
+                  <h4>월별 주문 연결 실적</h4>
+                  <table>
+                    <thead><tr><th>월</th><th class="number">매출</th><th class="number">순이익</th><th class="number">주문수</th></tr></thead>
+                    <tbody>${profitTableRows || `<tr><td colspan="4" class="empty">주문 연결 데이터 없음</td></tr>`}</tbody>
+                  </table>
+                </article>
+              </div>
+            </section>
+          `;
+        }
+        if (!rows.length && apiRows.length) {
+          const byMonth = new Map();
+          apiRows.forEach((row) => {
+            const month = row.report_date.slice(0, 7);
+            const bucket = byMonth.get(month) || [];
+            bucket.push(row);
+            byMonth.set(month, bucket);
+          });
+          const monthRows = [...byMonth.entries()].sort((a, b) => b[0].localeCompare(a[0]));
+          const tableRows = monthRows.map(([month, monthApiRows]) => {
+            const s = summarizeChannelRows(monthApiRows);
+            const apiRoas = s.spend ? s.conversionValue / s.spend : 0;
+            return `
+              <tr>
+                <td>${month}</td>
+                <td class="number">${fmtWon(s.spend)}</td>
+                <td class="number">${fmtWon(s.conversionValue)}</td>
+                <td class="number">${Number(s.conversions || 0).toFixed(1)}</td>
+                <td class="number">${fmtInt(s.clicks)}</td>
+                <td class="number">${fmtInt(s.impressions)}</td>
+                <td class="number">${fmtPct(apiRoas)}</td>
+              </tr>
+            `;
+          }).join('');
+          const totalApi = summarizeChannelRows(apiRows);
+          const totalApiRoas = totalApi.spend ? totalApi.conversionValue / totalApi.spend : 0;
+          return `
+            <section class="channel-section">
+              <div class="channel-section-head">
+                <h3 class="${platformColors[platform.code] || 'meta'}">${platform.label}</h3>
+                <div class="value ${totalApiRoas >= 1 ? 'good' : 'bad'}">${fmtPct(totalApiRoas)}</div>
+              </div>
+              <div class="note">광고 API 원천 · 광고비 ${fmtWon(totalApi.spend)} · ${adSalesLabel(platform.code)} ${fmtWon(totalApi.conversionValue)}</div>
+              <div class="channel-section-grid" style="margin-top:14px;">
+                <article class="compact-card" style="grid-column: 1 / -1;">
+                  <h4>월별 API 합계</h4>
+                  <table>
+                    <thead><tr><th>월</th><th class="number">광고비</th><th class="number">${adSalesLabel(platform.code)}</th><th class="number">전환수</th><th class="number">클릭</th><th class="number">노출</th><th class="number">API ROAS</th></tr></thead>
+                    <tbody>${tableRows}</tbody>
+                  </table>
+                </article>
+              </div>
+            </section>
+          `;
+        }
+        const total = rows.reduce((acc, row) => {
+          acc.spend += row.spend || 0;
+          acc.revenue += row.revenue || 0;
+          acc.net_profit += row.net_profit || 0;
+          acc.order_count += row.order_count || 0;
+          acc.month = row.month || acc.month;
+          return acc;
+        }, { spend: 0, revenue: 0, net_profit: 0, order_count: 0, month: '' });
+        const totalRoi = total.spend ? total.net_profit / total.spend : 0;
+        const tableRows = rows.sort((a, b) => (b.net_profit || 0) - (a.net_profit || 0)).map((row) => `
+          <tr>
+            <td>${row.category}</td>
+            <td class="number">${fmtWon(row.revenue)}</td>
+            <td class="number">${fmtWon(row.spend)}</td>
+            <td class="number ${row.net_profit >= 0 ? 'good' : 'bad'}">${fmtWon(row.net_profit)}</td>
+            <td class="number ${row.real_roi >= 0 ? 'good' : 'bad'}">${fmtPct(row.real_roi)}</td>
+          </tr>
+        `).join('');
+        return `
+          <section class="channel-section">
+            <div class="channel-section-head">
+              <h3 class="${platformColors[platform.code] || 'meta'}">${platform.label}</h3>
+              <div class="value ${total.net_profit >= 0 ? 'good' : 'bad'}">${fmtWon(total.net_profit)}</div>
+            </div>
+            <div class="note">${total.month || '-'} · 총 매출 ${fmtWon(total.revenue)} · 총 광고비 ${fmtWon(total.spend)} · 총 주문 ${fmtInt(total.order_count)} · 실ROI ${fmtPct(totalRoi)}</div>
+            <div class="channel-section-grid" style="margin-top:14px;">
+              <article class="compact-card" style="grid-column: 1 / -1;">
+                <h4>월별 카테고리 합계</h4>
+                <table>
+                  <thead><tr><th>카테고리</th><th class="number">매출</th><th class="number">광고비</th><th class="number">순이익</th><th class="number">실ROI</th></tr></thead>
+                  <tbody>${tableRows || `<tr><td colspan="5" class="empty">데이터 없음</td></tr>`}</tbody>
+                </table>
+              </article>
+            </div>
+          </section>
+        `;
+      }).join('');
+      channelMonthlySectionsEl.innerHTML = html;
+    }
+
+    function renderOperatingCategorySection() {
+      const rows = operatingCategoryRows().slice().sort((a, b) => (b.net_profit || 0) - (a.net_profit || 0));
+      const total = summarizeOperatingCategories(rows);
+      const rate = total.revenue ? total.netProfit / total.revenue : 0;
+      operatingCategorySummaryEl.innerHTML = [
+        { label: '총매출', value: fmtWon(total.revenue), meta: `주문 ${fmtInt(total.orderCount)}건` },
+        { label: '총원가', value: fmtWon(total.cogs), meta: '상품 원가 합계' },
+        { label: '수수료 + 배송비', value: fmtWon(total.channelFee + total.deliveryFee), meta: `수수료 ${fmtWon(total.channelFee)} · 배송비 ${fmtWon(total.deliveryFee)}` },
+        { label: '운영 순익', value: fmtWon(total.netProfit), meta: `순익률 ${fmtPct(rate)}`, className: total.netProfit >= 0 ? 'good' : 'bad' },
+      ].map((item) => `
+        <div class="mini-stat">
+          <span>${item.label}</span>
+          <strong class="${item.className || ''}">${item.value}</strong>
+          <div class="note">${item.meta}</div>
+        </div>
+      `).join('');
+
+      operatingCategoryTableEl.innerHTML = rows.map((row) => {
+        const rowRate = row.revenue ? row.net_profit / row.revenue : 0;
+        return `
+          <tr>
+            <td>${row.month}</td>
+            <td>${row.category}</td>
+            <td class="number">${fmtWon(row.revenue)}</td>
+            <td class="number">${fmtWon(row.cogs)}</td>
+            <td class="number">${fmtWon(row.channel_fee)}</td>
+            <td class="number">${fmtWon(row.delivery_fee)}</td>
+            <td class="number ${row.net_profit >= 0 ? 'good' : 'bad'}">${fmtWon(row.net_profit)}</td>
+            <td class="number ${rowRate >= 0 ? 'good' : 'bad'}">${fmtPct(rowRate)}</td>
+            <td class="number">${fmtInt(row.order_count)}</td>
+          </tr>
+        `;
+      }).join('') || `<tr><td colspan="9" class="empty">선택 기간의 카테고리 운영 순익 데이터가 없습니다.</td></tr>`;
+
+      const maxProfit = Math.max(...rows.map((row) => Math.abs(row.net_profit || 0)), 1);
+      operatingCategoryBarsEl.innerHTML = rows.slice(0, 10).map((row) => {
+        const width = Math.max((Math.abs(row.net_profit || 0) / maxProfit) * 100, 2);
+        return `
+          <div class="bar-row">
+            <div class="bar-head">
+              <span>${row.category}</span>
+              <span class="${row.net_profit >= 0 ? 'good' : 'bad'}">${fmtWon(row.net_profit)}</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:${width}%;background:${row.net_profit >= 0 ? 'var(--brand)' : 'var(--bad)'}"></div>
+            </div>
+            <div class="note">${row.month} · 매출 ${fmtWon(row.revenue)} · 주문 ${fmtInt(row.order_count)}건</div>
+          </div>
+        `;
+      }).join('') || `<div class="empty">표시할 카테고리 데이터가 없습니다.</div>`;
+    }
+
+    function render() {
+      renderChannelOverview();
+      renderChannelSummaryTable();
+      renderChannelDailySections();
+      renderChannelMonthlySections();
+      renderOperatingCategorySection();
+    }
+
+    const range = latestRange();
+    sinceInput.value = range.since;
+    untilInput.value = range.until;
+    sinceInput.addEventListener('change', render);
+    untilInput.addEventListener('change', render);
+    resetRangeButton.addEventListener('click', () => {
+      const next = latestRange();
+      sinceInput.value = next.since;
+      untilInput.value = next.until;
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
