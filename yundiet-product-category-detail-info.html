@@ -226,12 +226,13 @@
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 14px;
+      align-items: start;
       padding: 18px;
     }
 
     .product {
       display: grid;
-      grid-template-rows: auto 1fr;
+      grid-template-rows: auto auto;
       min-height: 278px;
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -239,8 +240,6 @@
     }
 
     .product-media {
-      aspect-ratio: 16 / 9;
-      height: auto;
       overflow: hidden;
       border-bottom: 1px solid var(--line);
       background: #f8faf7;
@@ -248,14 +247,14 @@
 
     .product-media img {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      height: auto;
+      object-fit: contain;
       padding: 0;
       display: block;
     }
 
     .product-media.contain img {
-      object-fit: cover;
+      object-fit: contain;
       padding: 0;
       background: #f8faf7;
     }
@@ -475,13 +474,13 @@
           </div>
         </div>
         <figure class="category-image">
-          <img src="assets/yundiet-product-category/danbaek-jeyuk-wide.jpg" alt="윤식단 단백밥 음식 사진">
+          <img src="assets/yundiet-product-category/danbaek-jeyuk.jpg" alt="윤식단 단백밥 음식 사진">
           <figcaption class="image-caption">이미지 영역: 바탕화면 단백밥-사진 폴더의 실제 음식 컷</figcaption>
         </figure>
       </div>
       <div class="product-grid">
         <article class="product">
-          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-original-wide.jpg" alt="단백밥 오리지널 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-original.jpg" alt="단백밥 오리지널 이미지 영역"></div>
           <div class="product-body">
             <h3>오리지널 L / S</h3>
             <div class="nutrition-card">
@@ -501,7 +500,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-jeyuk-wide.jpg" alt="단백밥 직화제육 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-jeyuk.jpg" alt="단백밥 직화제육 이미지 영역"></div>
           <div class="product-body">
             <h3>직화제육</h3>
             <div class="nutrition-card">
@@ -521,7 +520,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-bulgogi-wide.jpg" alt="단백밥 단짠불고기 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-bulgogi.jpg" alt="단백밥 단짠불고기 이미지 영역"></div>
           <div class="product-body">
             <h3>단짠불고기</h3>
             <div class="nutrition-card">
@@ -541,7 +540,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-hambak-wide.jpg" alt="단백밥 그릴드함박 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-hambak.jpg" alt="단백밥 그릴드함박 이미지 영역"></div>
           <div class="product-body">
             <h3>그릴드함박</h3>
             <div class="nutrition-card">
@@ -561,7 +560,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-duck-wide.jpg" alt="단백밥 훈제오리 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-duck.jpg" alt="단백밥 훈제오리 이미지 영역"></div>
           <div class="product-body">
             <h3>훈제오리</h3>
             <div class="nutrition-card">
@@ -599,13 +598,13 @@
           </div>
         </div>
         <figure class="category-image contain">
-          <img src="assets/yundiet-product-category/pure-chicken-150-wide.jpg" alt="윤식단 순수단백 제품 라벨 이미지">
+          <img src="assets/yundiet-product-category/pure-chicken-150.jpg" alt="윤식단 순수단백 제품 라벨 이미지">
           <figcaption class="image-caption">이미지 영역: 바탕화면 윤식단 제품관 순수단백 자료</figcaption>
         </figure>
       </div>
       <div class="product-grid">
         <article class="product">
-          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-chicken-100-wide.jpg" alt="순수단백 닭가슴살 100g 이미지 영역"></div>
+          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-chicken-100.jpg" alt="순수단백 닭가슴살 100g 이미지 영역"></div>
           <div class="product-body">
             <h3>닭가슴살 100g</h3>
             <div class="nutrition-card">
@@ -625,7 +624,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-chicken-150-wide.jpg" alt="순수단백 닭가슴살 150g 이미지 영역"></div>
+          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-chicken-150.jpg" alt="순수단백 닭가슴살 150g 이미지 영역"></div>
           <div class="product-body">
             <h3>닭가슴살 150g</h3>
             <div class="nutrition-card">
@@ -645,7 +644,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-jeyuk-wide.jpg" alt="순수단백 저당제육 이미지 영역"></div>
+          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-jeyuk.jpg" alt="순수단백 저당제육 이미지 영역"></div>
           <div class="product-body">
             <h3>저당제육 100g</h3>
             <div class="nutrition-card">
@@ -665,7 +664,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-bulgogi-wide.jpg" alt="순수단백 저당 불고기 100g 이미지 영역"></div>
+          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-bulgogi.jpg" alt="순수단백 저당 불고기 100g 이미지 영역"></div>
           <div class="product-body">
             <h3>저당 불고기 100g</h3>
             <div class="nutrition-card">
@@ -685,7 +684,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-hambak-wide.jpg" alt="순수단백 함박스테이크 이미지 영역"></div>
+          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-hambak.jpg" alt="순수단백 함박스테이크 이미지 영역"></div>
           <div class="product-body">
             <h3>함박스테이크 150g</h3>
             <div class="nutrition-card">
@@ -723,13 +722,13 @@
           </div>
         </div>
         <figure class="category-image">
-          <img src="assets/yundiet-product-category/balancy-hero-wide.jpg" alt="윤식단 밸런시 상품 사진">
+          <img src="assets/yundiet-product-category/balancy-hero.jpg" alt="윤식단 밸런시 상품 사진">
           <figcaption class="image-caption">이미지 영역: 바탕화면 밸런시-사진 폴더</figcaption>
         </figure>
       </div>
       <div class="product-grid">
         <article class="product">
-          <div class="product-media"><img src="assets/yundiet-product-category/balancy-mara-wide.jpg" alt="밸런시 마라 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/balancy-mara.jpg" alt="밸런시 마라 이미지 영역"></div>
           <div class="product-body">
             <h3>밸런시 마라</h3>
             <div class="nutrition-card">
@@ -750,7 +749,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media"><img src="assets/yundiet-product-category/balancy-curry-wide.jpg" alt="밸런시 핫 커리 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/balancy-curry.jpg" alt="밸런시 핫 커리 이미지 영역"></div>
           <div class="product-body">
             <h3>밸런시 핫 커리</h3>
             <div class="nutrition-card">
@@ -770,7 +769,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media"><img src="assets/yundiet-product-category/balancy-tomato-wide.jpg" alt="밸런시 토마토 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/balancy-tomato.jpg" alt="밸런시 토마토 이미지 영역"></div>
           <div class="product-body">
             <h3>밸런시 토마토</h3>
             <div class="nutrition-card">
@@ -790,7 +789,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media"><img src="assets/yundiet-product-category/balancy-signature-wide.jpg" alt="밸런시 시그니처 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/balancy-signature.jpg" alt="밸런시 시그니처 이미지 영역"></div>
           <div class="product-body">
             <h3>밸런시 시그니처</h3>
             <div class="nutrition-card">
