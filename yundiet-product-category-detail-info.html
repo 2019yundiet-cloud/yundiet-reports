@@ -239,7 +239,8 @@
     }
 
     .product-media {
-      height: 210px;
+      aspect-ratio: 16 / 9;
+      height: auto;
       overflow: hidden;
       border-bottom: 1px solid var(--line);
       background: #f8faf7;
@@ -248,14 +249,14 @@
     .product-media img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
-      padding: 10px;
+      object-fit: cover;
+      padding: 0;
       display: block;
     }
 
     .product-media.contain img {
-      object-fit: contain;
-      padding: 10px;
+      object-fit: cover;
+      padding: 0;
       background: #f8faf7;
     }
 
@@ -439,13 +440,13 @@
           </div>
         </div>
         <figure class="category-image">
-          <img src="assets/yundiet-product-category/danbaek-jeyuk.jpg" alt="윤식단 단백밥 음식 사진">
+          <img src="assets/yundiet-product-category/danbaek-jeyuk-wide.jpg" alt="윤식단 단백밥 음식 사진">
           <figcaption class="image-caption">이미지 영역: 바탕화면 단백밥-사진 폴더의 실제 음식 컷</figcaption>
         </figure>
       </div>
       <div class="product-grid">
         <article class="product">
-          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-original.jpg" alt="단백밥 오리지널 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-original-wide.jpg" alt="단백밥 오리지널 이미지 영역"></div>
           <div class="product-body">
             <h3>오리지널 L / S</h3>
             <p>단백밥을 처음 접하는 고객에게 가장 먼저 보여줄 기본형.</p>
@@ -457,7 +458,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-jeyuk.jpg" alt="단백밥 직화제육 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-jeyuk-wide.jpg" alt="단백밥 직화제육 이미지 영역"></div>
           <div class="product-body">
             <h3>직화제육</h3>
             <p>한식 반찬 감성을 살리는 매콤한 식사형 메뉴.</p>
@@ -469,7 +470,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-bulgogi.jpg" alt="단백밥 단짠불고기 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-bulgogi-wide.jpg" alt="단백밥 단짠불고기 이미지 영역"></div>
           <div class="product-body">
             <h3>단짠불고기</h3>
             <p>호불호가 적고 가족, 직장인, 첫 구매자에게 설명하기 쉬운 맛.</p>
@@ -481,7 +482,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-hambak.jpg" alt="단백밥 그릴드함박 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-hambak-wide.jpg" alt="단백밥 그릴드함박 이미지 영역"></div>
           <div class="product-body">
             <h3>그릴드함박</h3>
             <p>식단이 지루해지는 순간에 고기 반찬 느낌을 주는 메뉴.</p>
@@ -493,7 +494,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-duck.jpg" alt="단백밥 훈제오리 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/danbaek-duck-wide.jpg" alt="단백밥 훈제오리 이미지 영역"></div>
           <div class="product-body">
             <h3>훈제오리</h3>
             <p>닭가슴살 중심 식단에서 벗어나 색다른 단백질 선택지를 주는 메뉴.</p>
@@ -523,13 +524,13 @@
           </div>
         </div>
         <figure class="category-image contain">
-          <img src="assets/yundiet-product-category/pure-chicken-150.jpg" alt="윤식단 순수단백 제품 라벨 이미지">
+          <img src="assets/yundiet-product-category/pure-chicken-150-wide.jpg" alt="윤식단 순수단백 제품 라벨 이미지">
           <figcaption class="image-caption">이미지 영역: 바탕화면 윤식단 제품관 순수단백 자료</figcaption>
         </figure>
       </div>
       <div class="product-grid">
         <article class="product">
-          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-chicken-100.jpg" alt="순수단백 닭가슴살 100g 이미지 영역"></div>
+          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-chicken-100-wide.jpg" alt="순수단백 닭가슴살 100g 이미지 영역"></div>
           <div class="product-body">
             <h3>닭가슴살 100g</h3>
             <p>한 끼에 부담 없이 더하는 기본 단백질.</p>
@@ -541,7 +542,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-chicken-150.jpg" alt="순수단백 닭가슴살 150g 이미지 영역"></div>
+          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-chicken-150-wide.jpg" alt="순수단백 닭가슴살 150g 이미지 영역"></div>
           <div class="product-body">
             <h3>닭가슴살 150g</h3>
             <p>조금 더 든든한 단백질 양이 필요한 고객에게 맞는 구성.</p>
@@ -553,7 +554,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-jeyuk.jpg" alt="순수단백 저당제육 이미지 영역"></div>
+          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-jeyuk-wide.jpg" alt="순수단백 저당제육 이미지 영역"></div>
           <div class="product-body">
             <h3>저당제육 100g</h3>
             <p>제육볶음의 만족감은 살리고 당류 부담을 줄인 한식 반찬형 메뉴.</p>
@@ -565,7 +566,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-bulgogi.jpg" alt="순수단백 저당불고기 이미지 영역"></div>
+          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-bulgogi-wide.jpg" alt="순수단백 저당불고기 이미지 영역"></div>
           <div class="product-body">
             <h3>저당불고기</h3>
             <p>익숙한 불고기 맛으로 식단 반찬의 만족감을 높이는 메뉴.</p>
@@ -577,7 +578,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-hambak.jpg" alt="순수단백 함박스테이크 이미지 영역"></div>
+          <div class="product-media contain"><img src="assets/yundiet-product-category/pure-hambak-wide.jpg" alt="순수단백 함박스테이크 이미지 영역"></div>
           <div class="product-body">
             <h3>함박스테이크 150g</h3>
             <p>닭가슴살이 지겨운 고객에게 식사 만족감을 주는 단백질 메뉴.</p>
@@ -607,13 +608,13 @@
           </div>
         </div>
         <figure class="category-image">
-          <img src="assets/yundiet-product-category/balancy-hero.jpg" alt="윤식단 밸런시 상품 사진">
+          <img src="assets/yundiet-product-category/balancy-hero-wide.jpg" alt="윤식단 밸런시 상품 사진">
           <figcaption class="image-caption">이미지 영역: 바탕화면 밸런시-사진 폴더</figcaption>
         </figure>
       </div>
       <div class="product-grid">
         <article class="product">
-          <div class="product-media"><img src="assets/yundiet-product-category/balancy-mara.jpg" alt="밸런시 마라 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/balancy-mara-wide.jpg" alt="밸런시 마라 이미지 영역"></div>
           <div class="product-body">
             <h3>밸런시 마라</h3>
             <p>자극적인 맛이 당길 때 식단을 포기하지 않게 만드는 맛.</p>
@@ -625,7 +626,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media"><img src="assets/yundiet-product-category/balancy-curry.jpg" alt="밸런시 핫 커리 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/balancy-curry-wide.jpg" alt="밸런시 핫 커리 이미지 영역"></div>
           <div class="product-body">
             <h3>밸런시 핫 커리</h3>
             <p>향신료 풍미로 식단의 단조로움을 줄이는 메뉴.</p>
@@ -637,7 +638,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media"><img src="assets/yundiet-product-category/balancy-tomato.jpg" alt="밸런시 토마토 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/balancy-tomato-wide.jpg" alt="밸런시 토마토 이미지 영역"></div>
           <div class="product-body">
             <h3>밸런시 토마토</h3>
             <p>산뜻하고 부담 없는 맛으로 가볍게 먹기 좋은 메뉴.</p>
@@ -649,7 +650,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media"><img src="assets/yundiet-product-category/balancy-signature.jpg" alt="밸런시 시그니처 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/balancy-signature-wide.jpg" alt="밸런시 시그니처 이미지 영역"></div>
           <div class="product-body">
             <h3>밸런시 시그니처</h3>
             <p>밸런시 라인을 대표하는 기본 풍미 메뉴.</p>
@@ -679,13 +680,13 @@
           </div>
         </div>
         <figure class="category-image">
-          <img src="https://cdn-optimized.imweb.me/thumbnail/20260120/6b10d5b009494.jpg?w=800" alt="순소옥 통밀빵 상품 썸네일">
+          <img src="assets/yundiet-product-category/soonsook-bread-wide.jpg" alt="순소옥 통밀빵 상품 썸네일">
           <figcaption class="image-caption">이미지 영역: 자사몰 순소옥 통밀빵 썸네일</figcaption>
         </figure>
       </div>
       <div class="product-grid">
         <article class="product">
-          <div class="product-media"><img src="https://cdn-optimized.imweb.me/thumbnail/20260120/6b10d5b009494.jpg?w=800" alt="순소옥 통밀식빵 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/soonsook-bread-wide.jpg" alt="순소옥 통밀식빵 이미지 영역"></div>
           <div class="product-body">
             <h3>통밀식빵</h3>
             <p>아침 식사와 샌드위치 루틴에 넣기 좋은 기본 빵.</p>
@@ -697,7 +698,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media"><img src="https://cdn.imweb.me/thumbnail/20260120/bd9c5bb42aabf.jpg" alt="순소옥 모닝빵 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/soonsook-morning-wide.jpg" alt="순소옥 모닝빵 이미지 영역"></div>
           <div class="product-body">
             <h3>모닝빵</h3>
             <p>간식, 아침, 운동 전후에 부담 없이 꺼내 먹는 빵.</p>
@@ -709,7 +710,7 @@
           </div>
         </article>
         <article class="product">
-          <div class="product-media"><img src="https://cdn-optimized.imweb.me/thumbnail/20260120/6b10d5b009494.jpg?w=800" alt="순소옥 단팥빵 이미지 영역"></div>
+          <div class="product-media"><img src="assets/yundiet-product-category/soonsook-bread-wide.jpg" alt="순소옥 단팥빵 이미지 영역"></div>
           <div class="product-body">
             <h3>단팥빵</h3>
             <p>달달한 빵 욕구를 식단 안에서 해결하는 선택지.</p>
