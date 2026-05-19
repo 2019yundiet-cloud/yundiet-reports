@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>윤식단 · 4주 루틴 파트너십 제안서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&family=Noto+Serif+KR:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBF8F2;
+    --bg-soft:#F4EEDF;
+    --paper:#FFFFFF;
+    --ink:#2A2E26;
+    --ink-soft:#5A5E55;
+    --line:#E5DFCE;
+    --accent:#4F6B3E;
+    --accent-soft:#7E9968;
+    --accent-bg:#EAF0E2;
+    --warm:#C68642;
+    --shadow:0 10px 40px rgba(60,55,40,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased;font-weight:400}
+  .serif{font-family:'Noto Serif KR',serif}
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px}
+
+  /* HERO */
+  .hero{padding:96px 0 80px;background:linear-gradient(180deg,var(--bg-soft) 0%, var(--bg) 100%);position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;top:-120px;right:-80px;width:360px;height:360px;border-radius:50%;background:var(--accent-bg);opacity:.6;z-index:0}
+  .hero .wrap{position:relative;z-index:1}
+  .brand{display:inline-flex;align-items:center;gap:10px;font-size:14px;letter-spacing:.18em;color:var(--accent);font-weight:600;text-transform:uppercase;margin-bottom:28px}
+  .brand::before{content:"";width:28px;height:1.5px;background:var(--accent)}
+  .hero h1{font-size:clamp(36px,5vw,52px);font-weight:700;letter-spacing:-.02em;line-height:1.25;margin-bottom:20px}
+  .hero h1 .serif{color:var(--accent);font-weight:700}
+  .hero p.lead{font-size:18px;color:var(--ink-soft);max-width:580px;margin-bottom:36px}
+  .hero .meta{display:flex;flex-wrap:wrap;gap:24px;font-size:13px;color:var(--ink-soft);padding-top:24px;border-top:1px solid var(--line)}
+  .hero .meta span strong{color:var(--ink);font-weight:600;margin-right:6px}
+
+  /* SECTION */
+  section{padding:64px 0;border-top:1px solid var(--line)}
+  section:first-of-type{border-top:none}
+  .eyebrow{display:inline-block;font-size:12px;letter-spacing:.2em;color:var(--accent);font-weight:600;text-transform:uppercase;margin-bottom:14px}
+  h2{font-size:28px;font-weight:700;letter-spacing:-.01em;margin-bottom:24px;line-height:1.35}
+  h2 .num{display:inline-block;font-family:'Noto Serif KR',serif;color:var(--accent);font-weight:500;margin-right:14px}
+  h3{font-size:17px;font-weight:600;margin:24px 0 12px;color:var(--ink)}
+  p{color:var(--ink-soft);margin-bottom:14px}
+  p strong{color:var(--ink);font-weight:600}
+  .highlight-quote{background:var(--accent-bg);border-left:3px solid var(--accent);padding:22px 26px;border-radius:6px;margin:24px 0;font-size:17px;color:var(--ink);font-weight:500}
+  .highlight-quote .serif{font-style:italic}
+
+  /* CARD GRID */
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:22px}
+  .card h4{font-size:14px;color:var(--accent);font-weight:600;letter-spacing:.04em;margin-bottom:10px;text-transform:uppercase}
+  .card ul{list-style:none;padding:0}
+  .card li{padding:6px 0;color:var(--ink-soft);font-size:15px;position:relative;padding-left:16px}
+  .card li::before{content:"·";position:absolute;left:4px;color:var(--accent);font-weight:700}
+
+  /* OFFER BOX */
+  .offer{background:linear-gradient(135deg,var(--accent) 0%, var(--accent-soft) 100%);color:#fff;padding:36px 32px;border-radius:14px;margin:24px 0;box-shadow:var(--shadow)}
+  .offer .label{font-size:13px;letter-spacing:.18em;text-transform:uppercase;opacity:.85;margin-bottom:8px}
+  .offer .val{font-size:38px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+  .offer .desc{margin-top:10px;opacity:.92;font-size:15px}
+  .content-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px}
+  .content-item{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:20px}
+  .content-item .tag{display:inline-block;background:var(--accent-bg);color:var(--accent);font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:10px}
+  .content-item .qty{font-size:24px;font-weight:700;color:var(--ink);margin-bottom:4px}
+  .content-item .desc{font-size:13px;color:var(--ink-soft)}
+
+  /* TONE */
+  .tone{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+  .tone-box{padding:22px;border-radius:10px;border:1px solid var(--line)}
+  .tone-box.good{background:var(--accent-bg);border-color:var(--accent-soft)}
+  .tone-box.avoid{background:#FAF2EC;border-color:#E8D6C3}
+  .tone-box h4{font-size:14px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .tone-box.good h4{color:var(--accent)}
+  .tone-box.avoid h4{color:var(--warm)}
+  .tone-box ul{list-style:none}
+  .tone-box li{font-size:14px;padding:5px 0;color:var(--ink-soft)}
+  .tone-box li::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:currentColor;margin-right:9px;vertical-align:middle;opacity:.5}
+
+  /* PRODUCT */
+  .product-block{margin:32px 0}
+  .product-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+  .product-head h3{font-size:22px;font-weight:700;color:var(--ink);margin:0}
+  .product-head .pill{font-size:12px;background:var(--accent);color:#fff;padding:3px 12px;border-radius:20px;font-weight:500;letter-spacing:.04em}
+  .product-desc{color:var(--ink-soft);font-size:15px;margin-bottom:16px}
+  .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:680px}
+  thead{background:var(--bg-soft)}
+  th{padding:12px 10px;text-align:left;font-weight:600;color:var(--ink);font-size:12px;letter-spacing:.02em;border-bottom:1px solid var(--line);white-space:nowrap}
+  th:first-child{padding-left:18px}
+  td{padding:12px 10px;border-bottom:1px solid var(--line);color:var(--ink-soft);white-space:nowrap}
+  td:first-child{padding-left:18px;color:var(--ink);font-weight:500}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:var(--bg-soft)}
+  .nutri-note{font-size:12px;color:var(--ink-soft);margin-top:10px;opacity:.8}
+
+  /* UPLOAD GUIDE */
+  .quote-list{margin-top:18px}
+  .quote-list .q{background:var(--paper);border-left:3px solid var(--accent-soft);padding:14px 20px;margin-bottom:10px;border-radius:0 8px 8px 0;font-size:15px;color:var(--ink)}
+  .quote-list .q::before{content:"\201C";color:var(--accent);font-size:24px;margin-right:6px;vertical-align:-6px;font-family:'Noto Serif KR',serif}
+  .flow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+  .flow-step{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px;text-align:center;font-size:14px;color:var(--ink);position:relative}
+  .flow-step .n{display:block;font-family:'Noto Serif KR',serif;color:var(--accent);font-size:20px;font-weight:600;margin-bottom:4px}
+
+  /* CTA */
+  .cta{background:var(--ink);color:#FBF8F2;padding:56px 40px;border-radius:16px;margin:48px 0;text-align:center}
+  .cta h2{color:#fff;font-size:30px;margin-bottom:14px}
+  .cta p{color:#C9C7C0;font-size:16px;margin-bottom:28px;max-width:520px;margin-left:auto;margin-right:auto}
+  .cta-row{display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
+  .cta-btn{display:inline-flex;align-items:center;gap:10px;background:var(--accent-soft);color:#fff;padding:14px 28px;border-radius:30px;text-decoration:none;font-weight:600;font-size:15px;transition:all .2s}
+  .cta-btn:hover{background:var(--accent);transform:translateY(-1px)}
+  .cta-btn.outline{background:transparent;border:1.5px solid #5A5E55;color:#FBF8F2}
+  .cta-btn.outline:hover{background:#3A3E36;border-color:#FBF8F2}
+
+  /* FOOTER */
+  footer{text-align:center;padding:32px 0 56px;color:var(--ink-soft);font-size:13px;border-top:1px solid var(--line)}
+  footer .serif{color:var(--accent);font-weight:500}
+
+  @media (max-width:700px){
+    .hero{padding:64px 0 56px}
+    .grid,.tone,.content-grid{grid-template-columns:1fr}
+    .flow{grid-template-columns:1fr}
+    .offer{padding:28px 22px}
+    .offer .val{font-size:30px}
+    .cta{padding:40px 24px}
+    h2{font-size:24px}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="brand">YUNDIET · PARTNERSHIP</div>
+    <h1>4주 루틴 안에 자연스럽게,<br><span class="serif">계속할 수 있는 한 끼.</span></h1>
+    <p class="lead">윤식단은 단순 협찬이 아닌, 크리에이터님의 운동·식단·일상 루틴에 자연스럽게 함께하는 4주 루틴형 협업을 제안드립니다.</p>
+    <div class="meta">
+      <span><strong>From.</strong> 윤식단</span>
+      <span><strong>To.</strong> 크리에이터님</span>
+      <span><strong>Period.</strong> 4 Weeks</span>
+      <span><strong>Type.</strong> Routine-based Partnership</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">01 · Concept</div>
+    <h2><span class="num">01</span>협업 컨셉</h2>
+    <p>윤식단은 바쁜 일상 속에서도 식단을 무리 없이 이어갈 수 있도록 돕는 <strong>건강한 한 끼 루틴 브랜드</strong>입니다. 이번 협업은 단순 제품 협찬이 아니라, 크리에이터님의 평소 운동·식단·일상 루틴 안에 윤식단이 자연스럽게 함께하는 모습을 보여주는 <strong>4주 루틴형 협업</strong>입니다.</p>
+    <div class="highlight-quote">
+      <span class="serif">"식단은 참는 게 아니라, 계속할 수 있어야 합니다."</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">02 · Why You</div>
+    <h2><span class="num">02</span>제안드리는 이유</h2>
+    <p>크리에이터님이 평소 보여주시는 <strong>운동·식단·자기관리 루틴</strong>이 윤식단이 전달하고 싶은 방향과 잘 맞는다고 느꼈습니다.</p>
+    <p>윤식단은 제품을 억지로 소개하는 콘텐츠보다, 실제 일상 속에서 <strong>"식단을 계속 이어가는 한 끼"</strong>로 자연스럽게 보여지는 콘텐츠를 중요하게 생각하고 있습니다.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">03 · Offer</div>
+    <h2><span class="num">03</span>협업 제안 내용</h2>
+
+    <div class="offer">
+      <div class="label">제공 조건</div>
+      <div class="val">자사몰 이용권 200,000원</div>
+      <div class="desc">윤식단 자사몰에서 자유롭게 제품을 선택하여 사용하실 수 있습니다.</div>
+    </div>
+
+    <h3>콘텐츠 구성</h3>
+    <div class="content-grid">
+      <div class="content-item">
+        <span class="tag">Story</span>
+        <div class="qty">주 3회 × 4주</div>
+        <div class="desc">인스타그램 스토리로 일상 속 자연스러운 노출</div>
+      </div>
+      <div class="content-item">
+        <span class="tag">Reels</span>
+        <div class="qty">1개</div>
+        <div class="desc">윤식단 제품을 활용한 릴스 1편 제작</div>
+      </div>
+    </div>
+
+    <h3>스토리 방향</h3>
+    <div class="grid">
+      <div class="card">
+        <h4>일상 속 식사 장면</h4>
+        <ul>
+          <li>식사 중 윤식단 제품 사진</li>
+          <li>운동 전후 식사 장면</li>
+          <li>식탁·냉동실·전자레인지 조리 장면</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>루틴형 노출</h4>
+        <ul>
+          <li>바쁜 날 간편하게 챙겨 먹는 장면</li>
+          <li>"오늘 식단 이렇게 해결" 식의 자연스러운 노출</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>릴스 방향</h3>
+    <div class="grid">
+      <div class="card">
+        <h4>운동·다이어트 루틴</h4>
+        <ul>
+          <li>운동 후 든든한 한 끼</li>
+          <li>다이어트 중 맛있는 한 끼</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>일상·직장인 루틴</h4>
+        <ul>
+          <li>식단이 귀찮은 날 전자레인지로 해결</li>
+          <li>바쁜 직장인·운동인·자기관리 루틴에 맞는 식사</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">04 · Tone & Manner</div>
+    <h2><span class="num">04</span>콘텐츠 톤</h2>
+    <div class="tone">
+      <div class="tone-box good">
+        <h4>✓ 원하는 방향</h4>
+        <ul>
+          <li>내 루틴에 자연스럽게 들어온 식사</li>
+          <li>바쁜데도 식단을 놓치지 않는 방법</li>
+          <li>운동 후 먹기 좋은 따뜻한 한 끼</li>
+          <li>맛없게 참는 식단이 아닌 계속 가능한 식단</li>
+        </ul>
+      </div>
+      <div class="tone-box avoid">
+        <h4>✕ 피하고 싶은 방향</h4>
+        <ul>
+          <li>과장된 다이어트 효과 표현</li>
+          <li>단기간 감량 표현</li>
+          <li>치료·의학적 효능 표현</li>
+          <li>제품만 들고 단순 설명하는 콘텐츠</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">05 · Products</div>
+    <h2><span class="num">05</span>제품 정보 &amp; 영양성분</h2>
+
+    <div class="product-block">
+      <div class="product-head">
+        <h3>단백밥</h3>
+        <span class="pill">한 끼 식사형</span>
+      </div>
+      <p class="product-desc">전자레인지로 간편하게 먹을 수 있는 한 끼 식사형 제품입니다. 운동 후, 바쁜 날, 식단을 챙기기 어려운 날에도 따뜻하고 든든하게 먹기 좋습니다.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>제품</th><th>기준량</th><th>열량</th><th>나트륨</th><th>탄수화물</th><th>당류</th><th>지방</th><th>트랜스지방</th><th>포화지방</th><th>콜레스테롤</th><th>단백질</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>오리지널 L</td><td>420g</td><td>507kcal</td><td>497mg</td><td>65.6g</td><td>0.8g</td><td>4.7g</td><td>0g</td><td>3g</td><td>61.8mg</td><td>50.1g</td></tr>
+            <tr><td>오리지널 S</td><td>325g</td><td>408.35kcal</td><td>400mg</td><td>52.81g</td><td>0.72g</td><td>3.8g</td><td>0g</td><td>2.4g</td><td>49.78mg</td><td>38g</td></tr>
+            <tr><td>훈제오리</td><td>380g</td><td>585kcal</td><td>578mg</td><td>93g</td><td>0.45g</td><td>10.8g</td><td>0g</td><td>8g</td><td>53mg</td><td>29g</td></tr>
+            <tr><td>단짠불고기</td><td>390g</td><td>607kcal</td><td>1,375mg</td><td>67g</td><td>7g</td><td>24g</td><td>0g</td><td>7g</td><td>70mg</td><td>31g</td></tr>
+            <tr><td>직화제육</td><td>390g</td><td>612kcal</td><td>1,405mg</td><td>68g</td><td>7g</td><td>24g</td><td>0g</td><td>7g</td><td>70mg</td><td>30g</td></tr>
+            <tr><td>그릴드 함박</td><td>410g</td><td>737kcal</td><td>1,405mg</td><td>96g</td><td>0g</td><td>23g</td><td>0g</td><td>9.8g</td><td>172mg</td><td>32g</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="product-block">
+      <div class="product-head">
+        <h3>저당소스 5종</h3>
+        <span class="pill">맛 변경용</span>
+      </div>
+      <p class="product-desc">단백밥이나 닭가슴살을 더 맛있게 먹을 수 있는 소스입니다. 식단이 질리지 않도록 맛을 바꿔가며 활용할 수 있습니다.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>제품</th><th>기준량</th><th>열량</th><th>나트륨</th><th>탄수화물</th><th>당류</th><th>지방</th><th>트랜스지방</th><th>포화지방</th><th>콜레스테롤</th><th>단백질</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>바베큐</td><td>40g</td><td>66.26kcal</td><td>164.64mg</td><td>15.42g</td><td>0.86g</td><td>0.16g</td><td>0g</td><td>0.02g</td><td>0mg</td><td>0.77g</td></tr>
+            <tr><td>양념치킨</td><td>40g</td><td>69.60kcal</td><td>236.76mg</td><td>14.73g</td><td>0.36g</td><td>0.40g</td><td>0g</td><td>0.09g</td><td>0mg</td><td>1.77g</td></tr>
+            <tr><td>블랙알리오</td><td>40g</td><td>61.30kcal</td><td>473.54mg</td><td>13.94g</td><td>0.09g</td><td>0.04g</td><td>0g</td><td>0g</td><td>0mg</td><td>1.29g</td></tr>
+            <tr><td>데리야끼</td><td>40g</td><td>47.48kcal</td><td>375.91mg</td><td>10.20g</td><td>0.40g</td><td>0.16g</td><td>0g</td><td>0.09g</td><td>0mg</td><td>1.32g</td></tr>
+            <tr><td>볼케이노</td><td>40g</td><td>71.05kcal</td><td>420mg</td><td>14.5g</td><td>0.45g</td><td>0.65g</td><td>0g</td><td>0.12g</td><td>0mg</td><td>1.8g</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="product-block">
+      <div class="product-head">
+        <h3>순수단백</h3>
+        <span class="pill">단백질 반찬형</span>
+      </div>
+      <p class="product-desc">닭가슴살, 저당 제육, 저당 불고기, 함박스테이크 등으로 구성된 단백질 반찬형 제품입니다. 밥, 샐러드, 샌드위치, 도시락 구성에 곁들이기 좋습니다.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>제품</th><th>기준량</th><th>열량</th><th>나트륨</th><th>탄수화물</th><th>당류</th><th>지방</th><th>트랜스지방</th><th>포화지방</th><th>콜레스테롤</th><th>단백질</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>닭가슴살 오리지널</td><td>100g</td><td>105kcal</td><td>300mg</td><td>0g</td><td>0g</td><td>1.2g</td><td>0g</td><td>0.3g</td><td>70mg</td><td>24g</td></tr>
+            <tr><td>닭가슴살 오리지널</td><td>150g</td><td>157.5kcal</td><td>450mg</td><td>0g</td><td>0g</td><td>1.8g</td><td>0g</td><td>0.45g</td><td>105mg</td><td>36g</td></tr>
+            <tr><td>저당 제육볶음</td><td>100g</td><td>215kcal</td><td>530mg</td><td>20g</td><td>3g</td><td>8g</td><td>0g</td><td>7g</td><td>50mg</td><td>16g</td></tr>
+            <tr><td>저당 간장불고기</td><td>100g</td><td>280kcal</td><td>480mg</td><td>16g</td><td>3g</td><td>17g</td><td>0g</td><td>7g</td><td>70mg</td><td>16g</td></tr>
+            <tr><td>저당 함박스테이크</td><td>150g</td><td>380kcal</td><td>560mg</td><td>17g</td><td>0g</td><td>23g</td><td>0g</td><td>9g</td><td>60mg</td><td>27g</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="nutri-note">※ 영양성분은 제품 라벨 기준이며, 제조 환경에 따라 일부 오차가 있을 수 있습니다.</p>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">06 · For Creators</div>
+    <h2><span class="num">06</span>크리에이터 참고 포인트</h2>
+    <p>제품을 소개할 때는 수치만 강조하기보다, <strong>실제 루틴 속에서 이렇게 보여주시면 좋습니다.</strong></p>
+    <div class="grid">
+      <div class="card">
+        <h4>운동·단백질</h4>
+        <ul>
+          <li>운동 후 단백질 식사</li>
+          <li>닭가슴살만 먹기 어려운 날의 대체 식사</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>바쁜 일상</h4>
+        <ul>
+          <li>바쁜 날 전자레인지로 챙기는 한 끼</li>
+          <li>냉동실에 두고 필요할 때 꺼내 먹는 루틴</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>식단 변주</h4>
+        <ul>
+          <li>식단이 지루할 때 맛있게 바꾸는 식사</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>따뜻한 다이어트</h4>
+        <ul>
+          <li>따뜻하고 든든하게 먹는 다이어트 식단</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">07 · Upload Guide</div>
+    <h2><span class="num">07</span>업로드 가이드</h2>
+
+    <h3>스토리 예시 문구</h3>
+    <div class="quote-list">
+      <div class="q">오늘 운동 끝나고 윤식단으로 한 끼 해결</div>
+      <div class="q">식단 귀찮은 날엔 냉동실에서 꺼내서 3분</div>
+      <div class="q">참는 식단 말고 계속할 수 있는 식단</div>
+      <div class="q">바쁜 날에도 단백질은 챙기기</div>
+      <div class="q">요즘 내 운동 후 식사 루틴</div>
+    </div>
+
+    <h3>릴스 예시 흐름</h3>
+    <div class="flow">
+      <div class="flow-step"><span class="n">01</span>운동·일상 장면</div>
+      <div class="flow-step"><span class="n">02</span>식단 챙기기 귀찮은 순간</div>
+      <div class="flow-step"><span class="n">03</span>윤식단 조리 장면</div>
+      <div class="flow-step"><span class="n">04</span>실제 먹는 장면</div>
+      <div class="flow-step"><span class="n">05</span>짧은 소감</div>
+      <div class="flow-step"><span class="n">06</span>"식단은 계속할 수 있어야 하니까"</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">08 · Usage</div>
+    <h2><span class="num">08</span>콘텐츠 활용 안내</h2>
+    <p>크리에이터님이 제작한 콘텐츠는 기본적으로 <strong>인스타그램 게시 목적</strong>입니다.</p>
+    <p>추가로 <strong>광고 소재·상세페이지·자사몰·CRM 콘텐츠</strong> 등 2차 활용이 필요한 경우에는 <strong>사전에 별도 협의</strong>합니다.</p>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="cta">
+    <h2>함께 4주의 루틴을 만들어 가요</h2>
+    <p>제안 내용에 관심 있으시다면 아래 채널로 편하게 회신 부탁드립니다. 협업 일정, 발송 주소, 콘텐츠 일정은 회신 후 안내드립니다.</p>
+    <div class="cta-row">
+      <a href="mailto:yun-diet@naver.com" class="cta-btn">✉ yun-diet@naver.com</a>
+      <a href="https://instagram.com/yundiet_official" class="cta-btn outline">📷 인스타그램 DM</a>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><span class="serif">윤식단</span> · 계속할 수 있는 한 끼</p>
+    <p style="margin-top:6px;opacity:.7">© 2026 Yundiet. Partnership Proposal.</p>
+  </div>
+</footer>
+
+</body>
+</html>
