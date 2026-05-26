@@ -24,6 +24,7 @@
     --ink-3: #8a8a8a;
     --line: #e6e2d8;
     --white: #ffffff;
+    --ui-zoom: 1.05;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
@@ -40,6 +41,7 @@
     margin: 0 auto;
     background: var(--white);
     box-shadow: 0 0 60px rgba(42, 52, 30, 0.08);
+    zoom: var(--ui-zoom);
   }
 
   /* HERO */
@@ -148,6 +150,50 @@
     font-size: 15px; color: var(--ink-2);
     margin-bottom: 40px; max-width: 660px;
   }
+  .number-list {
+    list-style: none;
+    counter-reset: number-list;
+    display: grid;
+    gap: 8px;
+    margin: 14px 0;
+  }
+  .number-list li {
+    counter-increment: number-list;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.55;
+  }
+  .number-list li::before {
+    content: counter(number-list, decimal-leading-zero);
+    flex: 0 0 auto;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: var(--green-900);
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+  .number-list.hero-points {
+    color: rgba(255,255,255,0.86);
+    margin: 14px 0 10px;
+    position: relative;
+    z-index: 2;
+  }
+  .number-list.hero-points li::before {
+    background: var(--gold);
+    color: var(--green-900);
+  }
+  .number-list.hero-points strong { color: var(--gold); }
+  .number-list.compact-points { margin: 12px 0; gap: 7px; }
+  .number-list.note-points { margin-bottom: 0; }
 
   /* TRACKS */
   .tracks {
@@ -202,8 +248,9 @@
     margin-bottom: 20px;
   }
   .track.featured .track-desc { color: rgba(255,255,255,0.82); }
-  .track-list { list-style: none; }
+  .track-list { list-style: none; counter-reset: track-list; }
   .track-list li {
+    counter-increment: track-list;
     display: flex;
     align-items: flex-start;
     gap: 10px;
@@ -215,16 +262,22 @@
   .track.featured .track-list li { color: rgba(255,255,255,0.92); }
   .track-list-line { white-space: nowrap; }
   .track-list li::before {
-    content: "";
+    content: counter(track-list, decimal-leading-zero);
     flex-shrink: 0;
-    width: 14px; height: 14px;
-    margin-top: 4px;
-    border-radius: 50%;
+    min-width: 24px; height: 24px;
+    padding: 0 7px;
+    margin-top: 0;
+    border-radius: 999px;
     background: var(--green-500);
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'><path d='M3 7l3 3 5-6' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-    background-size: 14px;
+    color: var(--white);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
-  .track.featured .track-list li::before { background-color: var(--gold); }
+  .track.featured .track-list li::before { background-color: var(--gold); color: var(--green-900); }
 
   .track-cta {
     display: inline-flex;
@@ -588,8 +641,10 @@
     padding: 22px 24px;
     border: 1px solid var(--line);
     display: flex;
-    align-items: flex-start;
-    gap: 16px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
   }
   .benefit-num {
     flex-shrink: 0;
@@ -608,7 +663,7 @@
     width: 18px;
     height: 2px;
     background: var(--gold);
-    margin-bottom: 8px;
+    margin: 0 auto 8px;
   }
   .benefit-title {
     font-size: 15px;
@@ -752,7 +807,10 @@
   /* ===== RESPONSIVE — MOBILE (≤720px) ===== */
   @media (max-width: 720px) {
     body { line-height: 1.6; background: var(--beige); }
-    .container { background: transparent; }
+    .container {
+      width: calc(100% / var(--ui-zoom));
+      background: transparent;
+    }
 
     /* HERO */
     .hero {
@@ -956,8 +1014,8 @@
     .payback-grid { grid-template-columns: 1fr; gap: 12px; }
     .payback-card {
       padding: 22px 20px;
-      text-align: left;
-      border-left: 4px solid var(--green-500);
+      text-align: center;
+      border: 1.5px solid var(--green-500);
       background: var(--white);
       box-shadow: 0 4px 14px rgba(42, 52, 30, 0.07);
     }
@@ -976,16 +1034,17 @@
     .cycle-title { font-size: 17px; margin-bottom: 22px; }
     .cycle-diagram { grid-template-columns: 1fr; gap: 10px; }
     .cycle-node {
-      padding: 18px 18px;
-      text-align: left;
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 4px 16px;
+      padding: 22px 18px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 8px;
       align-items: center;
       box-shadow: 0 3px 10px rgba(42, 52, 30, 0.08);
     }
-    .cycle-node-step { margin-bottom: 0; grid-row: 1 / span 2; align-self: center; }
-    .cycle-node-title { font-size: 15px; margin-bottom: 2px; }
+    .cycle-node-step { margin-bottom: 0; align-self: center; }
+    .cycle-node-title { font-size: 15px; margin-bottom: 0; }
     .cycle-node-desc { font-size: 12px; }
     .cycle-arrow { transform: rotate(90deg); padding: 0; font-size: 18px; }
 
@@ -1005,12 +1064,12 @@
     .benefit-grid { grid-template-columns: 1fr; gap: 12px; }
     .benefit-card {
       padding: 18px 18px;
-      gap: 14px;
+      gap: 10px;
       background: var(--white);
       border: 1.5px solid var(--green-100);
       box-shadow: 0 3px 12px rgba(42, 52, 30, 0.06);
     }
-    .benefit-num { width: 42px; font-size: 26px; }
+    .benefit-num { width: auto; font-size: 26px; }
     .benefit-num::before { width: 14px; margin-bottom: 6px; }
     .benefit-title { font-size: 14.5px; }
     .benefit-desc { font-size: 12.5px; }
@@ -1055,11 +1114,13 @@
     <div class="hero-eyebrow">YUNDIET × FITNESS PARTNER PROGRAM</div>
     <h1>회원의 식단을 함께 책임지는<br/><span class="accent">든든한 식단 파트너 제휴</span>를 제안드립니다.</h1>
     <p class="hero-sub">운동만큼 중요한 것이 식단입니다.</p>
-    <p class="hero-sub" style="margin-top: 10px;">윤식단은 PT·필라테스 강사님께<br/>
-      ㆍ <strong style="color:var(--gold);">강사님 본인 특별가</strong><br/>
-      ㆍ <strong style="color:var(--gold);">회원 별도 할인가 페이지</strong><br/>
-      ㆍ <strong style="color:var(--gold);">매출 페이백</strong><br/>
-      을 모두 제안드립니다.</p>
+    <p class="hero-sub" style="margin-top: 10px;">윤식단은 PT·필라테스 강사님께</p>
+    <ol class="number-list hero-points">
+      <li><strong>강사님 본인 특별가</strong></li>
+      <li><strong>회원 별도 할인가 페이지</strong></li>
+      <li><strong>매출 페이백</strong></li>
+    </ol>
+    <p class="hero-sub">을 모두 제안드립니다.</p>
   </header>
 
   <!-- 01. TRACKS -->
@@ -1076,11 +1137,13 @@
         <div class="track-num">A</div>
         <div class="track-tag">TRACK A · EXCLUSIVE PRICING</div>
         <div class="track-title">강사님·회원 전용가 안내</div>
-        <p class="track-desc">강사님께는 <strong style="color:var(--green-900);">두 종류의 전용 구매 링크</strong>를 발급해드립니다.<br/><br/>
-          본인 식단용 가격과 회원 추천용 가격이 별도로 분리되어 있어,<br/>
-          ㆍ 강사님 본인의 식비 절감<br/>
-          ㆍ 회원에게도 합리적인 가격 제안<br/>
-          이 동시에 가능합니다.</p>
+        <div class="track-desc">강사님께는 <strong style="color:var(--green-900);">두 종류의 전용 구매 링크</strong>를 발급해드립니다.<br/><br/>
+          본인 식단용 가격과 회원 추천용 가격이 별도로 분리되어 있어,
+          <ol class="number-list compact-points">
+            <li>강사님 본인의 식비 절감</li>
+            <li>회원에게도 합리적인 가격 제안</li>
+          </ol>
+          이 동시에 가능합니다.</div>
         <ul class="track-list">
           <li><strong>강사님 본인 구매 시 특별 할인 제공</strong></li>
           <li><span class="track-list-line"><strong>회원 별도 할인가</strong> · 전용 페이지 제공</span></li>
@@ -1111,16 +1174,22 @@
   <section id="compare">
     <div class="section-label">02 · EXCLUSIVE PRICING</div>
     <h2 class="section-title">자사몰가 · 회원 전용가 · 선생님 전용가</h2>
-    <p class="section-desc">같은 제품, 같은 품질이지만<br/>강사님과 회원께 제공되는 가격은 자사몰 정가와 다르게 책정됩니다.<br/><br/>
-      ㆍ <strong>강사님 전용가</strong> — 강사님 본인 구매용 가격<br/>
-      ㆍ <strong>회원 전용가</strong> — 강사님이 회원에게 추천하실 때 사용하는 별도 페이지의 가격</p>
+    <div class="section-desc">같은 제품, 같은 품질이지만<br/>강사님과 회원께 제공되는 가격은 자사몰 정가와 다르게 책정됩니다.
+      <ol class="number-list compact-points">
+        <li><strong>강사님 전용가</strong> — 강사님 본인 구매용 가격</li>
+        <li><strong>회원 전용가</strong> — 강사님이 회원에게 추천하실 때 사용하는 별도 페이지의 가격</li>
+      </ol>
+    </div>
 
     <div class="pricing-guide">
       <div class="pricing-guide-label">RECOMMENDED PRICING</div>
       <div class="pricing-guide-title">회원 전용가 책정 제안</div>
-      <p class="pricing-guide-desc">회원 전용가는 자사몰 정가와 강사님 전용가 사이에서 책정하는 것을 권장드립니다.<br/><br/>
-        ㆍ 일반 자사몰보다 저렴해야 회원의 구매 동기가 생기고,<br/>
-        ㆍ 강사님 본인 가격보다는 높아야 강사님께 메리트가 유지됩니다.</p>
+      <div class="pricing-guide-desc">회원 전용가는 자사몰 정가와 강사님 전용가 사이에서 책정하는 것을 권장드립니다.
+        <ol class="number-list compact-points">
+          <li>일반 자사몰보다 저렴해야 회원의 구매 동기가 생기고,</li>
+          <li>강사님 본인 가격보다는 높아야 강사님께 메리트가 유지됩니다.</li>
+        </ol>
+      </div>
       <div class="pricing-guide-zones">
         <div class="pricing-zone retail">
           <span class="pricing-zone-tag">자사몰 정가</span>
@@ -1233,16 +1302,12 @@
     </div>
 
     <div class="compare-note">
-      <strong>참고.</strong><br/><br/>
-      <strong style="color:var(--green-900);">ㆍ 선생님 전용가</strong><br/>
-      &nbsp;&nbsp;&nbsp;강사님 본인이 직접 구매하실 때<br/>
-      &nbsp;&nbsp;&nbsp;적용되는 가격<br/><br/>
-      <strong style="color:var(--green-900);">ㆍ 회원 전용가</strong><br/>
-      &nbsp;&nbsp;&nbsp;강사님 추천 회원에게만 노출되는<br/>
-      &nbsp;&nbsp;&nbsp;별도 페이지 가격<br/><br/>
-      <strong style="color:var(--green-900);">ㆍ 대용량 옵션</strong><br/>
-      &nbsp;&nbsp;&nbsp;100g·20팩, 70개입 골라담기 등은<br/>
-      &nbsp;&nbsp;&nbsp;강사님 전용 페이지에서만 제공됩니다.
+      <strong>참고.</strong>
+      <ol class="number-list note-points">
+        <li><strong style="color:var(--green-900);">선생님 전용가</strong><br/>강사님 본인이 직접 구매하실 때 적용되는 가격</li>
+        <li><strong style="color:var(--green-900);">회원 전용가</strong><br/>강사님 추천 회원에게만 노출되는 별도 페이지 가격</li>
+        <li><strong style="color:var(--green-900);">대용량 옵션</strong><br/>100g·20팩, 70개입 골라담기 등은 강사님 전용 페이지에서만 제공됩니다.</li>
+      </ol>
     </div>
 
     <div class="highlight-box">
@@ -1316,11 +1381,14 @@
   <section id="products">
     <div class="section-label">04 · RECOMMENDED PRODUCTS</div>
     <h2 class="section-title">회원에게 추천하기 좋은<br/>윤식단 4대 카테고리</h2>
-    <p class="section-desc">고단백·저당으로 설계된 식단 라인업.<br/><br/>
-      ㆍ 운동 후 식사<br/>
-      ㆍ 다이어트 식단<br/>
-      ㆍ 벌크업 보조식<br/>
-      까지 폭넓게 어울립니다. 각 카테고리 모두 전용가로 제공됩니다.</p>
+    <div class="section-desc">고단백·저당으로 설계된 식단 라인업.
+      <ol class="number-list compact-points">
+        <li>운동 후 식사</li>
+        <li>다이어트 식단</li>
+        <li>벌크업 보조식</li>
+      </ol>
+      까지 폭넓게 어울립니다. 각 카테고리 모두 전용가로 제공됩니다.
+    </div>
 
     <div class="product-grid">
       <a class="product-card" href="https://www.yundiet.com/rice" target="_blank" rel="noopener">
