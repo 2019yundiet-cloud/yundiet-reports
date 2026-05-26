@@ -352,9 +352,9 @@
     font-size: 14.5px;
     color: var(--green-700);
     font-weight: 800;
-    background: var(--green-100);
-    padding: 6px 12px;
-    border-radius: 10px;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
     display: inline-block;
     letter-spacing: -0.02em;
   }
@@ -931,7 +931,12 @@
       margin-top: 2px;
       font-size: 11px;
     }
-    .compare-member { font-size: 16px !important; padding: 5px 12px !important; }
+    .compare-member {
+      font-size: 16px !important;
+      padding: 0 !important;
+      background: transparent !important;
+      border-radius: 0 !important;
+    }
     .compare-discount {
       width: 100%;
       text-align: right;
