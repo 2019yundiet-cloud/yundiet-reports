@@ -1922,6 +1922,16 @@
       return '';
     }
   };
+  const thumbFallbackHtml = (label = 'NO IMG') => `<span class="dtm-thumb-placeholder">${esc(label)}</span>`;
+  document.addEventListener('error', (event) => {
+    const img = event.target;
+    if (!(img instanceof HTMLImageElement)) return;
+    if (!img.closest('.col-thumb, .dtm-ad-card')) return;
+    const fallback = document.createElement('span');
+    fallback.className = 'dtm-thumb-placeholder';
+    fallback.textContent = 'NO IMG';
+    img.replaceWith(fallback);
+  }, true);
   const objectFromJson = (v) => {
     if (v && typeof v === 'object' && !Array.isArray(v)) return v;
     if (Array.isArray(v)) {
@@ -2496,7 +2506,7 @@
           : `ID ${adId}`;
         const thumb = imgUrl
           ? `<img src="${esc(imgUrl)}" alt="" loading="lazy" />`
-          : `<span class="dtm-thumb-placeholder">NO IMG</span>`;
+          : thumbFallbackHtml();
         const thumbHtml = editUrl
           ? `<a class="dtm-thumb-link" href="${esc(editUrl)}" target="_blank" rel="noopener" title="Meta 광고 관리자 수정페이지로 이동">${thumb}</a>`
           : thumb;
@@ -3457,7 +3467,7 @@
           const imgUrl = safeUrl(r.소재이미지URL);
           const editUrl = safeUrl(r.ad_manager_url);
           const title = esc(r.소재명 || '');
-          const img = imgUrl ? `<img src="${esc(imgUrl)}" alt="" loading="lazy" />` : '—';
+          const img = imgUrl ? `<img src="${esc(imgUrl)}" alt="" loading="lazy" />` : thumbFallbackHtml();
           const thumb = imgUrl && editUrl
             ? `<a class="ad-thumb-link" href="${esc(editUrl)}" target="_blank" rel="noopener" title="Meta 광고 관리자 수정페이지로 이동: ${title}">${img}</a>`
             : img;
