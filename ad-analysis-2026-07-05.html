@@ -986,6 +986,11 @@
     box-shadow: 0 2px 8px rgba(45, 80, 22, 0.06);
   }
   .profit-card h4 { margin: 0 0 6px; font-size: 16px; font-weight: 700; color: var(--brand-green); }
+  .monthly-overview-card {
+    grid-column: 1 / -1;
+    border-color: rgba(45, 80, 22, 0.28);
+  }
+  .monthly-overview-card .canvas-wrap { height: 360px; }
   .profit-headline {
     font-size: 13px; color: var(--muted); margin-bottom: 14px;
     display: flex; gap: 14px; flex-wrap: wrap; align-items: baseline;
@@ -1552,6 +1557,17 @@
       </select></label>
     </div>
     <div class="profit-grid">
+      <div class="profit-card monthly-overview-card">
+        <h4>전체 월별 성과 비교</h4>
+        <div class="profit-headline" id="headline-monthly-overview"></div>
+        <div class="canvas-wrap"><canvas id="chart-monthly-overview"></canvas></div>
+        <div class="profit-table-wrap">
+          <table class="profit-table">
+            <thead><tr><th>월</th><th class="num">매출</th><th class="num">광고비</th><th class="num">순이익</th><th class="num">실ROI</th><th class="num">주문수</th></tr></thead>
+            <tbody id="table-monthly-overview"></tbody>
+          </table>
+        </div>
+      </div>
       <div class="profit-card">
         <h4>단백밥</h4>
         <div class="profit-headline" id="headline-danbaekbob"></div>
@@ -3982,9 +3998,15 @@
   const profitRangeEnd = document.getElementById('profit-range-end');
   const profitRangeApply = document.getElementById('profit-range-apply');
   const profitRangeHelp = document.getElementById('profit-range-help');
+  const monthKey = (row) => String(row?.월 || row?.month || row?.month_start || row?.date || row?.날짜 || '').slice(0, 7);
+  const productKey = (row) => String(row?.카테고리 || row?.category || row?.상품 || row?.product || '').trim();
   const profitAllMonths = [...new Set(
-    Object.values(DATA.monthly_profit || {})
-      .flatMap(rows => (rows || []).map(row => String(row.월 || row.month || '').slice(0, 7)).filter(Boolean))
+    [
+      ...Object.values(DATA.monthly_profit || {})
+        .flatMap(rows => (rows || []).map(row => monthKey(row)).filter(Boolean)),
+      ...(DATA.ga4_profit_monthly || []).map(row => monthKey(row)).filter(Boolean),
+      ...((DATA.meta?.archive_summary?.rows || []).map(row => monthKey(row)).filter(Boolean)),
+    ]
   )].sort();
 
   function getSelectedProfitRange() {
@@ -4025,12 +4047,76 @@
     if (profitRangeHelp) {
       profitRangeHelp.textContent = options.length
         ? `· 조회 가능 월 ${options[0]} ~ ${options[options.length - 1]}`
-        : '· 조회 가능한 월 데이터 없음';
+      : '· 조회 가능한 월 데이터 없음';
     }
   }
 
+  function normalizeGa4MonthlyProfitRow(row, product) {
+    const month = monthKey(row);
+    if (!month) return null;
+    const revenue = numOrNull(row.매출) ?? numOrNull(row.revenue) ?? 0;
+    const adSpend = numOrNull(row.광고지출) ?? numOrNull(row.광고비) ?? numOrNull(row.ad_spend) ?? 0;
+    const netProfit = numOrNull(row.순이익) ?? numOrNull(row.net_profit) ?? 0;
+    const cogs = numOrNull(row.원가) ?? numOrNull(row.cogs);
+    const delivery = numOrNull(row.배송비) ?? numOrNull(row.delivery_fee);
+    const fee = numOrNull(row.수수료) ?? numOrNull(row.channel_fee);
+    const hasCostBreakdown = cogs != null || delivery != null || fee != null;
+    const nonAdCost = hasCostBreakdown
+      ? (cogs || 0) + (delivery || 0) + (fee || 0)
+      : Math.max(0, revenue - adSpend - netProfit);
+    const roasRaw = numOrNull(row.ROAS) ?? numOrNull(row.roas);
+    const roas = roasRaw != null
+      ? (Math.abs(roasRaw) <= 10 ? roasRaw * 100 : roasRaw)
+      : (adSpend ? (revenue / adSpend) * 100 : null);
+    const roi = numOrNull(row.실ROI) ?? numOrNull(row.real_roi) ?? (adSpend ? netProfit / adSpend : null);
+    return {
+      ...row,
+      title: `${product} · ${month}`,
+      product,
+      month: `${month}-01`,
+      월: month,
+      revenue,
+      매출: revenue,
+      구매전환값: revenue,
+      cogs_amount: nonAdCost,
+      원가액: nonAdCost,
+      ad_spend: adSpend,
+      광고지출: adSpend,
+      광고비: adSpend,
+      net_profit: netProfit,
+      순이익: netProfit,
+      순이익률: revenue ? (netProfit / revenue) * 100 : null,
+      roas,
+      ROAS: roas,
+      real_roi: roi,
+      실ROI: roi,
+      주문수: numOrNull(row.주문수) ?? numOrNull(row.order_count) ?? 0,
+      source: row.source || 'ga4_profit_monthly',
+      _monthly_source: 'ga4_profit_monthly',
+    };
+  }
+
+  function ga4MonthlyRowsForProduct(product) {
+    return (DATA.ga4_profit_monthly || [])
+      .filter(row => productKey(row) === product)
+      .map(row => normalizeGa4MonthlyProfitRow(row, product))
+      .filter(Boolean);
+  }
+
+  function mergeMonthlyProfitRows(product) {
+    const byMonth = new Map();
+    (DATA.monthly_profit?.[product] || []).forEach(row => {
+      const month = monthKey(row);
+      if (month) byMonth.set(month, { ...row, 월: month });
+    });
+    ga4MonthlyRowsForProduct(product).forEach(row => {
+      if (!byMonth.has(row.월)) byMonth.set(row.월, row);
+    });
+    return [...byMonth.values()];
+  }
+
   function normalizeMonthlyProfitRows(product) {
-    const rows = (DATA.monthly_profit?.[product] || []).map(r => ({ ...r }));
+    const rows = mergeMonthlyProfitRows(product).map(r => ({ ...r }));
     const currentMonth = String(DATA.meta?.date || '').slice(0, 7);
     if (!currentMonth) return rows;
 
@@ -4085,6 +4171,152 @@
         source: 'meta_mtd_ad_revenue_basis',
         _normalized_from_mtd: true,
       };
+    });
+  }
+
+  function getMonthlyOverviewRows() {
+    const sourceRows = Array.isArray(DATA.ga4_profit_monthly) ? DATA.ga4_profit_monthly : [];
+    const byMonth = new Map();
+    for (const row of sourceRows) {
+      const month = monthKey(row);
+      if (!month) continue;
+      if (!byMonth.has(month)) {
+        byMonth.set(month, { 월: month, 매출: 0, 광고비: 0, 순이익: 0, 주문수: 0, rows: 0 });
+      }
+      const acc = byMonth.get(month);
+      acc.매출 += numOrNull(row.매출) ?? numOrNull(row.revenue) ?? 0;
+      acc.광고비 += numOrNull(row.광고비) ?? numOrNull(row.광고지출) ?? numOrNull(row.ad_spend) ?? 0;
+      acc.순이익 += numOrNull(row.순이익) ?? numOrNull(row.net_profit) ?? 0;
+      acc.주문수 += numOrNull(row.주문수) ?? numOrNull(row.order_count) ?? 0;
+      acc.rows += 1;
+    }
+    return [...byMonth.values()]
+      .map(row => ({ ...row, 실ROI: row.광고비 ? row.순이익 / row.광고비 : null }))
+      .filter(row => {
+        const { start, end } = getSelectedProfitRange();
+        if (start && row.월 < start) return false;
+        if (end && row.월 > end) return false;
+        return true;
+      })
+      .sort((a, b) => (a.월 || '').localeCompare(b.월 || ''));
+  }
+
+  function renderMonthlyOverview() {
+    const rows = getMonthlyOverviewRows();
+    const headline = document.getElementById('headline-monthly-overview');
+    const body = document.getElementById('table-monthly-overview');
+    if (body) {
+      body.innerHTML = rows.map(r => `
+        <tr>
+          <td>${esc(r.월 || '-')}</td>
+          <td class="num">${fmtKRW(r.매출)}</td>
+          <td class="num">${fmtKRW(r.광고비)}</td>
+          <td class="num">${fmtKRW(r.순이익)}</td>
+          <td class="num">${fmtPctSigned(r.실ROI)}</td>
+          <td class="num">${fmtNum(r.주문수)}</td>
+        </tr>
+      `).join('');
+    }
+    const cur = rows[rows.length - 1];
+    const prev = rows[rows.length - 2];
+    if (headline) {
+      if (!cur) {
+        headline.textContent = '월별 실결제 기반 데이터가 없습니다.';
+      } else {
+        const prevProfit = money(prev?.순이익);
+        const deltaPct = prev && prevProfit !== 0 ? ((money(cur.순이익) - prevProfit) / Math.abs(prevProfit)) * 100 : null;
+        const deltaEl = deltaPct == null ? ''
+          : (deltaPct >= 0
+            ? `<span class="delta-up">▲ ${deltaPct.toFixed(1)}%</span>`
+            : `<span class="delta-down">▼ ${Math.abs(deltaPct).toFixed(1)}%</span>`);
+        headline.innerHTML = `
+          <div><span class="big">${fmtKRW(cur.순이익)}</span> <small>(${esc(cur.월)} 전체 순이익)</small></div>
+          <div>매출 ${fmtKRW(cur.매출)} · 광고비 ${fmtKRW(cur.광고비)} · 실ROI ${fmtPctSigned(cur.실ROI)}</div>
+          ${prev ? `<div>전월 대비 ${deltaEl} · 전월 ${fmtKRW(prevProfit)}</div>` : ''}`;
+      }
+    }
+    if (typeof Chart === 'undefined') return;
+    if (charts.__monthlyOverview) charts.__monthlyOverview.destroy();
+    const canvasEl = document.getElementById('chart-monthly-overview');
+    if (!canvasEl) return;
+    const ctx = canvasEl.getContext('2d');
+    if (!ctx) return;
+    charts.__monthlyOverview = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: rows.map(r => r.월),
+        datasets: [
+          {
+            label: '매출',
+            data: rows.map(r => money(r.매출)),
+            backgroundColor: 'rgba(82, 141, 84, 0.24)',
+            borderColor: 'rgba(82, 141, 84, 0.55)',
+            borderWidth: 1,
+            borderRadius: 4,
+            yAxisID: 'y',
+            order: 3,
+          },
+          {
+            label: '광고비',
+            data: rows.map(r => money(r.광고비)),
+            backgroundColor: 'rgba(214, 137, 16, 0.68)',
+            borderRadius: 4,
+            yAxisID: 'y',
+            order: 2,
+          },
+          {
+            type: 'line',
+            label: '순이익',
+            data: rows.map(r => money(r.순이익)),
+            borderColor: '#2D5016',
+            backgroundColor: 'rgba(45, 80, 22, 0.08)',
+            borderWidth: 4,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            pointBackgroundColor: '#2D5016',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            tension: 0.25,
+            fill: true,
+            yAxisID: 'y1',
+            order: 0,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 14, font: { size: 12 }, padding: 14 } },
+          tooltip: {
+            callbacks: {
+              label: (c) => `${c.dataset.label}: ${fmtKRW(c.parsed.y)}`,
+              afterBody: (items) => {
+                const row = rows[items[0].dataIndex];
+                return [`실ROI: ${fmtPctSigned(row.실ROI)}`, `주문수: ${fmtNum(row.주문수)}`];
+              }
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { font: { size: 11 } } },
+          y: {
+            beginAtZero: true,
+            position: 'left',
+            title: { display: true, text: '매출/광고비', font: { size: 11 }, color: '#6e6e6e' },
+            ticks: { callback: (v) => fmtKRW(v), font: { size: 10 } },
+            grid: { color: 'rgba(0,0,0,0.04)' },
+          },
+          y1: {
+            beginAtZero: false,
+            position: 'right',
+            title: { display: true, text: '순이익', font: { size: 12, weight: 'bold' }, color: '#2D5016' },
+            ticks: { callback: (v) => fmtKRW(v), font: { size: 11, weight: 'bold' }, color: '#2D5016' },
+            grid: { drawOnChartArea: false },
+          }
+        }
+      }
     });
   }
 
@@ -4257,10 +4489,12 @@
         alert('조회 시작 월이 종료 월보다 늦습니다.');
         return;
       }
+      renderMonthlyOverview();
       Object.keys(CHART_MAP).forEach(product => renderChart(product));
     });
   }
 
+  renderMonthlyOverview();
   Object.keys(CHART_MAP).forEach(p => {
     const sel = document.getElementById(CHART_MAP[p].select);
     if (sel) sel.addEventListener('change', () => renderChart(p));
