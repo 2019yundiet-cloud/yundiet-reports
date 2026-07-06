@@ -3994,6 +3994,120 @@
     '순수단백':  { canvas: 'chart-puresudanbak', select: 'sort-puresudanbak', headline: 'headline-puresudanbak', table: 'table-puresudanbak' },
   };
   const charts = {};
+
+  function drawFallbackComboChart(canvasEl, labels, barSeries, lineSeries, options = {}) {
+    if (!canvasEl) return;
+    const wrap = canvasEl.parentElement;
+    const rect = wrap?.getBoundingClientRect?.();
+    const cssWidth = Math.max(320, Math.floor(rect?.width || canvasEl.clientWidth || 720));
+    const cssHeight = Math.max(260, Math.floor(rect?.height || canvasEl.clientHeight || 360));
+    const ratio = window.devicePixelRatio || 1;
+    canvasEl.style.width = '100%';
+    canvasEl.style.height = `${cssHeight}px`;
+    canvasEl.width = Math.floor(cssWidth * ratio);
+    canvasEl.height = Math.floor(cssHeight * ratio);
+    const ctx = canvasEl.getContext('2d');
+    if (!ctx) return;
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+    const padding = { top: 24, right: 28, bottom: 54, left: 86 };
+    const plotW = Math.max(1, cssWidth - padding.left - padding.right);
+    const plotH = Math.max(1, cssHeight - padding.top - padding.bottom);
+    const allValues = [
+      ...barSeries.flatMap(series => series.data || []),
+      ...(lineSeries?.data || []),
+    ].map(v => Number(v) || 0);
+    const minValue = Math.min(0, ...allValues);
+    const maxValue = Math.max(1, ...allValues);
+    const range = maxValue - minValue || 1;
+    const yFor = value => padding.top + plotH - (((Number(value) || 0) - minValue) / range) * plotH;
+    const xFor = idx => padding.left + (labels.length <= 1 ? plotW / 2 : (plotW * idx) / (labels.length - 1));
+
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, cssWidth, cssHeight);
+    ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+    ctx.lineWidth = 1;
+    ctx.fillStyle = '#6e6e6e';
+    ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (let i = 0; i <= 4; i += 1) {
+      const value = minValue + (range * i) / 4;
+      const y = yFor(value);
+      ctx.beginPath();
+      ctx.moveTo(padding.left, y);
+      ctx.lineTo(cssWidth - padding.right, y);
+      ctx.stroke();
+      ctx.fillText(fmtKRW(value), padding.left - 8, y);
+    }
+
+    const groupW = plotW / Math.max(1, labels.length);
+    const barW = Math.max(10, Math.min(38, groupW / Math.max(2.2, barSeries.length + 0.8)));
+    labels.forEach((label, idx) => {
+      const center = padding.left + groupW * idx + groupW / 2;
+      barSeries.forEach((series, sIdx) => {
+        const value = Number(series.data?.[idx]) || 0;
+        const x = center - (barW * barSeries.length) / 2 + sIdx * barW;
+        const y = yFor(Math.max(0, value));
+        const zeroY = yFor(0);
+        ctx.fillStyle = series.color || 'rgba(82, 141, 84, 0.35)';
+        ctx.fillRect(x, y, barW * 0.86, Math.max(1, zeroY - y));
+      });
+      ctx.save();
+      ctx.translate(center, cssHeight - padding.bottom + 18);
+      ctx.rotate(-Math.PI / 5);
+      ctx.fillStyle = '#6e6e6e';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, 0, 0);
+      ctx.restore();
+    });
+
+    if (lineSeries?.data?.length) {
+      ctx.strokeStyle = lineSeries.color || '#2D5016';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      lineSeries.data.forEach((value, idx) => {
+        const x = labels.length <= 1 ? padding.left + plotW / 2 : xFor(idx);
+        const y = yFor(value);
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      lineSeries.data.forEach((value, idx) => {
+        const x = labels.length <= 1 ? padding.left + plotW / 2 : xFor(idx);
+        const y = yFor(value);
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = lineSeries.color || '#2D5016';
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+    }
+
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    const legendItems = [...barSeries.map(s => ({ label: s.label, color: s.color })), ...(lineSeries ? [{ label: lineSeries.label, color: lineSeries.color || '#2D5016' }] : [])];
+    let legendX = padding.left;
+    legendItems.forEach(item => {
+      ctx.fillStyle = item.color || '#999';
+      ctx.fillRect(legendX, cssHeight - 22, 10, 10);
+      ctx.fillStyle = '#3f3f3f';
+      ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillText(item.label, legendX + 14, cssHeight - 24);
+      legendX += ctx.measureText(item.label).width + 44;
+    });
+    if (options.note) {
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#8a6d3b';
+      ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillText(options.note, cssWidth - padding.right, 8);
+    }
+  }
+
   const profitRangeStart = document.getElementById('profit-range-start');
   const profitRangeEnd = document.getElementById('profit-range-end');
   const profitRangeApply = document.getElementById('profit-range-apply');
@@ -4235,10 +4349,22 @@
           ${prev ? `<div>전월 대비 ${deltaEl} · 전월 ${fmtKRW(prevProfit)}</div>` : ''}`;
       }
     }
-    if (typeof Chart === 'undefined') return;
-    if (charts.__monthlyOverview) charts.__monthlyOverview.destroy();
     const canvasEl = document.getElementById('chart-monthly-overview');
     if (!canvasEl) return;
+    if (typeof Chart === 'undefined') {
+      drawFallbackComboChart(
+        canvasEl,
+        rows.map(r => r.월),
+        [
+          { label: '매출', data: rows.map(r => money(r.매출)), color: 'rgba(82, 141, 84, 0.42)' },
+          { label: '광고비', data: rows.map(r => money(r.광고비)), color: 'rgba(214, 137, 16, 0.70)' },
+        ],
+        { label: '순이익', data: rows.map(r => money(r.순이익)), color: '#2D5016' },
+        { note: '내장 canvas 그래프' }
+      );
+      return;
+    }
+    if (charts.__monthlyOverview) charts.__monthlyOverview.destroy();
     const ctx = canvasEl.getContext('2d');
     if (!ctx) return;
     charts.__monthlyOverview = new Chart(ctx, {
@@ -4383,13 +4509,24 @@
     renderHeadline(product, sorted);
     renderProfitTable(product, sorted);
 
+    const canvasEl = document.getElementById(cfg.canvas);
+    if (!canvasEl) return;
     if (typeof Chart === 'undefined') {
+      drawFallbackComboChart(
+        canvasEl,
+        labels,
+        [
+          { label: '매출', data: revenue, color: 'rgba(82, 141, 84, 0.42)' },
+          { label: '원가', data: cogs, color: 'rgba(178, 186, 187, 0.50)' },
+          { label: '광고지출', data: adspend, color: 'rgba(214, 137, 16, 0.70)' },
+        ],
+        { label: '순이익', data: profit, color: '#2D5016' },
+        { note: '내장 canvas 그래프' }
+      );
       return;
     }
 
     if (charts[product]) charts[product].destroy();
-    const canvasEl = document.getElementById(cfg.canvas);
-    if (!canvasEl) return;
     const ctx = canvasEl.getContext('2d');
     if (!ctx) return;
     charts[product] = new Chart(ctx, {
