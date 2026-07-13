@@ -643,7 +643,10 @@
     padding: 10px 8px; border-bottom: 1px solid var(--border);
     vertical-align: middle;
   }
-  table.creatives tbody tr:hover { background: var(--brand-cream); }
+  table.creatives tbody tr.delivery-row-on > td { background: #FFFFFF; }
+  table.creatives tbody tr.delivery-row-off > td { background: #FFF1F0; }
+  table.creatives tbody tr.delivery-row-on:hover > td { background: #FFFFFF; }
+  table.creatives tbody tr.delivery-row-off:hover > td { background: #FFE3E0; }
   /* 구분 + 썸네일 + 소재명 freeze */
   table.creatives th.col-type, table.creatives td.col-type {
     position: sticky; left: 0; z-index: 3;
@@ -3474,6 +3477,7 @@
       const tfoot = sectionEl.querySelector('tfoot');
       rows.forEach(r => {
         const tr = document.createElement('tr');
+        tr.className = isRunningRow(r) ? 'delivery-row-on' : 'delivery-row-off';
         tr.innerHTML = COLS.map(col => {
         if (col.key === '__type') {
           const typeMeta = creativeTypeLabel(r);
@@ -3679,6 +3683,7 @@
       if (!matchOpsStatus(row)) return;
       const b = routeBucket(row);
       if (buckets[b]) buckets[b].push(row);
+      else (buckets[`${row.상품}-메인`] || buckets['단백밥-메인']).push(row);
     });
 
     const selected = getOpsRangeDays();
@@ -3808,6 +3813,7 @@
         const ascRisk = esc(r.ASC리스크 || '-');
         const opsNameHtml = adEditLinkHtml(r, r.소재명 || '-');
         const tr = document.createElement('tr');
+        tr.className = isRunningRow(r) ? 'delivery-row-on' : 'delivery-row-off';
         tr.innerHTML = `
           <td class="col-type"><span class="type-chip ${typeMeta.cls}">${typeMeta.text}</span></td>
           <td class="col-ops-type">${winnerChip}</td>
