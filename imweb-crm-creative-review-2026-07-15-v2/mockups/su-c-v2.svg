@@ -1,0 +1,22 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='780' height='1460' viewBox='0 0 780 1460'>
+  <defs>
+    <filter id='shadow' x='-20%' y='-20%' width='140%' height='140%'><feDropShadow dx='0' dy='18' stdDeviation='22' flood-opacity='.18'/></filter>
+    <clipPath id='screen'><rect x='42' y='28' width='696' height='1404' rx='56'/></clipPath>
+  </defs>
+  <rect width='780' height='1460' rx='76' fill='#171717'/>
+  <g clip-path='url(#screen)'>
+    <rect x='42' y='28' width='696' height='1404' fill='#b7d0dc'/>
+    <rect x='42' y='28' width='696' height='104' fill='#fee500'/>
+    <text x='76' y='88' font-family='Apple SD Gothic Neo, Noto Sans KR, sans-serif' font-size='27' font-weight='700' fill='#221f1f'>윤식단</text>
+    <circle cx='690' cy='78' r='7' fill='#342f2f'/><circle cx='666' cy='78' r='7' fill='#342f2f'/><circle cx='642' cy='78' r='7' fill='#342f2f'/>
+    <g filter='url(#shadow)'>
+      <rect x='72' y='158' width='636' height='1130' rx='28' fill='#fff'/>
+      <image href='../images/crm-su-c-v2.png' x='72' y='158' width='636' height='636' preserveAspectRatio='xMidYMid slice'/>
+      <text x='108' y='854' font-family='Apple SD Gothic Neo, Noto Sans KR, sans-serif' font-size='30' font-weight='750' fill='#161616'><tspan x='108' dy='0'>[윤식단] 이제 첫 메뉴만 고르면 돼요</tspan></text>
+      <text x='108' y='970' font-family='Apple SD Gothic Neo, Noto Sans KR, sans-serif' font-size='25' fill='#484848'><tspan x='108' dy='0'>단백밥·순수단백·밸런시 중 오늘 먹고 싶은</tspan><tspan x='108' dy='34'>메뉴부터 둘러보세요.</tspan></text>
+      <rect x='108' y='1150' width='564' height='82' rx='14' fill='#161616'/>
+      <text x='390' y='1203' text-anchor='middle' font-family='Apple SD Gothic Neo, Noto Sans KR, sans-serif' font-size='26' font-weight='700' fill='#fff'>첫 메뉴 고르기</text>
+    </g>
+    <text x='390' y='1362' text-anchor='middle' font-family='Apple SD Gothic Neo, Noto Sans KR, sans-serif' font-size='22' fill='#56707c'>고객 수신 화면 예시 · 검토용</text>
+  </g>
+</svg>
