@@ -1,0 +1,141 @@
+{
+  "run_id": "20260716-085021-127661-ad-copy-gpt-web-image-orchestrator",
+  "version": "crm-v4-review-feedback",
+  "channel": "Imweb brand message preview",
+  "live_setting_changed": false,
+  "selected_locked": [
+    "db-a-v3"
+  ],
+  "held_excluded": [
+    "db-c-v3",
+    "pp-a-v3"
+  ],
+  "items": [
+    {
+      "copy_id": "db-b-v4",
+      "campaign": "단백밥 장바구니 추가 후 1시간 미구매",
+      "target": "단백질 식사를 찾고 장바구니 복귀를 미룬 고객, 남성 비중이 높은 타깃",
+      "target_moment": "다시 검색하기 귀찮아 담아둔 단백밥 결제를 미루는 순간",
+      "headline": "고르던 단백밥\n바로 이어보기",
+      "product_name": "단백밥 직화제육",
+      "message_title": "[윤식단] 처음부터 다시 고르지 않아도 돼요",
+      "message_body": "장바구니에 담아둔 단백밥을 바로 이어서 확인해보세요.",
+      "cta": "장바구니 이어보기",
+      "landing_url": "https://www.yundiet.com/shop_cart?utm_source=imweb&utm_medium=brand_message&utm_campaign=cart_danbaekbap_1h&utm_content=commerce_v4_db_b",
+      "fallback_url": "https://www.yundiet.com/shop_view/?idx=1217",
+      "branch_rule": "cart contains Danbaekbap"
+    },
+    {
+      "copy_id": "pp-b-jeuyuk-v4",
+      "campaign": "순수단백 장바구니 추가 후 1시간 미구매",
+      "target": "닭가슴살 대신 맛있는 단백질 식사를 원하는 고객, 남성 비중이 높은 타깃",
+      "target_moment": "매번 먹던 닭가슴살 대신 매콤한 고기 반찬이 당기는 순간",
+      "headline": "닭가슴살 말고,\n저당 제육으로!",
+      "product_name": "순수단백 저당 제육볶음",
+      "message_title": "[윤식단] 닭가슴살 말고, 저당 제육으로!",
+      "message_body": "담아둔 저당 제육을 장바구니에서 바로 이어서 확인해보세요.",
+      "cta": "저당 제육 이어보기",
+      "landing_url": "https://www.yundiet.com/shop_cart?utm_source=imweb&utm_medium=brand_message&utm_campaign=cart_pureprotein_1h&utm_content=commerce_v4_jeuyuk",
+      "fallback_url": "https://www.yundiet.com/shop_view/?idx=1233",
+      "branch_rule": "cart product idx=1233 or product name contains 저당 제육"
+    },
+    {
+      "copy_id": "pp-b-bulgogi-v4",
+      "campaign": "순수단백 장바구니 추가 후 1시간 미구매",
+      "target": "닭가슴살 대신 맛있는 단백질 식사를 원하는 고객, 남성 비중이 높은 타깃",
+      "target_moment": "매번 먹던 닭가슴살 대신 불향 나는 고기 반찬이 당기는 순간",
+      "headline": "닭가슴살 말고,\n저당 간장불고기로!",
+      "product_name": "순수단백 저당 간장불고기",
+      "message_title": "[윤식단] 닭가슴살 말고, 저당 간장불고기로!",
+      "message_body": "담아둔 저당 간장불고기를 장바구니에서 바로 이어서 확인해보세요.",
+      "cta": "간장불고기 이어보기",
+      "landing_url": "https://www.yundiet.com/shop_cart?utm_source=imweb&utm_medium=brand_message&utm_campaign=cart_pureprotein_1h&utm_content=commerce_v4_bulgogi",
+      "fallback_url": "https://www.yundiet.com/shop_view/?idx=1214",
+      "branch_rule": "cart product idx=1214 or product name contains 간장불고기"
+    },
+    {
+      "copy_id": "pp-b-ssamjang-v4",
+      "campaign": "순수단백 장바구니 추가 후 1시간 미구매",
+      "target": "닭가슴살 대신 맛있는 단백질 식사를 원하는 고객, 남성 비중이 높은 타깃",
+      "target_moment": "매번 먹던 닭가슴살 대신 쌈장 풍미의 든든한 고기 반찬이 당기는 순간",
+      "headline": "닭가슴살 말고,\n저당 쌈장제육으로!",
+      "product_name": "순수단백 저당 쌈장제육",
+      "message_title": "[윤식단] 닭가슴살 말고, 저당 쌈장제육으로!",
+      "message_body": "담아둔 저당 쌈장제육을 장바구니에서 바로 이어서 확인해보세요.",
+      "cta": "쌈장제육 이어보기",
+      "landing_url": "https://www.yundiet.com/shop_cart?utm_source=imweb&utm_medium=brand_message&utm_campaign=cart_pureprotein_1h&utm_content=commerce_v4_ssamjang",
+      "fallback_url": "https://www.yundiet.com/shop_view/?idx=1235",
+      "branch_rule": "cart product idx=1235 or product name contains 쌈장제육"
+    },
+    {
+      "copy_id": "pp-b-hambak-v4",
+      "campaign": "순수단백 장바구니 추가 후 1시간 미구매",
+      "target": "닭가슴살 대신 맛있는 단백질 식사를 원하는 고객, 남성 비중이 높은 타깃",
+      "target_moment": "퍽퍽한 닭가슴살 대신 두툼한 함박을 먹고 싶은 순간",
+      "headline": "닭가슴살 말고,\n단백질 함박으로!",
+      "product_name": "순수단백 저당 함박",
+      "message_title": "[윤식단] 닭가슴살 말고, 단백질 함박으로!",
+      "message_body": "담아둔 저당 함박을 장바구니에서 바로 이어서 확인해보세요.",
+      "cta": "단백질 함박 이어보기",
+      "landing_url": "https://www.yundiet.com/shop_cart?utm_source=imweb&utm_medium=brand_message&utm_campaign=cart_pureprotein_1h&utm_content=commerce_v4_hambak",
+      "fallback_url": "https://www.yundiet.com/shop_view/?idx=1125",
+      "branch_rule": "cart product idx=1125 and selected option contains 함박"
+    },
+    {
+      "copy_id": "pp-c-v4",
+      "campaign": "순수단백 장바구니 추가 후 1시간 미구매",
+      "target": "단백질 식사를 찾고 고기 반찬 결제를 미룬 고객, 남성 비중이 높은 타깃",
+      "target_moment": "고기 반찬의 진한 맛이 다시 생각나는 순간",
+      "headline": "고기 한 팩,\n밥상 완성",
+      "product_name": "순수단백 저당 제육",
+      "message_title": "[윤식단] 고르던 순수단백, 장바구니에 있어요",
+      "message_body": "처음부터 다시 찾지 말고 담아둔 메뉴를 이어서 확인해보세요.",
+      "cta": "고기 메뉴 이어보기",
+      "landing_url": "https://www.yundiet.com/shop_cart?utm_source=imweb&utm_medium=brand_message&utm_campaign=cart_pureprotein_1h&utm_content=commerce_v4_pp_c",
+      "fallback_url": "https://www.yundiet.com/shop_view/?idx=1233",
+      "branch_rule": "cart contains Pure Protein meat product"
+    },
+    {
+      "copy_id": "su-a-v4",
+      "campaign": "회원가입 후 1시간 미구매",
+      "target": "가입 후 첫 단백질 식사를 고르지 못한 고객",
+      "target_moment": "가입은 했지만 첫 상품을 무엇으로 시작할지 모르는 순간",
+      "headline": "첫 메뉴,\n맛있는 것부터",
+      "product_name": "단백밥 오리지널 닭",
+      "message_title": "[윤식단] 첫 메뉴는 맛있는 것부터 골라보세요",
+      "message_body": "처음이라면 단백밥의 든든한 메뉴부터 둘러보세요.",
+      "cta": "첫 단백밥 둘러보기",
+      "landing_url": "https://www.yundiet.com/shop_view/?idx=1217&utm_source=imweb&utm_medium=brand_message&utm_campaign=signup_nopurchase_1h&utm_content=commerce_v4_su_a",
+      "fallback_url": "https://www.yundiet.com/rice",
+      "branch_rule": "signed up 1 hour ago and no purchase"
+    },
+    {
+      "copy_id": "su-b-v4",
+      "campaign": "회원가입 후 1시간 미구매",
+      "target": "가입 후 메뉴가 많아 첫 단백질 식사를 고르지 못한 고객",
+      "target_moment": "여러 메뉴 중 무엇을 먼저 먹을지 미루는 순간",
+      "headline": "뭐부터 먹지?\n인기 메뉴부터",
+      "product_name": "단백밥 여러 메뉴",
+      "message_title": "[윤식단] 뭐부터 먹을지 고민된다면 인기 메뉴부터",
+      "message_body": "단백밥 여러 메뉴를 한 번에 보고 오늘 끌리는 맛부터 골라보세요.",
+      "cta": "인기 단백밥 보기",
+      "landing_url": "https://www.yundiet.com/shop_view/?idx=1217&utm_source=imweb&utm_medium=brand_message&utm_campaign=signup_nopurchase_1h&utm_content=commerce_v4_su_b",
+      "fallback_url": "https://www.yundiet.com/rice",
+      "branch_rule": "signed up 1 hour ago and no purchase"
+    },
+    {
+      "copy_id": "su-c-v4",
+      "campaign": "회원가입 후 1시간 미구매",
+      "target": "가입 후 제품 구성을 한눈에 보고 싶은 고객",
+      "target_moment": "가입을 마치고 첫 상품을 골라담고 싶은 순간",
+      "headline": "가입 완료,\n이제 골라담기",
+      "product_name": "단백밥 패키지 라인업",
+      "message_title": "[윤식단] 가입 완료! 이제 단백밥만 골라보세요",
+      "message_body": "단백밥의 다양한 메뉴를 한 번에 둘러보고 원하는 맛부터 골라보세요.",
+      "cta": "단백밥 골라담기",
+      "landing_url": "https://www.yundiet.com/shop_view/?idx=1217&utm_source=imweb&utm_medium=brand_message&utm_campaign=signup_nopurchase_1h&utm_content=commerce_v4_su_c",
+      "fallback_url": "https://www.yundiet.com/rice",
+      "branch_rule": "signed up 1 hour ago and no purchase"
+    }
+  ]
+}
