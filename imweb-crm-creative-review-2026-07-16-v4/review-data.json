@@ -23,7 +23,7 @@
       "cta": "장바구니 이어보기",
       "landing_url": "https://www.yundiet.com/shop_cart?utm_source=imweb&utm_medium=brand_message&utm_campaign=cart_danbaekbap_1h&utm_content=commerce_v4_db_b",
       "fallback_url": "https://www.yundiet.com/shop_view/?idx=1217",
-      "branch_rule": "cart contains Danbaekbap"
+      "branch_rule": "장바구니에 단백밥 상품이 있고, 추가 후 1시간 동안 미구매"
     },
     {
       "copy_id": "pp-b-jeuyuk-v4",
@@ -37,7 +37,7 @@
       "cta": "저당 제육 이어보기",
       "landing_url": "https://www.yundiet.com/shop_cart?utm_source=imweb&utm_medium=brand_message&utm_campaign=cart_pureprotein_1h&utm_content=commerce_v4_jeuyuk",
       "fallback_url": "https://www.yundiet.com/shop_view/?idx=1233",
-      "branch_rule": "cart product idx=1233 or product name contains 저당 제육"
+      "branch_rule": "장바구니 상품 번호 1233 또는 상품명에 ‘저당 제육’ 포함"
     },
     {
       "copy_id": "pp-b-bulgogi-v4",
@@ -51,7 +51,7 @@
       "cta": "간장불고기 이어보기",
       "landing_url": "https://www.yundiet.com/shop_cart?utm_source=imweb&utm_medium=brand_message&utm_campaign=cart_pureprotein_1h&utm_content=commerce_v4_bulgogi",
       "fallback_url": "https://www.yundiet.com/shop_view/?idx=1214",
-      "branch_rule": "cart product idx=1214 or product name contains 간장불고기"
+      "branch_rule": "장바구니 상품 번호 1214 또는 상품명에 ‘간장불고기’ 포함"
     },
     {
       "copy_id": "pp-b-ssamjang-v4",
@@ -65,7 +65,7 @@
       "cta": "쌈장제육 이어보기",
       "landing_url": "https://www.yundiet.com/shop_cart?utm_source=imweb&utm_medium=brand_message&utm_campaign=cart_pureprotein_1h&utm_content=commerce_v4_ssamjang",
       "fallback_url": "https://www.yundiet.com/shop_view/?idx=1235",
-      "branch_rule": "cart product idx=1235 or product name contains 쌈장제육"
+      "branch_rule": "장바구니 상품 번호 1235 또는 상품명에 ‘쌈장제육’ 포함"
     },
     {
       "copy_id": "pp-b-hambak-v4",
@@ -79,7 +79,7 @@
       "cta": "단백질 함박 이어보기",
       "landing_url": "https://www.yundiet.com/shop_cart?utm_source=imweb&utm_medium=brand_message&utm_campaign=cart_pureprotein_1h&utm_content=commerce_v4_hambak",
       "fallback_url": "https://www.yundiet.com/shop_view/?idx=1125",
-      "branch_rule": "cart product idx=1125 and selected option contains 함박"
+      "branch_rule": "장바구니 상품 번호 1125이고 선택 옵션에 ‘함박’ 포함"
     },
     {
       "copy_id": "pp-c-v4",
@@ -93,7 +93,7 @@
       "cta": "고기 메뉴 이어보기",
       "landing_url": "https://www.yundiet.com/shop_cart?utm_source=imweb&utm_medium=brand_message&utm_campaign=cart_pureprotein_1h&utm_content=commerce_v4_pp_c",
       "fallback_url": "https://www.yundiet.com/shop_view/?idx=1233",
-      "branch_rule": "cart contains Pure Protein meat product"
+      "branch_rule": "장바구니에 순수단백 고기 상품이 있고, 추가 후 1시간 동안 미구매"
     },
     {
       "copy_id": "su-a-v4",
@@ -107,7 +107,7 @@
       "cta": "첫 단백밥 둘러보기",
       "landing_url": "https://www.yundiet.com/shop_view/?idx=1217&utm_source=imweb&utm_medium=brand_message&utm_campaign=signup_nopurchase_1h&utm_content=commerce_v4_su_a",
       "fallback_url": "https://www.yundiet.com/rice",
-      "branch_rule": "signed up 1 hour ago and no purchase"
+      "branch_rule": "회원가입 후 1시간이 지났고 구매 이력 없음"
     },
     {
       "copy_id": "su-b-v4",
@@ -121,7 +121,7 @@
       "cta": "인기 단백밥 보기",
       "landing_url": "https://www.yundiet.com/shop_view/?idx=1217&utm_source=imweb&utm_medium=brand_message&utm_campaign=signup_nopurchase_1h&utm_content=commerce_v4_su_b",
       "fallback_url": "https://www.yundiet.com/rice",
-      "branch_rule": "signed up 1 hour ago and no purchase"
+      "branch_rule": "회원가입 후 1시간이 지났고 구매 이력 없음"
     },
     {
       "copy_id": "su-c-v4",
@@ -135,7 +135,7 @@
       "cta": "단백밥 골라담기",
       "landing_url": "https://www.yundiet.com/shop_view/?idx=1217&utm_source=imweb&utm_medium=brand_message&utm_campaign=signup_nopurchase_1h&utm_content=commerce_v4_su_c",
       "fallback_url": "https://www.yundiet.com/rice",
-      "branch_rule": "signed up 1 hour ago and no purchase"
+      "branch_rule": "회원가입 후 1시간이 지났고 구매 이력 없음"
     }
   ]
 }

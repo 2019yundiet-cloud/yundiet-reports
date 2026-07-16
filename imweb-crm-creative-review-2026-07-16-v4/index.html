@@ -51,7 +51,7 @@
           <p class="eyebrow">이미지 카피</p><h3 class="headline">${br(item.headline)}</h3>
           <p class="eyebrow">고객 수신 내용</p><div class="message"><strong>${esc(item.message_title)}</strong><p>${esc(item.message_body)}</p><span>${esc(item.cta)}</span></div>
           <dl><div><dt>연결 상품</dt><dd>${esc(item.product_name)}</dd></div><div><dt>보내는 이유</dt><dd>${esc(item.target_moment)}</dd></div></dl>
-          <div class="links"><a href="${esc(item.landing_url)}" target="_blank" rel="noopener">장바구니 랜딩</a><a class="secondary" href="${esc(item.fallback_url)}" target="_blank" rel="noopener">상품 랜딩</a></div>
+          <div class="links"><a href="${esc(item.landing_url)}" target="_blank" rel="noopener">CRM 랜딩</a><a class="secondary" href="${esc(item.fallback_url)}" target="_blank" rel="noopener">상품 랜딩</a></div>
           <div class="decision"><button type="button" data-decision="선택">선택</button><button type="button" data-decision="수정">수정</button><button type="button" data-decision="보류">보류</button></div>
           <label class="note-label" for="note-${esc(item.copy_id)}">수정 의견</label><textarea id="note-${esc(item.copy_id)}" rows="3" placeholder="예: 카피 유지, 음식 크기만 10% 확대"></textarea>
         </div>
