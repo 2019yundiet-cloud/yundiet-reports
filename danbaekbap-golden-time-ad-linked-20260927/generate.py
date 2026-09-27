@@ -63,11 +63,15 @@ pages['01_정석형_1'] = page(f'''{bg_feast(.47)}
 
 pages['01_정석형_2'] = page(f'''<div class="abs" style="inset:0;background:#111"></div>
 <div class="abs" style="top:100px;left:65px;right:65px">{common2_header('var(--yellow)')}
-<div style="font-size:32px;line-height:1.45;font-weight:650;color:#ddd;margin-top:36px">명절 뒤 식단, 한 팩으로 든든하게 시작하세요.</div></div>
-<div class="abs" style="top:580px;left:65px;right:65px">{stats()}</div>
-{product(790,110,640)}
-<div class="abs" style="bottom:0;left:0;right:0;background:var(--red);padding:40px 65px 50px;font-size:34px;line-height:1.35;font-weight:850">밥·닭가슴살·채소를 한 팩에.<br>오늘의 다음 한 끼부터 시작해요.</div>
-<div class="abs" style="bottom:178px;left:65px;font-size:19px;color:#aaa">*오리지널 L 영양성분표 기준: 단백질 50.1g · 당류 0.8g · 총중량 420g</div>''')
+<div style="font-size:31px;line-height:1.45;font-weight:650;color:#ddd;margin-top:29px">명절 뒤 첫 식사, 오늘의 선택부터 다시 시작해요.</div></div>
+<div class="abs" style="top:550px;left:65px;right:65px;background:#242424;border-left:10px solid var(--yellow);border-radius:0 28px 28px 0;padding:32px 38px 37px">
+ <div style="font-size:27px;font-weight:900;color:var(--yellow)">왜 지금이 골든타임일까요?</div>
+ <div style="font-size:51px;line-height:1.28;font-weight:900;margin-top:14px">명절 식사는 끝났고,<br><span style="color:var(--yellow)">다음 한 끼는 지금</span> 고를 수 있으니까.</div>
+ <div style="font-size:28px;line-height:1.43;font-weight:650;color:#ddd;margin-top:18px">연휴 뒤 일상으로 돌아오는 첫 식사부터<br>식단을 다시 정할 수 있습니다.</div>
+</div>
+{product(980,165,530)}
+<div class="abs" style="bottom:0;left:0;right:0;background:var(--red);padding:34px 65px 42px;font-size:31px;line-height:1.42;font-weight:850">밥·닭가슴살·채소가 담긴 한 팩.<br>단백질 50g · 당류 1g · 총중량 420g</div>
+<div class="abs" style="bottom:175px;left:65px;font-size:19px;color:#aaa">*오리지널 L 영양성분표 기준: 단백질 50.1g · 당류 0.8g · 총중량 420g</div>''')
 
 pages['01_정석형_3'] = page(f'''<div class="abs" style="inset:0;background:#111"></div><div class="abs" style="inset:0 0 auto;height:355px;background:var(--red)"></div>
 <div class="abs" style="top:68px;left:55px;right:55px;text-align:center"><div class="bh" style="font-size:89px">골든타임의 한 끼</div><div style="font-size:35px;font-weight:800;margin-top:16px">가격과 구매평을 한눈에</div></div>
